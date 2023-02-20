@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -58,6 +59,40 @@ func (l *Impl) emit(tt TokenType) stateFn {
 	return nil
 }
 
+func (l *Impl) peek() rune {
+	if int(l.pos) >= len(l.src) {
+		return rune(EOF)
+	}
+
+	r, _ := utf8.DecodeRuneInString(l.src[l.pos:])
+	return r
+}
+
+func (l *Impl) backup() {
+	if !l.atEOF && l.pos > 0 {
+		r, w := utf8.DecodeLastRuneInString(l.src[:l.pos])
+		l.pos -= w
+
+		if r == '\n' {
+			l.line--
+		}
+	}
+}
+
+func lexSpaces(l *Impl) stateFn {
+	var r rune
+
+	for {
+		r = l.peek()
+		if !unicode.IsSpace(r) {
+			break
+		}
+
+		l.next()
+	}
+	return l.emit(TokenSpace)
+}
+
 func lexProto(l *Impl) stateFn {
 	switch r := l.next(); {
 	case l.atEOF:
@@ -88,6 +123,9 @@ func lexProto(l *Impl) stateFn {
 		return l.emit(TokenLeftAngle)
 	case r == '>':
 		return l.emit(TokenRightAngle)
+	case unicode.IsSpace(r):
+		l.backup()
+		return lexSpaces
 	}
 
 	return l.emit(TokenIllegal)

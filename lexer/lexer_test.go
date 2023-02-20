@@ -46,3 +46,10 @@ func TestNextTokenOnSymbols(t *testing.T) {
 		{EOF, "", Position{13, 1, 13}},
 	})
 }
+
+func TestNextTokenOnSpace(t *testing.T) {
+	runChecks(t, New("\t\n\v\f\r "), []Check{
+		{TokenSpace, "\t\n\v\f\r ", Position{0, 1, 0}},
+		{EOF, "", Position{6, 1, 6}},
+	})
+}
