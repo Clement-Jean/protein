@@ -53,3 +53,33 @@ func TestNextTokenOnSpace(t *testing.T) {
 		{EOF, "", Position{6, 1, 6}},
 	})
 }
+
+func TestNextTokenOnLineCommentWithEOF(t *testing.T) {
+	runChecks(t, New("//this is a comment"), []Check{
+		{TokenComment, "//this is a comment", Position{0, 1, 0}},
+		{EOF, "", Position{19, 1, 19}},
+	})
+}
+
+func TestNextTokenOnLineCommentWithNewLine(t *testing.T) {
+	runChecks(t, New("//this is a comment\n_"), []Check{
+		{TokenComment, "//this is a comment", Position{0, 1, 1}},
+		{TokenSpace, "\n", Position{19, 1, 19}},
+		{TokenUnderscore, "_", Position{20, 1, 20}},
+		{EOF, "", Position{21, 1, 21}},
+	})
+}
+
+func TestNextTokenOnMultilineComment(t *testing.T) {
+	runChecks(t, New("/*this is a comment*/_"), []Check{
+		{TokenComment, "/*this is a comment*/", Position{0, 1, 0}},
+		{TokenUnderscore, "_", Position{21, 1, 21}},
+		{EOF, "", Position{22, 1, 22}},
+	})
+}
+
+func TestNextTokenOnUnterminatedMultilineComment(t *testing.T) {
+	runChecks(t, New("/*this is a comment"), []Check{
+		{TokenError, errorUnterminatedMultilineComment, Position{0, 1, 0}},
+	})
+}

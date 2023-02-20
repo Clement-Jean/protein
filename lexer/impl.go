@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -79,6 +80,18 @@ func (l *Impl) backup() {
 	}
 }
 
+func (l *Impl) errorf(format string, args ...any) stateFn {
+	l.token = Token{TokenError, fmt.Sprintf(format, args...), Position{
+		Offset: l.start,
+		Line:   l.startLine,
+		Column: l.start - l.startLineOffset,
+	}}
+	l.start = 0
+	l.pos = 0
+	l.src = l.src[:0]
+	return nil
+}
+
 func lexSpaces(l *Impl) stateFn {
 	var r rune
 
@@ -91,6 +104,41 @@ func lexSpaces(l *Impl) stateFn {
 		l.next()
 	}
 	return l.emit(TokenSpace)
+}
+
+func lexLineComment(l *Impl) stateFn {
+	var r rune
+
+	for {
+		r = l.peek()
+		if r == '\n' || r == rune(EOF) {
+			break
+		}
+
+		l.next()
+	}
+	return l.emit(TokenComment)
+}
+
+func lexMultilineComment(l *Impl) stateFn {
+	var p rune
+	var r rune
+
+	for {
+		p = r
+		if r == rune(EOF) {
+			return l.errorf(errorUnterminatedMultilineComment)
+		}
+
+		r = l.peek()
+		if p == '*' && r == '/' {
+			l.next()
+			break
+		}
+
+		l.next()
+	}
+	return l.emit(TokenComment)
 }
 
 func lexProto(l *Impl) stateFn {
@@ -126,6 +174,12 @@ func lexProto(l *Impl) stateFn {
 	case unicode.IsSpace(r):
 		l.backup()
 		return lexSpaces
+	case r == '/' && l.peek() == '/':
+		l.backup()
+		return lexLineComment
+	case r == '/' && l.peek() == '*':
+		l.backup()
+		return lexMultilineComment
 	}
 
 	return l.emit(TokenIllegal)
