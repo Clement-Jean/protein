@@ -83,3 +83,12 @@ func TestNextTokenOnUnterminatedMultilineComment(t *testing.T) {
 		{TokenError, errorUnterminatedMultilineComment, Position{0, 1, 0}},
 	})
 }
+
+func TestNextTokenOnIdentifier(t *testing.T) {
+	runChecks(t, New("hello_world2023 HelloWorld2023"), []Check{
+		{TokenIdentifier, "hello_world2023", Position{0, 1, 0}},
+		{TokenSpace, " ", Position{15, 1, 15}},
+		{TokenIdentifier, "HelloWorld2023", Position{16, 1, 16}},
+		{EOF, "", Position{30, 1, 30}},
+	})
+}

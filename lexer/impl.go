@@ -80,6 +80,12 @@ func (l *Impl) backup() {
 	}
 }
 
+func (l *Impl) acceptWhile(valid string) {
+	for strings.ContainsRune(valid, l.next()) {
+	}
+	l.backup()
+}
+
 func (l *Impl) errorf(format string, args ...any) stateFn {
 	l.token = Token{TokenError, fmt.Sprintf(format, args...), Position{
 		Offset: l.start,
@@ -141,6 +147,11 @@ func lexMultilineComment(l *Impl) stateFn {
 	return l.emit(TokenComment)
 }
 
+func lexIdentifier(l *Impl) stateFn {
+	l.acceptWhile("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
+	return l.emit(TokenIdentifier)
+}
+
 func lexProto(l *Impl) stateFn {
 	switch r := l.next(); {
 	case l.atEOF:
@@ -180,6 +191,9 @@ func lexProto(l *Impl) stateFn {
 	case r == '/' && l.peek() == '*':
 		l.backup()
 		return lexMultilineComment
+	case unicode.IsLetter(r):
+		l.backup()
+		return lexIdentifier
 	}
 
 	return l.emit(TokenIllegal)
