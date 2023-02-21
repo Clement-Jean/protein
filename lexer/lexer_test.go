@@ -92,3 +92,24 @@ func TestNextTokenOnIdentifier(t *testing.T) {
 		{EOF, "", Position{30, 1, 30}},
 	})
 }
+
+func TestNextTokenOnString(t *testing.T) {
+	runChecks(t, New("'test' \"test\""), []Check{
+		{TokenStr, "'test'", Position{0, 1, 0}},
+		{TokenSpace, " ", Position{6, 1, 6}},
+		{TokenStr, "\"test\"", Position{7, 1, 7}},
+		{EOF, "", Position{13, 1, 13}},
+	})
+}
+
+func TestNextTokenOnUnterminatedString(t *testing.T) {
+	runChecks(t, New("'test"), []Check{
+		{TokenError, errorUnterminatedQuotedString, Position{0, 1, 0}},
+	})
+}
+
+func TestNextTokenOnMismatchedQuotesString(t *testing.T) {
+	runChecks(t, New("\"test'"), []Check{
+		{TokenError, errorUnterminatedQuotedString, Position{}},
+	})
+}

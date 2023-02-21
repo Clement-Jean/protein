@@ -152,6 +152,21 @@ func lexIdentifier(l *Impl) stateFn {
 	return l.emit(TokenIdentifier)
 }
 
+func lexString(l *Impl) stateFn {
+	open := l.src[l.pos]
+	l.next()
+Loop:
+	for {
+		switch l.next() {
+		case rune(EOF):
+			return l.errorf(errorUnterminatedQuotedString)
+		case rune(open):
+			break Loop
+		}
+	}
+	return l.emit(TokenStr)
+}
+
 func lexProto(l *Impl) stateFn {
 	switch r := l.next(); {
 	case l.atEOF:
@@ -194,6 +209,9 @@ func lexProto(l *Impl) stateFn {
 	case unicode.IsLetter(r):
 		l.backup()
 		return lexIdentifier
+	case r == '"' || r == '\'':
+		l.backup()
+		return lexString
 	}
 
 	return l.emit(TokenIllegal)
