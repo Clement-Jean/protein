@@ -113,3 +113,55 @@ func TestNextTokenOnMismatchedQuotesString(t *testing.T) {
 		{TokenError, errorUnterminatedQuotedString, Position{}},
 	})
 }
+
+func TestNextTokenOnIntDecimal(t *testing.T) {
+	runChecks(t, New("5 0 -5 +5"), []Check{
+		{TokenInt, "5", Position{0, 1, 0}},
+		{TokenSpace, " ", Position{1, 1, 1}},
+		{TokenInt, "0", Position{2, 1, 2}},
+		{TokenSpace, " ", Position{3, 1, 3}},
+		{TokenInt, "-5", Position{4, 1, 4}},
+		{TokenSpace, " ", Position{6, 1, 6}},
+		{TokenInt, "+5", Position{7, 1, 7}},
+		{EOF, "", Position{9, 1, 9}},
+	})
+}
+
+func TestNextTokenOnIntHex(t *testing.T) {
+	runChecks(t, New("0xff 0XFF"), []Check{
+		{TokenInt, "0xff", Position{0, 1, 0}},
+		{TokenSpace, " ", Position{4, 1, 4}},
+		{TokenInt, "0XFF", Position{5, 1, 5}},
+		{EOF, "", Position{9, 1, 9}},
+	})
+}
+
+func TestNextTokenOnIntOctal(t *testing.T) {
+	runChecks(t, New("056"), []Check{
+		{TokenInt, "056", Position{0, 1, 0}},
+		{EOF, "", Position{3, 1, 3}},
+	})
+}
+
+func TestNextTokenOnFloat(t *testing.T) {
+	runChecks(t, New("-0.8 +0.8 -.8 +.8 .8 .8e8 .8e+8 .8e-8 8e8"), []Check{
+		{TokenFloat, "-0.8", Position{0, 1, 0}},
+		{TokenSpace, " ", Position{4, 1, 4}},
+		{TokenFloat, "+0.8", Position{5, 1, 5}},
+		{TokenSpace, " ", Position{9, 1, 9}},
+		{TokenFloat, "-.8", Position{10, 1, 10}},
+		{TokenSpace, " ", Position{13, 1, 13}},
+		{TokenFloat, "+.8", Position{14, 1, 14}},
+		{TokenSpace, " ", Position{17, 1, 17}},
+		{TokenFloat, ".8", Position{18, 1, 18}},
+		{TokenSpace, " ", Position{20, 1, 20}},
+		{TokenFloat, ".8e8", Position{21, 1, 21}},
+		{TokenSpace, " ", Position{25, 1, 25}},
+		{TokenFloat, ".8e+8", Position{26, 1, 26}},
+		{TokenSpace, " ", Position{31, 1, 31}},
+		{TokenFloat, ".8e-8", Position{32, 1, 32}},
+		{TokenSpace, " ", Position{37, 1, 37}},
+		{TokenFloat, "8e8", Position{38, 1, 38}},
+		{EOF, "", Position{41, 1, 41}},
+	})
+}

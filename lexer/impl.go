@@ -80,6 +80,14 @@ func (l *Impl) backup() {
 	}
 }
 
+func (l *Impl) accept(valid string) bool {
+	if strings.ContainsRune(valid, l.next()) {
+		return true
+	}
+	l.backup()
+	return false
+}
+
 func (l *Impl) acceptWhile(valid string) {
 	for strings.ContainsRune(valid, l.next()) {
 	}
@@ -167,6 +175,37 @@ Loop:
 	return l.emit(TokenStr)
 }
 
+func lexNumber(l *Impl) stateFn {
+	var t TokenType = TokenInt
+
+	l.accept("+-")
+
+	digits := "0123456789" // decimal
+
+	if l.accept("0") { // starts with 0
+		if l.accept("xX") {
+			digits = "0123456789abcdefABCDEF" // hexadecimal
+		} else {
+			digits = "01234567" // octal
+		}
+	}
+
+	l.acceptWhile(digits)
+
+	if l.accept(".") {
+		t = TokenFloat
+		l.acceptWhile("0123456789")
+	}
+
+	if l.accept("eE") { // exponent
+		t = TokenFloat
+		l.accept("+-")
+		l.acceptWhile("0123456789")
+	}
+
+	return l.emit(t)
+}
+
 func lexProto(l *Impl) stateFn {
 	switch r := l.next(); {
 	case l.atEOF:
@@ -179,7 +218,7 @@ func lexProto(l *Impl) stateFn {
 		return l.emit(TokenColon)
 	case r == ';':
 		return l.emit(TokenSemicolon)
-	case r == '.':
+	case r == '.' && !unicode.IsNumber(l.peek()):
 		return l.emit(TokenDot)
 	case r == '{':
 		return l.emit(TokenLeftBrace)
@@ -212,6 +251,9 @@ func lexProto(l *Impl) stateFn {
 	case r == '"' || r == '\'':
 		l.backup()
 		return lexString
+	case r == '+' || r == '-' || r == '.' || ('0' <= r && r <= '9'):
+		l.backup()
+		return lexNumber
 	}
 
 	return l.emit(TokenIllegal)
