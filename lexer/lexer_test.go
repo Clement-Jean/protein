@@ -23,7 +23,17 @@ func runChecks(t *testing.T, l Lexer, tests []Check) {
 			t.Fatalf("tests[%d] - literal wrong. expected='%s', got='%s'", i, tt.expectedLiteral, tok.Literal)
 		}
 
-		// asserts on Position for later
+		if tok.Position.Offset != tt.expectedPosition.Offset {
+			t.Fatalf("tests[%d] - offset wrong. expected=%d, got=%d", i, tt.expectedPosition.Offset, tok.Position.Offset)
+		}
+
+		if tok.Position.Line != tt.expectedPosition.Line {
+			t.Fatalf("tests[%d] - line wrong. expected=%d, got=%d", i, tt.expectedPosition.Line, tok.Position.Line)
+		}
+
+		if tok.Position.Column != tt.expectedPosition.Column {
+			t.Fatalf("tests[%d] - column wrong. expected=%d, got=%d", i, tt.expectedPosition.Column, tok.Position.Column)
+		}
 	}
 }
 
@@ -50,7 +60,14 @@ func TestNextTokenOnSymbols(t *testing.T) {
 func TestNextTokenOnSpace(t *testing.T) {
 	runChecks(t, New("\t\n\v\f\r "), []Check{
 		{TokenSpace, "\t\n\v\f\r ", Position{0, 1, 0}},
-		{EOF, "", Position{6, 1, 6}},
+		{EOF, "", Position{6, 2, 4}},
+	})
+}
+
+func TestNextTokenOnMultipleNewline(t *testing.T) {
+	runChecks(t, New("\n\n"), []Check{
+		{TokenSpace, "\n\n", Position{0, 1, 0}},
+		{EOF, "", Position{2, 3, 0}},
 	})
 }
 
@@ -63,10 +80,10 @@ func TestNextTokenOnLineCommentWithEOF(t *testing.T) {
 
 func TestNextTokenOnLineCommentWithNewLine(t *testing.T) {
 	runChecks(t, New("//this is a comment\n_"), []Check{
-		{TokenComment, "//this is a comment", Position{0, 1, 1}},
+		{TokenComment, "//this is a comment", Position{0, 1, 0}},
 		{TokenSpace, "\n", Position{19, 1, 19}},
-		{TokenUnderscore, "_", Position{20, 1, 20}},
-		{EOF, "", Position{21, 1, 21}},
+		{TokenUnderscore, "_", Position{20, 2, 0}},
+		{EOF, "", Position{21, 2, 1}},
 	})
 }
 
@@ -110,7 +127,7 @@ func TestNextTokenOnUnterminatedString(t *testing.T) {
 
 func TestNextTokenOnMismatchedQuotesString(t *testing.T) {
 	runChecks(t, New("\"test'"), []Check{
-		{TokenError, errorUnterminatedQuotedString, Position{}},
+		{TokenError, errorUnterminatedQuotedString, Position{0, 1, 0}},
 	})
 }
 
