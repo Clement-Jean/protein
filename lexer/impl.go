@@ -53,8 +53,10 @@ func (l *Impl) emit(tt TokenType) stateFn {
 	}}
 	l.start = l.pos
 	l.startLine = l.line
-	if tt == TokenSpace && strings.Contains(t.Literal, "\n") {
-		l.startLineOffset = l.start
+	if tt == TokenSpace {
+		if lineStart := strings.LastIndex(t.Literal, "\n"); lineStart != -1 {
+			l.startLineOffset = l.start - (len(t.Literal) - 1 - lineStart)
+		}
 	}
 	l.token = t
 	return nil
