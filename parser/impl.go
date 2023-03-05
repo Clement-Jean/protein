@@ -37,6 +37,14 @@ func (p *Impl) Parse() pb.FileDescriptorProto {
 	d := pb.FileDescriptorProto{}
 
 	for p.curToken.Type != lexer.EOF {
+		if p.curToken.Type == lexer.TokenIdentifier {
+			switch p.curToken.Literal {
+			case "syntax":
+				d.Syntax = p.parseSyntax()
+			default:
+				break
+			}
+		}
 		p.nextToken()
 	}
 
