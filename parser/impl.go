@@ -12,6 +12,7 @@ type Impl struct {
 	peekToken lexer.Token
 }
 
+// New creates a new instance of the Parser
 func New(l lexer.Lexer) Parser {
 	p := &Impl{l: l}
 	p.nextToken()
@@ -37,6 +38,7 @@ func (p *Impl) acceptPeek(t lexer.TokenType) bool {
 	return true
 }
 
+// Parse populates a FileDescriptorProto
 func (p *Impl) Parse() pb.FileDescriptorProto {
 	d := pb.FileDescriptorProto{}
 
