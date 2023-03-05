@@ -24,13 +24,17 @@ func (p *Impl) nextToken() {
 	p.peekToken = p.l.NextToken()
 }
 
-func (p *Impl) expectPeek(t lexer.TokenType) bool {
-	if p.peekToken.Type == t {
-		p.nextToken()
-		return true
-	} else {
+// acceptPeek returns true and advance token
+// if the type t is equal to the peekToken.Type
+// else it returns false
+func (p *Impl) acceptPeek(t lexer.TokenType) bool {
+	if p.peekToken.Type != t {
+		//TODO: add error and update documentation
 		return false
 	}
+
+	p.nextToken()
+	return true
 }
 
 func (p *Impl) Parse() pb.FileDescriptorProto {

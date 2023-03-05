@@ -7,10 +7,10 @@ import (
 )
 
 func (p *Impl) parseSyntax() *string {
-	if !p.expectPeek(lexer.TokenEqual) {
+	if !p.acceptPeek(lexer.TokenEqual) {
 		return nil
 	}
-	if !p.expectPeek(lexer.TokenStr) {
+	if !p.acceptPeek(lexer.TokenStr) {
 		return nil
 	}
 
@@ -18,7 +18,7 @@ func (p *Impl) parseSyntax() *string {
 		return r == '\'' || r == '"'
 	})
 
-	if !p.expectPeek(lexer.TokenSemicolon) {
+	if !p.acceptPeek(lexer.TokenSemicolon) {
 		return nil
 	}
 
