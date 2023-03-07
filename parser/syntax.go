@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"strings"
-
 	"github.com/Clement-Jean/protein/lexer"
 )
 
@@ -14,9 +12,7 @@ func (p *Impl) parseSyntax() *string {
 		return nil
 	}
 
-	s := strings.TrimFunc(p.curToken.Literal, func(r rune) bool {
-		return r == '\'' || r == '"'
-	})
+	s := destringify(p.curToken.Literal)
 
 	if !p.acceptPeek(lexer.TokenSemicolon) {
 		return nil
