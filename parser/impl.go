@@ -42,7 +42,7 @@ func (p *Impl) nextToken() {
 func (p *Impl) accept(original lexer.TokenType, expected ...lexer.TokenType) bool {
 	if !slices.Contains(expected, original) {
 		p.error(fmt.Sprintf(
-			errorUnexpectedPeek,
+			errorUnexpected,
 			strings.Trim(fmt.Sprint(expected), "[]"),
 			original.String(),
 		))
