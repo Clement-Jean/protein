@@ -27,7 +27,16 @@ func New(l lexer.Lexer) Parser {
 
 func (p *Impl) nextToken() {
 	p.curToken = p.peekToken
+
+	for p.curToken.Type == lexer.TokenSpace {
+		p.curToken = p.l.NextToken()
+	}
+
 	p.peekToken = p.l.NextToken()
+
+	for p.peekToken.Type == lexer.TokenSpace {
+		p.peekToken = p.l.NextToken()
+	}
 }
 
 func (p *Impl) accept(original lexer.TokenType, expected ...lexer.TokenType) bool {
