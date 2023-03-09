@@ -7,21 +7,15 @@ import (
 	"github.com/Clement-Jean/protein/lexer"
 )
 
-func runSyntaxCheck(t *testing.T, expected *string, tokens []lexer.Token) string {
+func runSyntaxCheck(t *testing.T, expected string, tokens []lexer.Token) string {
 	d, err := runCheck(t, tokens)
 
 	if len(err) != 0 {
 		return err
 	}
 
-	if expected != d.Syntax && (d.Syntax == nil || expected == nil || *d.Syntax != *expected) {
-		if d.Syntax == nil {
-			t.Fatalf("syntax wrong. expected='%s', got=nil", *expected)
-		} else if expected == nil {
-			t.Fatalf("syntax wrong. expected=nil, got='%s'", *d.Syntax)
-		}
-
-		t.Fatalf("syntax wrong. expected='%s', got='%s'", *expected, *d.Syntax)
+	if syntax := d.GetSyntax(); syntax != expected {
+		t.Fatalf("syntax wrong. expected='%s', got='%s'", expected, syntax)
 	}
 
 	return ""
@@ -29,8 +23,7 @@ func runSyntaxCheck(t *testing.T, expected *string, tokens []lexer.Token) string
 
 func TestParseSyntaxProto3(t *testing.T) {
 	// syntax = "proto3";
-	expected := "proto3"
-	err := runSyntaxCheck(t, &expected, []lexer.Token{
+	err := runSyntaxCheck(t, "proto3", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "syntax", Position: lexer.Position{}},
 		{Type: lexer.TokenEqual, Literal: "=", Position: lexer.Position{}},
 		{Type: lexer.TokenStr, Literal: "\"proto3\"", Position: lexer.Position{}},
@@ -44,8 +37,7 @@ func TestParseSyntaxProto3(t *testing.T) {
 
 func TestParseSyntaxProto2(t *testing.T) {
 	// syntax = 'proto2';
-	expected := "proto2"
-	err := runSyntaxCheck(t, &expected, []lexer.Token{
+	err := runSyntaxCheck(t, "proto2", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "syntax", Position: lexer.Position{}},
 		{Type: lexer.TokenEqual, Literal: "=", Position: lexer.Position{}},
 		{Type: lexer.TokenStr, Literal: "'proto2'", Position: lexer.Position{}},
@@ -59,13 +51,13 @@ func TestParseSyntaxProto2(t *testing.T) {
 
 func TestParseSyntaxExpectedEqual(t *testing.T) {
 	// syntax 'proto2';
-	err := runSyntaxCheck(t, nil, []lexer.Token{
+	err := runSyntaxCheck(t, "", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "syntax", Position: lexer.Position{}},
 		{Type: lexer.TokenStr, Literal: "'proto2'", Position: lexer.Position{}},
 		{Type: lexer.TokenSemicolon, Literal: ";", Position: lexer.Position{}},
 	})
 
-	expectedErr := fmt.Sprintf(errorUnexpectedPeek, "=", "String")
+	expectedErr := fmt.Sprintf(errorUnexpected, "=", "String")
 	if err != expectedErr {
 		t.Fatalf("error wrong. expected='%s', got='%s'", expectedErr, err)
 	}
@@ -73,14 +65,14 @@ func TestParseSyntaxExpectedEqual(t *testing.T) {
 
 func TestParseSyntaxExpectedStr(t *testing.T) {
 	// syntax = proto2;
-	err := runSyntaxCheck(t, nil, []lexer.Token{
+	err := runSyntaxCheck(t, "", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "syntax", Position: lexer.Position{}},
 		{Type: lexer.TokenEqual, Literal: "=", Position: lexer.Position{}},
 		{Type: lexer.TokenIdentifier, Literal: "proto2", Position: lexer.Position{}},
 		{Type: lexer.TokenSemicolon, Literal: ";", Position: lexer.Position{}},
 	})
 
-	expectedErr := fmt.Sprintf(errorUnexpectedPeek, "String", "Identifier")
+	expectedErr := fmt.Sprintf(errorUnexpected, "String", "Identifier")
 	if err != expectedErr {
 		t.Fatalf("error wrong. expected='%s', got='%s'", expectedErr, err)
 	}
@@ -88,13 +80,13 @@ func TestParseSyntaxExpectedStr(t *testing.T) {
 
 func TestParseSyntaxExpectedSemicolon(t *testing.T) {
 	// syntax = 'proto2'
-	err := runSyntaxCheck(t, nil, []lexer.Token{
+	err := runSyntaxCheck(t, "", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "syntax", Position: lexer.Position{}},
 		{Type: lexer.TokenEqual, Literal: "=", Position: lexer.Position{}},
 		{Type: lexer.TokenStr, Literal: "'proto2'", Position: lexer.Position{}},
 	})
 
-	expectedErr := fmt.Sprintf(errorUnexpectedPeek, ";", "EOF")
+	expectedErr := fmt.Sprintf(errorUnexpected, ";", "EOF")
 	if err != expectedErr {
 		t.Fatalf("error wrong. expected='%s', got='%s'", expectedErr, err)
 	}

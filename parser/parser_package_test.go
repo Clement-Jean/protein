@@ -7,21 +7,15 @@ import (
 	"github.com/Clement-Jean/protein/lexer"
 )
 
-func runPackageCheck(t *testing.T, expected *string, tokens []lexer.Token) string {
+func runPackageCheck(t *testing.T, expected string, tokens []lexer.Token) string {
 	d, err := runCheck(t, tokens)
 
 	if len(err) != 0 {
 		return err
 	}
 
-	if expected != d.Package && (d.Package == nil || expected == nil || *d.Package != *expected) {
-		if d.Package == nil {
-			t.Fatalf("package wrong. expected='%s', got=nil", *expected)
-		} else if expected == nil {
-			t.Fatalf("package wrong. expected=nil, got='%s'", *d.Package)
-		}
-
-		t.Fatalf("package wrong. expected='%s', got='%s'", *expected, *d.Package)
+	if pkg := d.GetPackage(); pkg != expected {
+		t.Fatalf("package wrong. expected='%s', got='%s'", expected, pkg)
 	}
 
 	return ""
@@ -29,8 +23,7 @@ func runPackageCheck(t *testing.T, expected *string, tokens []lexer.Token) strin
 
 func TestParsePackageIdentifier(t *testing.T) {
 	// package google;
-	expected := "google"
-	err := runPackageCheck(t, &expected, []lexer.Token{
+	err := runPackageCheck(t, "google", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "package", Position: lexer.Position{}},
 		{Type: lexer.TokenIdentifier, Literal: "google", Position: lexer.Position{}},
 		{Type: lexer.TokenSemicolon, Literal: ";", Position: lexer.Position{}},
@@ -43,8 +36,7 @@ func TestParsePackageIdentifier(t *testing.T) {
 
 func TestParsePackageFullIdentifier(t *testing.T) {
 	// package google.protobuf;
-	expected := "google.protobuf"
-	err := runPackageCheck(t, &expected, []lexer.Token{
+	err := runPackageCheck(t, "google.protobuf", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "package", Position: lexer.Position{}},
 		{Type: lexer.TokenIdentifier, Literal: "google", Position: lexer.Position{}},
 		{Type: lexer.TokenDot, Literal: ".", Position: lexer.Position{}},
@@ -59,14 +51,14 @@ func TestParsePackageFullIdentifier(t *testing.T) {
 
 func TestParseUnterminedPackage(t *testing.T) {
 	// package google.;
-	err := runPackageCheck(t, nil, []lexer.Token{
+	err := runPackageCheck(t, "", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "package", Position: lexer.Position{}},
 		{Type: lexer.TokenIdentifier, Literal: "google", Position: lexer.Position{}},
 		{Type: lexer.TokenDot, Literal: ".", Position: lexer.Position{}},
 		{Type: lexer.TokenSemicolon, Literal: ";", Position: lexer.Position{}},
 	})
 
-	expectedErr := fmt.Sprintf(errorUnexpectedPeek, "Identifier", ";")
+	expectedErr := fmt.Sprintf(errorUnexpected, "Identifier", ";")
 	if err != expectedErr {
 		t.Fatalf("error wrong. expected='%s', got='%s'", expectedErr, err)
 	}
@@ -74,13 +66,13 @@ func TestParseUnterminedPackage(t *testing.T) {
 
 func TestParseExpectedIdentifier(t *testing.T) {
 	// package 'google';
-	err := runPackageCheck(t, nil, []lexer.Token{
+	err := runPackageCheck(t, "", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "package", Position: lexer.Position{}},
 		{Type: lexer.TokenStr, Literal: "'google'", Position: lexer.Position{}},
 		{Type: lexer.TokenSemicolon, Literal: ";", Position: lexer.Position{}},
 	})
 
-	expectedErr := fmt.Sprintf(errorUnexpectedPeek, "Identifier", "String")
+	expectedErr := fmt.Sprintf(errorUnexpected, "Identifier", "String")
 	if err != expectedErr {
 		t.Fatalf("error wrong. expected='%s', got='%s'", expectedErr, err)
 	}
@@ -88,12 +80,12 @@ func TestParseExpectedIdentifier(t *testing.T) {
 
 func TestParseExpectedSemicolon(t *testing.T) {
 	// package google
-	err := runPackageCheck(t, nil, []lexer.Token{
+	err := runPackageCheck(t, "", []lexer.Token{
 		{Type: lexer.TokenIdentifier, Literal: "package", Position: lexer.Position{}},
 		{Type: lexer.TokenIdentifier, Literal: "google", Position: lexer.Position{}},
 	})
 
-	expectedErr := fmt.Sprintf(errorUnexpectedPeek, ";", "EOF")
+	expectedErr := fmt.Sprintf(errorUnexpected, ";", "EOF")
 	if err != expectedErr {
 		t.Fatalf("error wrong. expected='%s', got='%s'", expectedErr, err)
 	}
