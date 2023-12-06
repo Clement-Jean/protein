@@ -1,0 +1,17 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "lexer_example_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/Clement-Jean/protein/examples/lexer",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@protein//lexer",
+    ],
+)
+
+go_binary(
+    name = "lexer_example",
+    embed = [":lexer_example_lib"],
+    visibility = ["//visibility:public"],
+)
