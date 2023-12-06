@@ -57,6 +57,18 @@ func symbolsTestCase() TestCase {
 func TestTokenize(t *testing.T) {
 	tests := []TestCase{
 		symbolsTestCase(),
+		{
+			name:  "spaces",
+			input: "\t\n\v\f\n ",
+			kinds: []token.Kind{token.KindSpace, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 6}, {Start: 6, End: 6}},
+		},
+		{
+			name:  "double_newline",
+			input: "\n\n",
+			kinds: []token.Kind{token.KindSpace, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 2}, {Start: 2, End: 2}},
+		},
 	}
 
 	runTestCases(t, tests)

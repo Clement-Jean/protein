@@ -4,6 +4,21 @@ import "github.com/Clement-Jean/protein/token"
 
 type stateFn func() stateFn
 
+func isSpace(r rune) bool {
+	switch r {
+	case '\t', '\n', '\v', '\f', '\r', ' ', 0x85, 0xA0:
+		return true
+	}
+	return false
+}
+
+func (l *impl) lexSpaces() stateFn {
+	for isSpace(l.buf.peek()) {
+		l.buf.next()
+	}
+	return l.emit(token.KindSpace)
+}
+
 func (l *impl) lexProto() stateFn {
 	if l.buf.atEOF {
 		return l.emit(token.KindEOF)
@@ -41,7 +56,11 @@ func (l *impl) lexProto() stateFn {
 	case '/':
 		return l.emit(token.KindSlash)
 	default:
-		if l.buf.atEOF {
+		switch {
+		case isSpace(next):
+			l.buf.backup()
+			return l.lexSpaces
+		case l.buf.atEOF:
 			return l.emit(token.KindEOF)
 		}
 	}
