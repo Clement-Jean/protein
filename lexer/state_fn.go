@@ -59,6 +59,30 @@ func (l *impl) lexIdentifier() stateFn {
 	return l.emit(token.KindIdentifier)
 }
 
+func (l *impl) lexString() stateFn {
+	const escape = '\\'
+
+	open := l.buf.next()
+	next := l.buf.next()
+	inEscape := false
+
+	for ; !l.buf.atEOF && next != '\n'; next = l.buf.next() {
+		switch {
+		case inEscape:
+			inEscape = false
+		case next == escape:
+			inEscape = true
+		case next == open: // open and not escaped
+			return l.emit(token.KindStr)
+		}
+	}
+
+	if next == '\n' {
+		l.buf.backup()
+	}
+	return l.errorf(token.KindErrorUnterminatedQuotedString)
+}
+
 func (l *impl) lexProto() stateFn {
 	if l.buf.atEOF {
 		return l.emit(token.KindEOF)
@@ -101,6 +125,9 @@ func (l *impl) lexProto() stateFn {
 		case isSpace(next):
 			l.buf.backup()
 			return l.lexSpaces
+		case next == '"' || next == '\'':
+			l.buf.backup()
+			return l.lexString
 		case next == '/':
 			peek := l.buf.peek()
 			if peek == '/' {

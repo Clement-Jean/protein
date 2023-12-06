@@ -99,6 +99,41 @@ func TestTokenize(t *testing.T) {
 			kinds: []token.Kind{token.KindIdentifier, token.KindSpace, token.KindIdentifier, token.KindEOF},
 			spans: []span.Span{{Start: 0, End: 15}, {Start: 15, End: 16}, {Start: 16, End: 30}, {Start: 30, End: 30}},
 		},
+		{
+			name:  "string",
+			input: "'test' \"test\"",
+			kinds: []token.Kind{token.KindStr, token.KindSpace, token.KindStr, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 6}, {Start: 6, End: 7}, {Start: 7, End: 13}, {Start: 13, End: 13}},
+		},
+		{
+			name:  "escaped_string",
+			input: "'this is a \\\"123string\\\"'",
+			kinds: []token.Kind{token.KindStr, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 25}, {Start: 25, End: 25}},
+		},
+		{
+			name:  "unterminated_string_eof",
+			input: "'test",
+			kinds: []token.Kind{token.KindErrorUnterminatedQuotedString, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 5}, {Start: 5, End: 5}},
+		},
+		{
+			name:  "unterminated_string_newline",
+			input: "'test\n'",
+			kinds: []token.Kind{
+				token.KindErrorUnterminatedQuotedString,
+				token.KindSpace,
+				token.KindErrorUnterminatedQuotedString,
+				token.KindEOF,
+			},
+			spans: []span.Span{{Start: 0, End: 5}, {Start: 5, End: 6}, {Start: 6, End: 7}, {Start: 7, End: 7}},
+		},
+		{
+			name:  "unterminated_string_mismatch",
+			input: "\"test'",
+			kinds: []token.Kind{token.KindErrorUnterminatedQuotedString, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 6}, {Start: 6, End: 6}},
+		},
 	}
 
 	runTestCases(t, tests)
