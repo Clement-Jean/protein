@@ -1,0 +1,8 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "token",
+    srcs = ["token.go"],
+    importpath = "github.com/Clement-Jean/protein/token",
+    visibility = ["//visibility:public"],
+)
