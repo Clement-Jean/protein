@@ -1,11 +1,26 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "lexer",
-    srcs = ["lexer.go"],
+    srcs = [
+        "impl.go",
+        "lexer.go",
+        "rune_reader.go",
+        "state_fn.go",
+    ],
     importpath = "github.com/Clement-Jean/protein/lexer",
     visibility = ["//visibility:public"],
     deps = [
+        "//internal/span",
+        "//token",
+    ],
+)
+
+go_test(
+    name = "lexer_test",
+    srcs = ["lexer_test.go"],
+    deps = [
+        ":lexer",
         "//internal/span",
         "//token",
     ],
