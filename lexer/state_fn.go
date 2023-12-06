@@ -24,6 +24,14 @@ func isIdentifier(r rune) bool {
 	return isLetter(r) || r == '_' || isDigit(r)
 }
 
+func isHexadecimalDigit(r rune) bool {
+	return isDigit(r) || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')
+}
+
+func isOctalDigit(r rune) bool {
+	return r >= '0' && r <= '7'
+}
+
 func (l *impl) lexSpaces() stateFn {
 	for isSpace(l.buf.peek()) {
 		l.buf.next()
@@ -83,6 +91,37 @@ func (l *impl) lexString() stateFn {
 	return l.errorf(token.KindErrorUnterminatedQuotedString)
 }
 
+func (l *impl) lexNumber() stateFn {
+	kind := token.KindInt
+
+	l.accept("+-")
+
+	digits := isDigit
+
+	if l.accept("0") { // starts with 0
+		if l.accept("xX") {
+			digits = isHexadecimalDigit
+		} else {
+			digits = isOctalDigit
+		}
+	}
+
+	l.acceptWhile(digits)
+
+	if l.accept(".") {
+		kind = token.KindFloat
+		l.acceptWhile(isDigit)
+	}
+
+	if l.accept("eE") { // exponent
+		kind = token.KindFloat
+		l.accept("+-")
+		l.acceptWhile(isDigit)
+	}
+
+	return l.emit(kind)
+}
+
 func (l *impl) lexProto() stateFn {
 	if l.buf.atEOF {
 		return l.emit(token.KindEOF)
@@ -100,7 +139,11 @@ func (l *impl) lexProto() stateFn {
 	case ';':
 		return l.emit(token.KindSemicolon)
 	case '.':
-		return l.emit(token.KindDot)
+		if !isDigit(l.buf.peek()) {
+			return l.emit(token.KindDot)
+		}
+		l.buf.backup()
+		return l.lexNumber
 	case '{':
 		return l.emit(token.KindLeftBrace)
 	case '}':
@@ -125,6 +168,9 @@ func (l *impl) lexProto() stateFn {
 		case isSpace(next):
 			l.buf.backup()
 			return l.lexSpaces
+		case isDigit(next) || next == '-' || next == '+' || next == '.':
+			l.buf.backup()
+			return l.lexNumber
 		case next == '"' || next == '\'':
 			l.buf.backup()
 			return l.lexString
