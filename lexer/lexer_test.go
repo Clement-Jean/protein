@@ -58,6 +58,12 @@ func TestTokenize(t *testing.T) {
 	tests := []TestCase{
 		symbolsTestCase(),
 		{
+			name:  "illegal",
+			input: "&",
+			kinds: []token.Kind{token.KindIllegal, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 1}, {Start: 1, End: 1}},
+		},
+		{
 			name:  "spaces",
 			input: "\t\n\v\f\n ",
 			kinds: []token.Kind{token.KindSpace, token.KindEOF},
