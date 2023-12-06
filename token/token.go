@@ -36,8 +36,8 @@ const (
 var KindToStr = [...]string{
 	"EOF",
 	"Illegal",
-	"Unterminated multiline comment Error",
 	"Unterminated quoted string Error",
+	"Unterminated multiline comment Error",
 	"Space",
 	"Comment",
 	"Identifier",
