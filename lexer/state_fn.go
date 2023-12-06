@@ -19,6 +19,29 @@ func (l *impl) lexSpaces() stateFn {
 	return l.emit(token.KindSpace)
 }
 
+func (l *impl) lexLineComment() stateFn {
+	for r := l.buf.peek(); !l.buf.atEOF && r != '\n'; r = l.buf.peek() {
+		l.buf.next()
+	}
+
+	return l.emit(token.KindComment)
+}
+
+func (l *impl) lexMultilineComment() stateFn {
+	next := l.buf.next()
+
+	for !l.buf.atEOF {
+		if next == '*' && l.buf.peek() == '/' {
+			l.buf.next()
+			return l.emit(token.KindComment)
+		}
+
+		next = l.buf.next()
+	}
+
+	return l.errorf(token.KindErrorUnterminatedMultilineComment)
+}
+
 func (l *impl) lexProto() stateFn {
 	if l.buf.atEOF {
 		return l.emit(token.KindEOF)
@@ -53,13 +76,21 @@ func (l *impl) lexProto() stateFn {
 		return l.emit(token.KindLeftAngle)
 	case '>':
 		return l.emit(token.KindRightAngle)
-	case '/':
-		return l.emit(token.KindSlash)
 	default:
 		switch {
 		case isSpace(next):
 			l.buf.backup()
 			return l.lexSpaces
+		case next == '/':
+			peek := l.buf.peek()
+			if peek == '/' {
+				l.buf.backup()
+				return l.lexLineComment
+			} else if peek == '*' {
+				l.buf.backup()
+				return l.lexMultilineComment
+			}
+			return l.emit(token.KindSlash)
 		case l.buf.atEOF:
 			return l.emit(token.KindEOF)
 		}

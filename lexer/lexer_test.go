@@ -69,6 +69,30 @@ func TestTokenize(t *testing.T) {
 			kinds: []token.Kind{token.KindSpace, token.KindEOF},
 			spans: []span.Span{{Start: 0, End: 2}, {Start: 2, End: 2}},
 		},
+		{
+			name:  "line_comment_eof",
+			input: "//this is a comment",
+			kinds: []token.Kind{token.KindComment, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 19}, {Start: 19, End: 19}},
+		},
+		{
+			name:  "line_comment_newline",
+			input: "//this is a comment\n",
+			kinds: []token.Kind{token.KindComment, token.KindSpace, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 19}, {Start: 19, End: 20}, {Start: 20, End: 20}},
+		},
+		{
+			name:  "multiline_comment",
+			input: "/*this is a comment*/",
+			kinds: []token.Kind{token.KindComment, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 21}, {Start: 21, End: 21}},
+		},
+		{
+			name:  "multiline_comment_eof",
+			input: "/*this is a comment",
+			kinds: []token.Kind{token.KindErrorUnterminatedMultilineComment, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 19}, {Start: 19, End: 19}},
+		},
 	}
 
 	runTestCases(t, tests)
