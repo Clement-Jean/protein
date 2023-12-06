@@ -12,6 +12,18 @@ func isSpace(r rune) bool {
 	return false
 }
 
+func isDigit(r rune) bool {
+	return r >= '0' && r <= '9'
+}
+
+func isLetter(r rune) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
+}
+
+func isIdentifier(r rune) bool {
+	return isLetter(r) || r == '_' || isDigit(r)
+}
+
 func (l *impl) lexSpaces() stateFn {
 	for isSpace(l.buf.peek()) {
 		l.buf.next()
@@ -40,6 +52,11 @@ func (l *impl) lexMultilineComment() stateFn {
 	}
 
 	return l.errorf(token.KindErrorUnterminatedMultilineComment)
+}
+
+func (l *impl) lexIdentifier() stateFn {
+	l.acceptWhile(isIdentifier)
+	return l.emit(token.KindIdentifier)
 }
 
 func (l *impl) lexProto() stateFn {
@@ -78,6 +95,9 @@ func (l *impl) lexProto() stateFn {
 		return l.emit(token.KindRightAngle)
 	default:
 		switch {
+		case isLetter(next):
+			l.buf.backup()
+			return l.lexIdentifier
 		case isSpace(next):
 			l.buf.backup()
 			return l.lexSpaces

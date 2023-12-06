@@ -93,6 +93,12 @@ func TestTokenize(t *testing.T) {
 			kinds: []token.Kind{token.KindErrorUnterminatedMultilineComment, token.KindEOF},
 			spans: []span.Span{{Start: 0, End: 19}, {Start: 19, End: 19}},
 		},
+		{
+			name:  "identifier",
+			input: "hello_world2023 HelloWorld2023",
+			kinds: []token.Kind{token.KindIdentifier, token.KindSpace, token.KindIdentifier, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 15}, {Start: 15, End: 16}, {Start: 16, End: 30}, {Start: 30, End: 30}},
+		},
 	}
 
 	runTestCases(t, tests)
