@@ -1,0 +1,9 @@
+# Output of the go coverage tool
+*.out
+
+# Output directories made by Bazel
+bazel-*
+
+# Goland config directories
+.idea
+.ijwb
