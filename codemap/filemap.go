@@ -3,6 +3,7 @@ package codemap
 import (
 	"log"
 
+	"github.com/Clement-Jean/protein/internal/bytes"
 	"github.com/Clement-Jean/protein/internal/span"
 	"github.com/Clement-Jean/protein/token"
 )
@@ -74,4 +75,12 @@ func (fm *FileMap) RegisterTokens(kinds []token.Kind, spans []span.Span) []token
 	}
 
 	return r
+}
+
+func (fm *FileMap) PrintItems() {
+	for i := 0; i < len(fm.kinds); i++ {
+		if literal := fm.Lookup(i); literal != nil {
+			log.Println(i, bytes.ToString(literal))
+		}
+	}
 }
