@@ -1,0 +1,15 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "codemap",
+    srcs = [
+        "codemap.go",
+        "filemap.go",
+    ],
+    importpath = "github.com/Clement-Jean/protein/codemap",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/span",
+        "//token",
+    ],
+)
