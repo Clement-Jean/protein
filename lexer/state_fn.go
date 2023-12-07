@@ -33,30 +33,30 @@ func isOctalDigit(r rune) bool {
 }
 
 func (l *impl) lexSpaces() stateFn {
-	for isSpace(l.buf.peek()) {
-		l.buf.next()
+	for isSpace(l.peek()) {
+		l.next()
 	}
 	return l.emit(token.KindSpace)
 }
 
 func (l *impl) lexLineComment() stateFn {
-	for r := l.buf.peek(); !l.buf.atEOF && r != '\n'; r = l.buf.peek() {
-		l.buf.next()
+	for r := l.peek(); !l.atEOF && r != '\n'; r = l.peek() {
+		l.next()
 	}
 
 	return l.emit(token.KindComment)
 }
 
 func (l *impl) lexMultilineComment() stateFn {
-	next := l.buf.next()
+	next := l.next()
 
-	for !l.buf.atEOF {
-		if next == '*' && l.buf.peek() == '/' {
-			l.buf.next()
+	for !l.atEOF {
+		if next == '*' && l.peek() == '/' {
+			l.next()
 			return l.emit(token.KindComment)
 		}
 
-		next = l.buf.next()
+		next = l.next()
 	}
 
 	return l.errorf(token.KindErrorUnterminatedMultilineComment)
@@ -70,11 +70,11 @@ func (l *impl) lexIdentifier() stateFn {
 func (l *impl) lexString() stateFn {
 	const escape = '\\'
 
-	open := l.buf.next()
-	next := l.buf.next()
+	open := l.next()
+	next := l.next()
 	inEscape := false
 
-	for ; !l.buf.atEOF && next != '\n'; next = l.buf.next() {
+	for ; !l.atEOF && next != '\n'; next = l.next() {
 		switch {
 		case inEscape:
 			inEscape = false
@@ -86,7 +86,7 @@ func (l *impl) lexString() stateFn {
 	}
 
 	if next == '\n' {
-		l.buf.backup()
+		l.backup()
 	}
 	return l.errorf(token.KindErrorUnterminatedQuotedString)
 }
@@ -123,11 +123,11 @@ func (l *impl) lexNumber() stateFn {
 }
 
 func (l *impl) lexProto() stateFn {
-	if l.buf.atEOF {
+	if l.atEOF {
 		return l.emit(token.KindEOF)
 	}
 
-	switch next := l.buf.next(); next {
+	switch next := l.next(); next {
 	case '_':
 		return l.emit(token.KindUnderscore)
 	case '=':
@@ -139,10 +139,10 @@ func (l *impl) lexProto() stateFn {
 	case ';':
 		return l.emit(token.KindSemicolon)
 	case '.':
-		if !isDigit(l.buf.peek()) {
+		if !isDigit(l.peek()) {
 			return l.emit(token.KindDot)
 		}
-		l.buf.backup()
+		l.backup()
 		return l.lexNumber
 	case '{':
 		return l.emit(token.KindLeftBrace)
@@ -163,28 +163,28 @@ func (l *impl) lexProto() stateFn {
 	default:
 		switch {
 		case isLetter(next):
-			l.buf.backup()
+			l.backup()
 			return l.lexIdentifier
 		case isSpace(next):
-			l.buf.backup()
+			l.backup()
 			return l.lexSpaces
 		case isDigit(next) || next == '-' || next == '+' || next == '.':
-			l.buf.backup()
+			l.backup()
 			return l.lexNumber
 		case next == '"' || next == '\'':
-			l.buf.backup()
+			l.backup()
 			return l.lexString
 		case next == '/':
-			peek := l.buf.peek()
+			peek := l.peek()
 			if peek == '/' {
-				l.buf.backup()
+				l.backup()
 				return l.lexLineComment
 			} else if peek == '*' {
-				l.buf.backup()
+				l.backup()
 				return l.lexMultilineComment
 			}
 			return l.emit(token.KindSlash)
-		case l.buf.atEOF:
+		case l.atEOF:
 			return l.emit(token.KindEOF)
 		}
 	}

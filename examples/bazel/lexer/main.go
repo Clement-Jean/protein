@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/Clement-Jean/protein/lexer"
@@ -12,7 +11,7 @@ import (
 func main() {
 	content := "message Example {}"
 
-	l := lexer.New(strings.NewReader(content))
+	l := lexer.New([]byte(content))
 	kinds, spans := l.Tokenize()
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, ' ', 0)
 

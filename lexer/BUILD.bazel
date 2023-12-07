@@ -5,7 +5,6 @@ go_library(
     srcs = [
         "impl.go",
         "lexer.go",
-        "rune_reader.go",
         "state_fn.go",
     ],
     importpath = "github.com/Clement-Jean/protein/lexer",
@@ -21,6 +20,7 @@ go_test(
     srcs = ["lexer_test.go"],
     deps = [
         ":lexer",
+        "//internal/bytes",
         "//internal/span",
         "//token",
     ],

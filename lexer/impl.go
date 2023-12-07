@@ -1,30 +1,59 @@
 package lexer
 
 import (
-	"io"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/Clement-Jean/protein/internal/span"
 	"github.com/Clement-Jean/protein/token"
 )
 
 type impl struct {
-	buf      *inMemoryRuneReader
-	location span.Span
-	kind     token.Kind
+	buf        []byte
+	location   span.Span
+	start, pos int
+	kind       token.Kind
+	atEOF      bool
 }
 
-func New(reader io.Reader) Lexer {
-	return &impl{
-		buf: newInMemoryRuneReader(reader),
+func New(buf []byte) Lexer {
+	return &impl{buf: buf}
+}
+
+func (l *impl) next() rune {
+	if l.pos >= len(l.buf) {
+		l.atEOF = true
+		return 0
 	}
+
+	r, w := utf8.DecodeRune(l.buf[l.pos:])
+	l.pos += w
+	return r
+}
+
+func (l *impl) peek() rune {
+	if l.pos >= len(l.buf) {
+		return 0
+	}
+
+	r, _ := utf8.DecodeRune(l.buf[l.pos:])
+	return r
+}
+
+func (l *impl) backup() {
+	if l.atEOF || l.pos == 0 {
+		return
+	}
+
+	_, w := utf8.DecodeLastRune(l.buf[:l.pos])
+	l.pos -= w
 }
 
 func (l *impl) emit(kind token.Kind) stateFn {
 	l.kind = kind
-	l.location = span.Span{Start: l.buf.start, End: l.buf.pos}
-	l.buf.start = l.buf.pos
+	l.location = span.Span{Start: l.start, End: l.pos}
+	l.start = l.pos
 	return nil
 }
 
@@ -33,17 +62,17 @@ func (l *impl) errorf(kind token.Kind) stateFn {
 }
 
 func (l *impl) accept(valid string) bool {
-	if strings.ContainsRune(valid, l.buf.next()) {
+	if strings.ContainsRune(valid, l.next()) {
 		return true
 	}
-	l.buf.backup()
+	l.backup()
 	return false
 }
 
 func (l *impl) acceptWhile(fn func(rune) bool) {
-	for fn(l.buf.next()) {
+	for fn(l.next()) {
 	}
-	l.buf.backup()
+	l.backup()
 }
 
 func (l *impl) nextToken() (token.Kind, span.Span) {

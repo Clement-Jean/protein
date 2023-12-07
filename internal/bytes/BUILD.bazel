@@ -1,0 +1,8 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "bytes",
+    srcs = ["bytes.go"],
+    importpath = "github.com/Clement-Jean/protein/internal/bytes",
+    visibility = ["//:__subpackages__"],
+)

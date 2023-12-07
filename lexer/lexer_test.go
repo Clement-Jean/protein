@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Clement-Jean/protein/internal/bytes"
 	"github.com/Clement-Jean/protein/internal/span"
 	"github.com/Clement-Jean/protein/lexer"
 	"github.com/Clement-Jean/protein/token"
@@ -22,7 +23,7 @@ func runTestCases(t *testing.T, tests []TestCase) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			l := lexer.New(strings.NewReader(test.input))
+			l := lexer.New(bytes.FromString(test.input))
 			kinds, spans := l.Tokenize()
 
 			if !reflect.DeepEqual(test.kinds, kinds) {
@@ -46,10 +47,10 @@ func symbolsTestCase() TestCase {
 
 	for i := uint8(0); i < uint8(len(input)); i++ {
 		expectedTokens[i] = token.Kind(start + i)
-		expectedLocations[i] = span.Span{Start: uint64(i), End: uint64(i + 1)}
+		expectedLocations[i] = span.Span{Start: int(i), End: int(i + 1)}
 	}
 	expectedTokens[len(input)] = token.KindEOF
-	expectedLocations[len(input)] = span.Span{Start: uint64(len(input)), End: uint64(len(input))}
+	expectedLocations[len(input)] = span.Span{Start: len(input), End: len(input)}
 
 	return TestCase{"symbols", input, expectedTokens, expectedLocations}
 }
