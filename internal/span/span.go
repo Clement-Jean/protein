@@ -3,8 +3,8 @@ package span
 import "fmt"
 
 type Span struct {
-	Start uint64
-	End   uint64
+	Start int
+	End   int
 }
 
 func (s Span) String() string {

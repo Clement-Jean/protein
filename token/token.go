@@ -64,7 +64,7 @@ var KindToStr = [...]string{
 func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }
 func (k Kind) String() string { return KindToStr[k] }
 
-type UniqueID = uint64
+type UniqueID = int
 
 type Token struct {
 	ID   UniqueID
