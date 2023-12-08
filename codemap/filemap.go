@@ -24,7 +24,7 @@ func (fm *FileMap) Lookup(id token.UniqueID) []byte {
 }
 
 func (fm *FileMap) SpanOf(id token.UniqueID) (span.Span, bool) {
-	if id >= len(fm.kinds) {
+	if id > len(fm.kinds) {
 		return span.Span{}, false
 	}
 	s := fm.spans[id]
@@ -68,7 +68,7 @@ func (fm *FileMap) RegisterTokens(kinds []token.Kind, spans []span.Span) []token
 
 	fm.kinds = kinds
 	fm.spans = spans
-	r := make([]token.Token, len(kinds))
+	r := make([]token.Token, len(kinds)+1)
 
 	for i := 0; i < len(kinds); i++ {
 		r[i] = token.Token{ID: i, Kind: kinds[i]}
