@@ -9,6 +9,7 @@ go_library(
     importpath = "github.com/Clement-Jean/protein/codemap",
     visibility = ["//visibility:public"],
     deps = [
+        "//internal/bytes",
         "//internal/span",
         "//token",
     ],
