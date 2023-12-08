@@ -14,7 +14,7 @@ import (
 )
 
 type UnderTest interface {
-	ast.Identifier | ast.Syntax | ast.Edition | ast.Package
+	ast.Identifier | ast.Syntax | ast.Edition | ast.Package | ast.Import
 }
 
 type TestCase[T UnderTest] struct {
@@ -188,7 +188,11 @@ func TestParseHandleUnknownIdentifier(t *testing.T) {
 		t.Fatalf("expected 1 error, got %d", len(errs))
 	}
 
-	expectErr := gotUnexpected(&tokens[0], token.KindSyntax)
+	expectedKinds := []token.Kind{
+		token.KindSyntax, token.KindEdition,
+		token.KindPackage, token.KindImport,
+	}
+	expectErr := gotUnexpected(&tokens[0], expectedKinds...)
 	if strings.Compare(errs[0].Error(), expectErr.Error()) != 0 {
 		t.Fatalf("expected error '%s', got '%s'", expectErr.Error(), errs[0].Error())
 	}
