@@ -6,5 +6,6 @@ use (
 	./codemap
 	./internal
 	./lexer
+	./parser
 	./token
 )

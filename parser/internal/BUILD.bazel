@@ -1,0 +1,9 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "internal",
+    srcs = ["test_utils.go"],
+    importpath = "github.com/Clement-Jean/protein/parser/internal",
+    visibility = ["//parser:__subpackages__"],
+    deps = ["//internal/span"],
+)

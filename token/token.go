@@ -31,6 +31,8 @@ const (
 	KindLeftAngle   // <
 	KindRightAngle  // >
 	KindSlash
+
+	KindSyntax
 )
 
 var KindToStr = [...]string{
@@ -59,6 +61,7 @@ var KindToStr = [...]string{
 	"<",
 	">",
 	"/",
+	"syntax",
 }
 
 func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }
