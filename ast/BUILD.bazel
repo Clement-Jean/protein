@@ -1,0 +1,13 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "ast",
+    srcs = [
+        "ast.go",
+        "string.go",
+        "syntax.go",
+    ],
+    importpath = "github.com/Clement-Jean/protein/ast",
+    visibility = ["//visibility:public"],
+    deps = ["//token"],
+)
