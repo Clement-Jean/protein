@@ -2,8 +2,8 @@ go 1.21.4
 
 use (
 	.
-	./internal
 	./codemap
+	./internal
 	./lexer
 	./token
 )
