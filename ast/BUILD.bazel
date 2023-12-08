@@ -5,6 +5,8 @@ go_library(
     srcs = [
         "ast.go",
         "edition.go",
+        "identifier.go",
+        "package.go",
         "string.go",
         "syntax.go",
     ],
