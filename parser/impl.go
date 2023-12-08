@@ -57,7 +57,8 @@ func (p *impl) nextToken() *token.Token {
 }
 
 var literalToKind = map[string]token.Kind{
-	"syntax": token.KindSyntax,
+	"syntax":  token.KindSyntax,
+	"edition": token.KindEdition,
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {
@@ -79,6 +80,8 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 		switch kind {
 		case token.KindSyntax:
 			a.Syntax, err = p.parseSyntax()
+		case token.KindEdition:
+			a.Edition, err = p.parseEdition()
 		default:
 			err = gotUnexpected(tok, token.KindSyntax)
 		}

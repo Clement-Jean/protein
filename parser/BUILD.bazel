@@ -4,6 +4,7 @@ go_library(
     name = "parser",
     srcs = [
         "constant.go",
+        "edition.go",
         "error.go",
         "impl.go",
         "parser.go",
@@ -22,6 +23,7 @@ go_library(
 go_test(
     name = "parser_test",
     srcs = [
+        "edition_test.go",
         "parser_test.go",
         "syntax_test.go",
     ],

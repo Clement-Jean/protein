@@ -14,7 +14,7 @@ import (
 )
 
 type UnderTest interface {
-	ast.Syntax
+	ast.Syntax | ast.Edition
 }
 
 type TestCase[T UnderTest] struct {
