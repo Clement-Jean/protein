@@ -6,6 +6,7 @@ go_library(
         "ast.go",
         "edition.go",
         "identifier.go",
+        "import.go",
         "package.go",
         "string.go",
         "syntax.go",
