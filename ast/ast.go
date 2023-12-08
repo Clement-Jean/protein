@@ -1,5 +1,6 @@
 package ast
 
 type Ast struct {
-	Syntax Syntax
+	Syntax  Syntax
+	Edition Edition
 }

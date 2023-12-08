@@ -4,6 +4,7 @@ go_library(
     name = "ast",
     srcs = [
         "ast.go",
+        "edition.go",
         "string.go",
         "syntax.go",
     ],
