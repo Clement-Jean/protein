@@ -34,6 +34,7 @@ const (
 
 	KindSyntax
 	KindEdition
+	KindPackage
 )
 
 var KindToStr = [...]string{
@@ -64,6 +65,7 @@ var KindToStr = [...]string{
 	"/",
 	"syntax",
 	"edition",
+	"package",
 }
 
 func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }

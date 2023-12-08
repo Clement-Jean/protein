@@ -7,6 +7,7 @@ go_library(
         "edition.go",
         "error.go",
         "impl.go",
+        "package.go",
         "parser.go",
         "syntax.go",
     ],
@@ -23,7 +24,10 @@ go_library(
 go_test(
     name = "parser_test",
     srcs = [
+        "constant_test.go",
         "edition_test.go",
+        "identifier_test.go",
+        "package_test.go",
         "parser_test.go",
         "syntax_test.go",
     ],
