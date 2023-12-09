@@ -1,0 +1,41 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "config_example_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/Clement-Jean/protein/examples/config",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@protein//lexer",
+    ],
+)
+
+go_binary(
+    name = "lexer_with_comments_example",
+    gotags = [
+        "protein_keep_comments",
+    ],
+    embed = [":config_example_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_binary(
+    name = "lexer_without_comments_example",
+    embed = [":config_example_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_binary(
+    name = "lexer_with_sci_example",
+    gotags = [
+        "protein_generate_source_code_info",
+    ],
+    embed = [":config_example_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_binary(
+    name = "lexer_without_sci_example",
+    embed = [":config_example_lib"],
+    visibility = ["//visibility:public"],
+)
