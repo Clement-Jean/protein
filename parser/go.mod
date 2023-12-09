@@ -7,5 +7,3 @@ require (
 	github.com/Clement-Jean/protein/token v0.0.0
 	github.com/Clement-Jean/protein/codemap v0.0.0
 )
-
-require github.com/Clement-Jean/protein/internal v0.0.0 // indirect
