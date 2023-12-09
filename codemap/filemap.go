@@ -68,7 +68,7 @@ func (fm *FileMap) RegisterTokens(kinds []token.Kind, spans []span.Span) []token
 
 	fm.kinds = kinds
 	fm.spans = spans
-	r := make([]token.Token, len(kinds)+1)
+	r := make([]token.Token, len(kinds))
 
 	for i := 0; i < len(kinds); i++ {
 		r[i] = token.Token{ID: i, Kind: kinds[i]}
