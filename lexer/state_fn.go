@@ -1,6 +1,9 @@
 package lexer
 
-import "github.com/Clement-Jean/protein/token"
+import (
+	"github.com/Clement-Jean/protein/config"
+	"github.com/Clement-Jean/protein/token"
+)
 
 type stateFn func() stateFn
 
@@ -40,26 +43,38 @@ func (l *impl) lexSpaces() stateFn {
 }
 
 func (l *impl) lexLineComment() stateFn {
-	for r := l.peek(); !l.atEOF && r != '\n'; r = l.peek() {
-		l.next()
-	}
+	l.goToEndOfLineComment()
 
 	return l.emit(token.KindComment)
 }
 
+func (l *impl) goToEndOfLineComment() {
+	for r := l.peek(); !l.atEOF && r != '\n'; r = l.peek() {
+		l.next()
+	}
+}
+
 func (l *impl) lexMultilineComment() stateFn {
+	if ok := l.goToEndOfMultilineComment(); ok {
+		return l.emit(token.KindComment)
+	}
+
+	return l.errorf(token.KindErrorUnterminatedMultilineComment)
+}
+
+func (l *impl) goToEndOfMultilineComment() bool {
 	next := l.next()
 
 	for !l.atEOF {
 		if next == '*' && l.peek() == '/' {
 			l.next()
-			return l.emit(token.KindComment)
+			return true
 		}
 
 		next = l.next()
 	}
 
-	return l.errorf(token.KindErrorUnterminatedMultilineComment)
+	return false
 }
 
 func (l *impl) lexIdentifier() stateFn {
@@ -127,7 +142,38 @@ func (l *impl) lexProto() stateFn {
 		return l.emit(token.KindEOF)
 	}
 
-	switch next := l.next(); next {
+	next := l.next()
+
+begin:
+	if !config.GenerateSourceCodeInfo {
+		for isSpace(next) {
+			l.start = l.pos // skipping
+			next = l.next()
+		}
+	}
+
+	if !config.KeepComments {
+		if next == '/' && l.peek() == '/' {
+			l.goToEndOfLineComment()
+			next = l.next()
+
+			if isSpace(next) {
+				goto begin
+			}
+		} else if next == '/' && l.peek() == '*' {
+			if ok := l.goToEndOfMultilineComment(); ok {
+				next = l.next()
+			} else {
+				return l.errorf(token.KindErrorUnterminatedMultilineComment)
+			}
+
+			if isSpace(next) {
+				goto begin
+			}
+		}
+	}
+
+	switch next {
 	case '_':
 		return l.emit(token.KindUnderscore)
 	case '=':
@@ -165,7 +211,7 @@ func (l *impl) lexProto() stateFn {
 		case isLetter(next):
 			l.backup()
 			return l.lexIdentifier
-		case isSpace(next):
+		case config.GenerateSourceCodeInfo && isSpace(next):
 			l.backup()
 			return l.lexSpaces
 		case isDigit(next) || next == '-' || next == '+' || next == '.':
@@ -175,13 +221,15 @@ func (l *impl) lexProto() stateFn {
 			l.backup()
 			return l.lexString
 		case next == '/':
-			peek := l.peek()
-			if peek == '/' {
-				l.backup()
-				return l.lexLineComment
-			} else if peek == '*' {
-				l.backup()
-				return l.lexMultilineComment
+			if config.KeepComments {
+				peek := l.peek()
+				if peek == '/' {
+					l.backup()
+					return l.lexLineComment
+				} else if peek == '*' {
+					l.backup()
+					return l.lexMultilineComment
+				}
 			}
 			return l.emit(token.KindSlash)
 		case l.atEOF:

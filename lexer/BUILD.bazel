@@ -10,6 +10,7 @@ go_library(
     importpath = "github.com/Clement-Jean/protein/lexer",
     visibility = ["//visibility:public"],
     deps = [
+        "//config",
         "//internal/span",
         "//token",
     ],
@@ -18,6 +19,10 @@ go_library(
 go_test(
     name = "lexer_test",
     srcs = ["lexer_test.go"],
+    gotags = [
+        "protein_keep_comments",
+        "protein_generate_source_code_info",
+    ],
     deps = [
         ":lexer",
         "//internal/bytes",

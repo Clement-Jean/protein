@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/Clement-Jean/protein/ast"
 	"github.com/Clement-Jean/protein/codemap"
+	"github.com/Clement-Jean/protein/config"
 	"github.com/Clement-Jean/protein/internal/bytes"
 	"github.com/Clement-Jean/protein/token"
 )
@@ -21,7 +22,8 @@ func New(tokens []token.Token, fm *codemap.FileMap) Parser {
 }
 
 func isSpaceOrComment(kind token.Kind) bool {
-	return kind == token.KindSpace || kind == token.KindComment
+	return (config.GenerateSourceCodeInfo && kind == token.KindSpace) ||
+		(config.KeepComments && kind == token.KindComment)
 }
 
 func (p *impl) curr() *token.Token {

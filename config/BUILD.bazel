@@ -1,0 +1,13 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "config",
+    srcs = [
+        "generate_source_code_info_false.go",
+        "generate_source_code_info_true.go",
+        "keep_comments_false.go",
+        "keep_comments_true.go",
+    ],
+    importpath = "github.com/Clement-Jean/protein/config",
+    visibility = ["//visibility:public"],
+)

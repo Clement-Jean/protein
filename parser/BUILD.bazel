@@ -17,6 +17,7 @@ go_library(
     deps = [
         "//ast",
         "//codemap",
+        "//config",
         "//internal/bytes",
         "//token",
     ],
@@ -34,6 +35,10 @@ go_test(
         "syntax_test.go",
     ],
     embed = [":parser"],
+    gotags = [
+        "protein_keep_comments",
+        "protein_generate_source_code_info",
+    ],
     deps = [
         "//ast",
         "//codemap",
