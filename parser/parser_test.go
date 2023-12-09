@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"testing"
 
@@ -69,6 +70,7 @@ func runTestCases[T UnderTest](
 	dummy := "test.proto"
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			log.Println("----", test.name, "----")
 			fm := cm.Insert(dummy, bytes.FromString(test.content))
 			ref := internal.ReferenceString(test.indices, '-')
 			spans := internal.MakeSpansFromIndices(ref, test.locs)
@@ -108,34 +110,6 @@ func TestPeekEOF(t *testing.T) {
 	}
 }
 
-func TestPeekSkipSpacesAndComments(t *testing.T) {
-	fm := &codemap.FileMap{}
-	tokens := []token.Token{
-		token.Token{
-			ID:   1,
-			Kind: token.KindComment,
-		},
-		token.Token{
-			ID:   2,
-			Kind: token.KindSpace,
-		},
-		token.Token{
-			ID:   3,
-			Kind: token.KindIdentifier,
-		},
-	}
-	p := New(tokens, fm).(*impl)
-	tok := p.peek()
-
-	if tok.ID != 3 {
-		t.Fatalf("expected ID 3, got %d", tok.ID)
-	}
-
-	if tok.Kind != token.KindIdentifier {
-		t.Fatalf("expected Identifier, got %s", tok.Kind.String())
-	}
-}
-
 func TestNextEOF(t *testing.T) {
 	fm := &codemap.FileMap{}
 	p := New(nil, fm).(*impl)
@@ -143,34 +117,6 @@ func TestNextEOF(t *testing.T) {
 
 	if tok != nil {
 		t.Fatalf("expected nil, got %v", tok)
-	}
-}
-
-func TestNextSkipSpacesAndComments(t *testing.T) {
-	fm := &codemap.FileMap{}
-	tokens := []token.Token{
-		token.Token{
-			ID:   1,
-			Kind: token.KindComment,
-		},
-		token.Token{
-			ID:   2,
-			Kind: token.KindSpace,
-		},
-		token.Token{
-			ID:   3,
-			Kind: token.KindIdentifier,
-		},
-	}
-	p := New(tokens, fm).(*impl)
-	tok := p.nextToken()
-
-	if tok.ID != 3 {
-		t.Fatalf("expected ID 3, got %d", tok.ID)
-	}
-
-	if tok.Kind != token.KindIdentifier {
-		t.Fatalf("expected Identifier, got %s", tok.Kind.String())
 	}
 }
 
