@@ -18,7 +18,7 @@ func TestPackage(t *testing.T) {
 	tests := []TestCase[ast.Package]{
 		{
 			name:        internal.CaseName("package", true, "identifier"),
-			expectedObj: ast.Package{ID: 3, Value: ast.Identifier{ID: 1}},
+			expectedObj: ast.Package{ID: 4, Value: ast.Identifier{ID: 1}},
 
 			content: "package google;",
 			indices: "a------bc-----de",
@@ -31,7 +31,7 @@ func TestPackage(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("package", true, "full_identifier"),
-			expectedObj: ast.Package{ID: 6, Value: ast.Identifier{ID: 5, Parts: []token.UniqueID{1, 3}}},
+			expectedObj: ast.Package{ID: 7, Value: ast.Identifier{ID: 6, Parts: []token.UniqueID{1, 3}}},
 
 			content: "package google.protobuf;",
 			indices: "a------bc-----de-------fg",
@@ -62,7 +62,7 @@ func TestPackage(t *testing.T) {
 		{
 			name: internal.CaseName("package", false, "expect_semicolon"),
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 0, Kind: token.KindEOF}, token.KindSemicolon),
+				gotUnexpected(&token.Token{ID: 2, Kind: token.KindEOF}, token.KindSemicolon),
 			},
 
 			content: "package 'google'",

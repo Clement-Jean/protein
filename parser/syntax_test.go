@@ -17,7 +17,7 @@ func TestSyntax(t *testing.T) {
 	tests := []TestCase[ast.Syntax]{
 		{
 			name:        internal.CaseName("syntax", true),
-			expectedObj: ast.Syntax{ID: 4, Value: ast.String{ID: 2}},
+			expectedObj: ast.Syntax{ID: 5, Value: ast.String{ID: 2}},
 
 			content: "syntax = 'proto2';",
 			indices: "a-----bcde-------fg",
@@ -63,7 +63,7 @@ func TestSyntax(t *testing.T) {
 		{
 			name: internal.CaseName("syntax", false, "expect_semicolon"),
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 0, Kind: token.KindEOF}, token.KindSemicolon),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindEOF}, token.KindSemicolon),
 			},
 
 			content: "syntax = 'proto3'",

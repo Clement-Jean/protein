@@ -25,7 +25,7 @@ func TestImport(t *testing.T) {
 	tests := []TestCase[ast.Import]{
 		{
 			name:        internal.CaseName("import", true),
-			expectedObj: ast.Import{ID: 3, Value: ast.String{ID: 1}},
+			expectedObj: ast.Import{ID: 4, Value: ast.String{ID: 1}},
 
 			content: "import 'google/protobuf/empty.proto';",
 			indices: "a-----bc----------------------------de",
@@ -34,11 +34,12 @@ func TestImport(t *testing.T) {
 				token.KindIdentifier,
 				token.KindStr,
 				token.KindSemicolon,
+				token.KindEOF,
 			},
 		},
 		{
 			name:        internal.CaseName("import", true, "public"),
-			expectedObj: ast.Import{ID: 4, Value: ast.String{ID: 2}, IsPublic: true},
+			expectedObj: ast.Import{ID: 5, Value: ast.String{ID: 2}, IsPublic: true},
 
 			content: "import public 'google/protobuf/empty.proto';",
 			indices: "a-----bc-----de----------------------------fg",
@@ -48,11 +49,12 @@ func TestImport(t *testing.T) {
 				token.KindIdentifier, // public
 				token.KindStr,
 				token.KindSemicolon,
+				token.KindEOF,
 			},
 		},
 		{
 			name:        internal.CaseName("import", true, "weak"),
-			expectedObj: ast.Import{ID: 4, Value: ast.String{ID: 2}, IsWeak: true},
+			expectedObj: ast.Import{ID: 5, Value: ast.String{ID: 2}, IsWeak: true},
 
 			content: "import weak 'google/protobuf/empty.proto';",
 			indices: "a-----bc---de----------------------------fg",
@@ -62,6 +64,7 @@ func TestImport(t *testing.T) {
 				token.KindIdentifier, // weak
 				token.KindStr,
 				token.KindSemicolon,
+				token.KindEOF,
 			},
 		},
 		{
@@ -77,12 +80,13 @@ func TestImport(t *testing.T) {
 				token.KindIdentifier,
 				token.KindInt,
 				token.KindSemicolon,
+				token.KindEOF,
 			},
 		},
 		{
 			name: internal.CaseName("import", false, "expect_semicolon"),
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 0, Kind: token.KindEOF}, token.KindSemicolon),
+				gotUnexpected(&token.Token{ID: 2, Kind: token.KindEOF}, token.KindSemicolon),
 			},
 
 			content: "import 'empty.proto'",
@@ -91,6 +95,7 @@ func TestImport(t *testing.T) {
 			kinds: []token.Kind{
 				token.KindIdentifier,
 				token.KindStr,
+				token.KindEOF,
 			},
 		},
 		{

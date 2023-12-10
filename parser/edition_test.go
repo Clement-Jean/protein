@@ -22,13 +22,12 @@ func TestEdition(t *testing.T) {
 
 			content: "edition = '2023';",
 			indices: "a------bcde-----fg",
-			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'g'}, {'g', 'g'}},
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'g'}},
 			kinds: []token.Kind{
 				token.KindIdentifier,
 				token.KindEqual,
 				token.KindStr,
 				token.KindSemicolon,
-				token.KindEOF,
 			},
 		},
 		{
@@ -39,12 +38,11 @@ func TestEdition(t *testing.T) {
 
 			content: "edition '2023';",
 			indices: "a------bc-----de",
-			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'d', 'e'}, {'e', 'e'}},
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'d', 'e'}},
 			kinds: []token.Kind{
 				token.KindIdentifier,
 				token.KindStr,
 				token.KindSemicolon,
-				token.KindEOF,
 			},
 		},
 		{
@@ -55,13 +53,12 @@ func TestEdition(t *testing.T) {
 
 			content: "edition = 2023;",
 			indices: "a------bcde---fg",
-			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'g'}, {'g', 'g'}},
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'g'}},
 			kinds: []token.Kind{
 				token.KindIdentifier,
 				token.KindEqual,
 				token.KindIdentifier,
 				token.KindSemicolon,
-				token.KindEOF,
 			},
 		},
 		{
@@ -72,12 +69,11 @@ func TestEdition(t *testing.T) {
 
 			content: "edition = '2023'",
 			indices: "a------bcde-----f",
-			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'f'}},
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}},
 			kinds: []token.Kind{
 				token.KindIdentifier,
 				token.KindEqual,
 				token.KindStr,
-				token.KindEOF,
 			},
 		},
 	}

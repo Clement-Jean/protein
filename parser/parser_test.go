@@ -75,6 +75,11 @@ func runTestCases[T UnderTest](
 			ref := internal.ReferenceString(test.indices, '-')
 			spans := internal.MakeSpansFromIndices(ref, test.locs)
 
+			if len(test.kinds) != 0 && test.kinds[len(test.kinds)-1] != token.KindEOF {
+				// add EOF if not in kinds
+				test.kinds = append(test.kinds, token.KindEOF)
+			}
+
 			if len(spans) != len(test.kinds) {
 				t.Fatalf("have %d kinds and %d locs", len(test.kinds), len(spans))
 			}
@@ -125,7 +130,7 @@ func TestParseHandleUnknownIdentifier(t *testing.T) {
 	cm := codemap.New()
 	fm := cm.Insert("test.proto", content)
 	kinds := []token.Kind{token.KindIdentifier}
-	spans := []span.Span{span.Span{Start: 0, End: 7}}
+	spans := []span.Span{{Start: 0, End: 7}}
 	tokens := fm.RegisterTokens(kinds, spans)
 	p := New(tokens, fm)
 	_, errs := p.Parse()

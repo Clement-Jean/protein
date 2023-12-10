@@ -1,8 +1,9 @@
 package internal
 
 import (
-	"github.com/Clement-Jean/protein/internal/span"
 	"strings"
+
+	"github.com/Clement-Jean/protein/internal/span"
 )
 
 func CaseName(domain string, isValid bool, descriptions ...string) string {
@@ -58,5 +59,9 @@ func MakeSpansFromIndices(ref map[rune]int, indices [][2]rune) (spans []span.Spa
 
 		spans = append(spans, span.Span{Start: ref[index[0]], End: ref[index[1]]})
 	}
+
+	// Add EOF span
+	last := spans[len(spans)-1]
+	spans = append(spans, span.Span{Start: last.End, End: last.End})
 	return spans
 }
