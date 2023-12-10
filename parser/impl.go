@@ -88,6 +88,12 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 			a.Edition, err = p.parseEdition()
 		case token.KindPackage:
 			a.Package, err = p.parsePackage()
+		case token.KindImport:
+			var imp ast.Import
+
+			if imp, err = p.parseImport(); err == nil {
+				a.Imports = append(a.Imports, imp)
+			}
 		default:
 			err = gotUnexpected(
 				tok,
