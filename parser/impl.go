@@ -63,6 +63,7 @@ var literalToKind = map[string]token.Kind{
 	"edition": token.KindEdition,
 	"package": token.KindPackage,
 	"import":  token.KindImport,
+	"option":  token.KindOption,
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {
@@ -93,6 +94,12 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 
 			if imp, err = p.parseImport(); err == nil {
 				a.Imports = append(a.Imports, imp)
+			}
+		case token.KindOption:
+			var option ast.Option
+
+			if option, err = p.parseOption(); err == nil {
+				a.Options = append(a.Options, option)
 			}
 		default:
 			err = gotUnexpected(

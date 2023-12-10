@@ -38,6 +38,7 @@ const (
 	KindImport
 	KindPublic
 	KindWeak
+	KindOption
 )
 
 var KindToStr = [...]string{
@@ -72,6 +73,7 @@ var KindToStr = [...]string{
 	"import",
 	"public",
 	"weak",
+	"option",
 }
 
 func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }
