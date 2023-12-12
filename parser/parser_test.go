@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"log"
 	"strings"
 	"testing"
@@ -15,7 +14,8 @@ import (
 )
 
 type UnderTest interface {
-	ast.Identifier | ast.Syntax | ast.Edition | ast.Package | ast.Import | ast.Option
+	ast.Identifier | ast.Syntax | ast.Edition | ast.Package | ast.Import | ast.Option |
+		ast.TextField | ast.TextMessage | ast.TextScalarList
 }
 
 type TestCase[T UnderTest] struct {
@@ -39,13 +39,11 @@ func checkErrs(t *testing.T, errs []error, expectedErrs []error) {
 		t.Fatalf("expected %d errors, got %d", len(expectedErrs), len(errs))
 	}
 
-	for i, err := range errs {
-		var got *Error
-		var expected *Error
+	for i, _ := range errs {
+		got := errs[i].(*Error)
+		expected := expectedErrs[i].(*Error)
 
-		if errors.As(err, &got) && errors.As(expectedErrs[i], &expected) {
-			checkIDs(t, got.ID, expected.ID)
-		}
+		checkIDs(t, got.ID, expected.ID)
 		if strings.Compare(got.Error(), expected.Error()) != 0 {
 			t.Fatalf("expected error '%s', got '%s'", expected.Error(), got.Error())
 		}
@@ -90,13 +88,18 @@ func runTestCases[T UnderTest](
 			if !test.keepFirstToken {
 				i.nextToken()
 			}
-			obj, errs := parseFn(i)
+			obj, err := parseFn(i)
 
 			fm.PrintItems()
 
 			if test.expectedErrs != nil {
-				checkErrs(t, []error{errs}, test.expectedErrs)
+				checkErrs(t, []error{err}, test.expectedErrs)
 			} else {
+				if err != nil {
+					t.Fatal(err)
+					return
+				}
+
 				onObj(t, obj, test.expectedObj)
 			}
 
