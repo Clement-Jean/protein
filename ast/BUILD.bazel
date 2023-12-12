@@ -4,9 +4,13 @@ go_library(
     name = "ast",
     srcs = [
         "ast.go",
+        "boolean.go",
         "edition.go",
+        "float.go",
         "identifier.go",
         "import.go",
+        "integer.go",
+        "option.go",
         "package.go",
         "string.go",
         "syntax.go",
