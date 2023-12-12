@@ -4,9 +4,9 @@ go_library(
     name = "config",
     srcs = [
         "generate_source_code_info_false.go",
-        "generate_source_code_info_true.go",
+        "generate_source_code_info_true.go",  # keep
         "keep_comments_false.go",
-        "keep_comments_true.go",
+        "keep_comments_true.go",  # keep
     ],
     importpath = "github.com/Clement-Jean/protein/config",
     visibility = ["//visibility:public"],
