@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"bytes"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -17,8 +18,18 @@ type impl struct {
 	atEOF      bool
 }
 
+var utf8Bom = []byte{0xEF, 0xBB, 0xBF}
+
 func New(buf []byte) Lexer {
-	return &impl{buf: buf}
+	start := 0
+	pos := 0
+
+	if len(buf) >= 3 && bytes.Equal(buf[0:3], utf8Bom) {
+		start = 3
+		pos = 3
+	}
+
+	return &impl{buf: buf, start: start, pos: pos}
 }
 
 func (l *impl) next() rune {

@@ -71,6 +71,12 @@ func TestTokenize(t *testing.T) {
 			spans: []span.Span{{Start: 0, End: 4}, {Start: 4, End: 4}},
 		},
 		{
+			name:  "skip_utf8_bom",
+			input: bytes.ToString([]byte{0xEF, 0xBB, 0xBF}),
+			kinds: []token.Kind{token.KindEOF},
+			spans: []span.Span{{Start: 3, End: 3}},
+		},
+		{
 			name:  "spaces",
 			input: "\t\n\v\f\n ",
 			kinds: []token.Kind{token.KindSpace, token.KindEOF},
