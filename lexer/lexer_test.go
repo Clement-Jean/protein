@@ -65,6 +65,12 @@ func TestTokenize(t *testing.T) {
 			spans: []span.Span{{Start: 0, End: 1}, {Start: 1, End: 1}},
 		},
 		{
+			name:  "illegal_utf8",
+			input: "🙈",
+			kinds: []token.Kind{token.KindIllegal, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 4}, {Start: 4, End: 4}},
+		},
+		{
 			name:  "spaces",
 			input: "\t\n\v\f\n ",
 			kinds: []token.Kind{token.KindSpace, token.KindEOF},
@@ -111,6 +117,12 @@ func TestTokenize(t *testing.T) {
 			input: "'test' \"test\"",
 			kinds: []token.Kind{token.KindStr, token.KindSpace, token.KindStr, token.KindEOF},
 			spans: []span.Span{{Start: 0, End: 6}, {Start: 6, End: 7}, {Start: 7, End: 13}, {Start: 13, End: 13}},
+		},
+		{
+			name:  "string_utf8",
+			input: "'🙈🙉🙊'",
+			kinds: []token.Kind{token.KindStr, token.KindEOF},
+			spans: []span.Span{{Start: 0, End: 14}, {Start: 14, End: 14}},
 		},
 		{
 			name:  "escaped_string",
