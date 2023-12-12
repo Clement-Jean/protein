@@ -14,6 +14,7 @@ go_library(
         "package.go",
         "string.go",
         "syntax.go",
+        "text_message.go",
     ],
     importpath = "github.com/Clement-Jean/protein/ast",
     visibility = ["//visibility:public"],

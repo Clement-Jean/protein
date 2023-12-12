@@ -39,6 +39,10 @@ const (
 	KindPublic
 	KindWeak
 	KindOption
+	KindTextMessage
+	KindTextField
+	KindTextScalarList
+	KindTextMessageList
 )
 
 var KindToStr = [...]string{
@@ -74,6 +78,10 @@ var KindToStr = [...]string{
 	"public",
 	"weak",
 	"option",
+	"text_message",
+	"text_field",
+	"text_scalar_list",
+	"text_message_list",
 }
 
 func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }
