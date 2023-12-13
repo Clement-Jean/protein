@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "constant.go",
         "edition.go",
+        "enum.go",
         "error.go",
         "impl.go",
         "import.go",
@@ -30,11 +31,13 @@ go_test(
     srcs = [
         "constant_test.go",
         "edition_test.go",
+        "enum_test.go",
         "identifier_test.go",
         "import_test.go",
         "option_test.go",
         "package_test.go",
         "parser_test.go",
+        "reserved_test.go",
         "syntax_test.go",
     ],
     embed = [":parser"],

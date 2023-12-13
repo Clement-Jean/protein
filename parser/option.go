@@ -90,6 +90,40 @@ func (p *impl) parseOptionIdentifierEqualValue() (ast.Identifier, ast.Expression
 	return name, value, nil
 }
 
+func (p *impl) parseInlineOption() (ast.Option, error) {
+	name, value, err := p.parseOptionIdentifierEqualValue()
+
+	if err != nil {
+		return ast.Option{}, err
+	}
+
+	id := p.fm.Merge(token.KindOption, name.ID, value.GetID())
+	return ast.Option{ID: id, Name: name, Value: value}, nil
+}
+
+func (p *impl) parseInlineOptions() ([]ast.Option, error) {
+	var options []ast.Option
+	peek := p.peek()
+
+	for ; peek.Kind != token.KindRightSquare && peek.Kind != token.KindEOF; peek = p.peek() {
+		if peek := p.peek(); peek.Kind == token.KindComma {
+			p.nextToken()
+		}
+		option, err := p.parseInlineOption()
+
+		if err != nil {
+			return nil, err
+		}
+
+		options = append(options, option)
+	}
+
+	if peek.Kind != token.KindRightSquare {
+		return nil, gotUnexpected(peek, token.KindRightSquare)
+	}
+	return options, nil
+}
+
 func (p *impl) parseOption() (ast.Option, error) {
 	first := p.curr()
 	name, value, err := p.parseOptionIdentifierEqualValue()

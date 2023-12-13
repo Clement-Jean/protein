@@ -46,6 +46,8 @@ const (
 	KindRange
 	KindReserved
 	KindMax
+	KindEnum
+	KindEnumValue
 )
 
 var KindToStr = [...]string{
@@ -88,10 +90,13 @@ var KindToStr = [...]string{
 	"range",
 	"reserved",
 	"max",
+	"enum",
+	"enum_value",
 }
 
-func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }
-func (k Kind) String() string { return KindToStr[k] }
+func (k Kind) IsSymbol() bool  { return KindUnderscore <= k && k <= KindSlash }
+func (k Kind) IsKeyword() bool { return KindSyntax <= k && k <= KindTextMessageList }
+func (k Kind) String() string  { return KindToStr[k] }
 
 type UniqueID = int
 

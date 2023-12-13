@@ -65,6 +65,7 @@ var literalToKind = map[string]token.Kind{
 	"import":   token.KindImport,
 	"option":   token.KindOption,
 	"reserved": token.KindReserved,
+	"enum":     token.KindEnum,
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {
@@ -101,6 +102,12 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 
 			if option, err = p.parseOption(); err == nil {
 				a.Options = append(a.Options, option)
+			}
+		case token.KindEnum:
+			var enum ast.Enum
+
+			if enum, err = p.parseEnum(); err == nil {
+				a.Enums = append(a.Enums, enum)
 			}
 		default:
 			err = gotUnexpected(
