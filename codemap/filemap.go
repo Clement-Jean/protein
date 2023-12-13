@@ -9,9 +9,9 @@ import (
 )
 
 type FileMap struct {
+	content []byte
 	kinds   []token.Kind
 	spans   []span.Span
-	content []byte
 }
 
 func (fm FileMap) Lookup(id token.UniqueID) []byte {
@@ -77,7 +77,7 @@ func (fm *FileMap) RegisterTokens(kinds []token.Kind, spans []span.Span) []token
 	return r
 }
 
-func (fm *FileMap) PrintItems() {
+func (fm FileMap) PrintItems() {
 	for i := 0; i < len(fm.kinds); i++ {
 		if literal := fm.Lookup(i); literal != nil {
 			log.Println(i, bytes.ToString(literal))
