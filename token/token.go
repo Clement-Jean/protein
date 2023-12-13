@@ -43,6 +43,9 @@ const (
 	KindTextField
 	KindTextScalarList
 	KindTextMessageList
+	KindRange
+	KindReserved
+	KindMax
 )
 
 var KindToStr = [...]string{
@@ -82,6 +85,9 @@ var KindToStr = [...]string{
 	"text_field",
 	"text_scalar_list",
 	"text_message_list",
+	"range",
+	"reserved",
+	"max",
 }
 
 func (k Kind) IsSymbol() bool { return KindUnderscore < k && k < KindSlash }

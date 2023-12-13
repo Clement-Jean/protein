@@ -12,6 +12,8 @@ go_library(
         "integer.go",
         "option.go",
         "package.go",
+        "range.go",
+        "reserved.go",
         "string.go",
         "syntax.go",
         "text_message.go",

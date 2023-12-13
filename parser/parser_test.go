@@ -15,7 +15,8 @@ import (
 
 type UnderTest interface {
 	ast.Identifier | ast.Syntax | ast.Edition | ast.Package | ast.Import | ast.Option |
-		ast.TextField | ast.TextMessage | ast.TextScalarList
+		ast.TextField | ast.TextMessage | ast.TextScalarList | ast.Enum | ast.EnumValue |
+		ast.ReservedTags | ast.ReservedNames
 }
 
 type TestCase[T UnderTest] struct {

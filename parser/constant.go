@@ -8,6 +8,15 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
+func (p *impl) parseInt() (ast.Integer, error) {
+	if peek := p.peek(); peek.Kind != token.KindInt {
+		return ast.Integer{}, gotUnexpected(peek, token.KindInt)
+	}
+
+	next := p.nextToken()
+	return ast.Integer{ID: next.ID}, nil
+}
+
 func (p *impl) parseString() (ast.String, error) {
 	if peek := p.peek(); peek.Kind != token.KindStr {
 		return ast.String{}, gotUnexpected(peek, token.KindStr)

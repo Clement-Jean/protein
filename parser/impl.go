@@ -59,11 +59,12 @@ func (p *impl) nextToken() *token.Token {
 }
 
 var literalToKind = map[string]token.Kind{
-	"syntax":  token.KindSyntax,
-	"edition": token.KindEdition,
-	"package": token.KindPackage,
-	"import":  token.KindImport,
-	"option":  token.KindOption,
+	"syntax":   token.KindSyntax,
+	"edition":  token.KindEdition,
+	"package":  token.KindPackage,
+	"import":   token.KindImport,
+	"option":   token.KindOption,
+	"reserved": token.KindReserved,
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {

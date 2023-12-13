@@ -11,6 +11,7 @@ go_library(
         "option.go",
         "package.go",
         "parser.go",
+        "reserved.go",
         "syntax.go",
     ],
     importpath = "github.com/Clement-Jean/protein/parser",
