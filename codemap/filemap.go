@@ -14,7 +14,7 @@ type FileMap struct {
 	content []byte
 }
 
-func (fm *FileMap) Lookup(id token.UniqueID) []byte {
+func (fm FileMap) Lookup(id token.UniqueID) []byte {
 	s, _ := fm.SpanOf(id)
 	if s.End > len(fm.content) {
 		log.Panicf("FileMap thinks it contains %d, but the range (%s) doesn't point to anything valid!", id, s)
@@ -23,7 +23,7 @@ func (fm *FileMap) Lookup(id token.UniqueID) []byte {
 	return fm.content[s.Start:s.End]
 }
 
-func (fm *FileMap) SpanOf(id token.UniqueID) (span.Span, bool) {
+func (fm FileMap) SpanOf(id token.UniqueID) (span.Span, bool) {
 	if id > len(fm.kinds) {
 		return span.Span{}, false
 	}
