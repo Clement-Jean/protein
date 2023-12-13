@@ -96,7 +96,7 @@ func checkTextField(t *testing.T, got, expected ast.TextField) {
 		}
 
 		for i, field := range expectedValueType.Fields {
-			checkIDs(t, gotValueType.Fields[i].GetID(), field.GetID())
+			checkIDs(t, gotValueType.Fields[i].ID, field.ID)
 		}
 	default:
 		t.Fatal("this should never happen!")
