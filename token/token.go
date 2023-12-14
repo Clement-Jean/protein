@@ -48,6 +48,8 @@ const (
 	KindMax
 	KindEnum
 	KindEnumValue
+	KindMessage
+	KindField
 )
 
 var KindToStr = [...]string{
@@ -92,6 +94,8 @@ var KindToStr = [...]string{
 	"max",
 	"enum",
 	"enum_value",
+	"message",
+	"field",
 }
 
 func (k Kind) IsSymbol() bool  { return KindUnderscore <= k && k <= KindSlash }

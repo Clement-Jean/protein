@@ -11,6 +11,7 @@ go_library(
         "identifier.go",
         "import.go",
         "integer.go",
+        "message.go",
         "option.go",
         "package.go",
         "range.go",
