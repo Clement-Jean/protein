@@ -63,6 +63,7 @@ type Message struct {
 	Fields        []Field
 	ReservedTags  []ReservedTags
 	ReservedNames []ReservedNames
+	Oneofs        []Oneof
 	Enums         []Enum
 	Messages      []Message
 	Name          Identifier

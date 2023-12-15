@@ -160,6 +160,51 @@ func TestParseMessage(t *testing.T) {
 			},
 		},
 		{
+			name: internal.CaseName("message", true, "oneof"),
+			expectedObj: ast.Message{
+				ID:   22,
+				Name: ast.Identifier{ID: 1},
+				Oneofs: []ast.Oneof{{
+					ID:   21,
+					Name: ast.Identifier{ID: 4},
+					Fields: []ast.Field{
+						{ID: 19, Type: ast.FieldTypeUint64, TypeID: 7, Name: ast.Identifier{ID: 7}, Tag: ast.Integer{ID: 9}},
+						{ID: 20, Type: ast.FieldTypeString, TypeID: 12, Name: ast.Identifier{ID: 12}, Tag: ast.Integer{ID: 14}},
+					},
+				}},
+			},
+
+			content: "message Test { oneof Test2 { uint64 id = 1; string uuid = 2; } }",
+			indices: "a------bc---defg----hi----jklm-----no-pqrstuv-----wx---yz12345678",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'g', 'h'},
+				{'i', 'j'}, {'k', 'l'}, {'m', 'n'}, {'o', 'p'},
+				{'q', 'r'}, {'s', 't'}, {'t', 'u'}, {'v', 'w'},
+				{'x', 'y'}, {'z', '1'}, {'2', '3'}, {'3', '4'},
+				{'5', '6'}, {'7', '8'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier,
+				token.KindIdentifier, // Test
+				token.KindLeftBrace,
+				token.KindIdentifier, // oneof
+				token.KindIdentifier, // Test2
+				token.KindLeftBrace,
+				token.KindIdentifier, // uint64
+				token.KindIdentifier, // id
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+				token.KindIdentifier, // string
+				token.KindIdentifier, // uuid
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+				token.KindRightBrace,
+				token.KindRightBrace,
+			},
+		},
+		{
 			name: internal.CaseName("message", true, "reserved_tag"),
 			expectedObj: ast.Message{
 				ID:   8,

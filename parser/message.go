@@ -231,6 +231,12 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 			if field, err = p.parseMapField(); err == nil {
 				msg.Fields = append(msg.Fields, field)
 			}
+		case token.KindOneOf:
+			var oneof ast.Oneof
+
+			if oneof, err = p.parseOneof(); err == nil {
+				msg.Oneofs = append(msg.Oneofs, oneof)
+			}
 		case token.KindEnum:
 			var enum ast.Enum
 
