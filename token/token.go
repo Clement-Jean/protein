@@ -50,6 +50,7 @@ const (
 	KindEnumValue
 	KindMessage
 	KindField
+	KindMap
 )
 
 var KindToStr = [...]string{
@@ -96,6 +97,7 @@ var KindToStr = [...]string{
 	"enum_value",
 	"message",
 	"field",
+	"map",
 }
 
 func (k Kind) IsSymbol() bool  { return KindUnderscore <= k && k <= KindSlash }

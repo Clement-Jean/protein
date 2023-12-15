@@ -67,6 +67,7 @@ var literalToKind = map[string]token.Kind{
 	"reserved": token.KindReserved,
 	"enum":     token.KindEnum,
 	"message":  token.KindMessage,
+	"map":      token.KindMap,
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {

@@ -120,6 +120,46 @@ func TestParseMessage(t *testing.T) {
 			},
 		},
 		{
+			name: internal.CaseName("message", true, "map_field"),
+			expectedObj: ast.Message{
+				ID:   17,
+				Name: ast.Identifier{ID: 1},
+				Fields: []ast.Field{
+					{
+						ID:   16,
+						Type: ast.FieldTypeMessage, TypeID: 15,
+						Name: ast.Identifier{ID: 9},
+						Tag:  ast.Integer{ID: 11},
+					},
+				},
+			},
+
+			content: "message Test { map<string,uint64> id = 1; }",
+			indices: "a------bc---defg--hi-----jk-----lmn-opqrstuv",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'g', 'h'},
+				{'h', 'i'}, {'i', 'j'}, {'j', 'k'}, {'k', 'l'},
+				{'l', 'm'}, {'n', 'o'}, {'p', 'q'}, {'r', 's'},
+				{'s', 't'}, {'u', 'v'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier,
+				token.KindIdentifier, // Test
+				token.KindLeftBrace,
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindIdentifier, // string
+				token.KindComma,
+				token.KindIdentifier, //uint64
+				token.KindRightAngle,
+				token.KindIdentifier, // id
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+				token.KindRightBrace,
+			},
+		},
+		{
 			name: internal.CaseName("message", true, "reserved_tag"),
 			expectedObj: ast.Message{
 				ID:   8,
@@ -563,4 +603,203 @@ func TestParseField(t *testing.T) {
 	}
 
 	runTestCases(t, tests, checkField, (*impl).parseField)
+}
+
+func TestParseMapField(t *testing.T) {
+	tests := []TestCase[ast.Field]{
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", true),
+			expectedObj: ast.Field{
+				ID: 12, Type: ast.FieldTypeMessage, TypeID: 11, Name: ast.Identifier{ID: 6}, Tag: ast.Integer{ID: 8},
+			},
+
+			content: "map<string, uint64> ids = 1;",
+			indices: "a--bc-----def-----ghi--jklmno",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'n', 'o'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindIdentifier, // string
+				token.KindComma,
+				token.KindIdentifier, // uint64
+				token.KindRightAngle,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", false, "expected_left_angle"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 1, Kind: token.KindLeftSquare}, token.KindLeftAngle),
+			},
+
+			content: "map[string, uint64> ids = 1;",
+			indices: "a--bc-----def-----ghi--jklmno",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'n', 'o'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftSquare,
+				token.KindIdentifier, // string
+				token.KindComma,
+				token.KindIdentifier, // uint64
+				token.KindRightAngle,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", false, "expected_key_identifier"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 2, Kind: token.KindStr}, token.KindIdentifier),
+			},
+
+			content: "map<'string', uint64> ids = 1;",
+			indices: "a--bc-------def-----ghi--jklmno",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'n', 'o'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindStr,
+				token.KindComma,
+				token.KindIdentifier, // uint64
+				token.KindRightAngle,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", false, "expected_comma"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindIdentifier}, token.KindComma),
+			},
+
+			content: "map<string uint64> ids = 1;",
+			indices: "a--bc-----de-----fgh--ijklmn",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'e', 'f'},
+				{'f', 'g'}, {'h', 'i'}, {'j', 'k'}, {'l', 'm'},
+				{'m', 'n'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindIdentifier, // string
+				token.KindIdentifier, // uint64
+				token.KindRightAngle,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", false, "expected_Value_identifier"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 4, Kind: token.KindStr}, token.KindIdentifier),
+			},
+
+			content: "map<string, 'uint64'> ids = 1;",
+			indices: "a--bc-----def-------ghi--jklmno",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'n', 'o'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindIdentifier, // string
+				token.KindComma,
+				token.KindStr,
+				token.KindRightAngle,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", false, "expected_right_angle"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 5, Kind: token.KindRightSquare}, token.KindRightAngle),
+			},
+
+			content: "map<string, uint64] ids = 1;",
+			indices: "a--bc-----def-----ghi--jklmno",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'n', 'o'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindIdentifier, // string
+				token.KindComma,
+				token.KindIdentifier, // uint64
+				token.KindRightSquare,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("map_field", false, "expected_right_square"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 13, Kind: token.KindEOF}, token.KindRightSquare),
+			},
+
+			content: "map<string, uint64> ids = 1 [deprecated = true",
+			indices: "a--bc-----def-----ghi--jklmnop---------qrst---u",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'o', 'p'}, {'p', 'q'}, {'r', 's'},
+				{'t', 'u'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // map
+				token.KindLeftAngle,
+				token.KindIdentifier, // string
+				token.KindComma,
+				token.KindIdentifier, // uint64
+				token.KindRightAngle,
+				token.KindIdentifier, // ids
+				token.KindEqual,
+				token.KindInt,
+				token.KindLeftSquare,
+				token.KindIdentifier, // deprecated
+				token.KindEqual,
+				token.KindIdentifier, // true
+			},
+		},
+	}
+
+	runTestCases(t, tests, checkField, (*impl).parseMapField)
 }

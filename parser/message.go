@@ -111,6 +111,57 @@ func (p *impl) parseField() (field ast.Field, err error) {
 	return field, nil
 }
 
+func (p *impl) parseMapField() (field ast.Field, err error) {
+	if peek := p.peek(); peek.Kind != token.KindIdentifier {
+		return ast.Field{}, gotUnexpected(peek, token.KindIdentifier)
+	}
+	first := p.nextToken()
+
+	if peek := p.peek(); peek.Kind != token.KindLeftAngle {
+		return ast.Field{}, gotUnexpected(peek, token.KindLeftAngle)
+	}
+	p.nextToken()
+
+	_, err = p.parseIdentifier()
+
+	if err != nil {
+		return ast.Field{}, err
+	}
+
+	if peek := p.peek(); peek.Kind != token.KindComma {
+		return ast.Field{}, gotUnexpected(peek, token.KindComma)
+	}
+	p.nextToken()
+
+	_, err = p.parseIdentifier()
+
+	if err != nil {
+		return ast.Field{}, err
+	}
+
+	if peek := p.peek(); peek.Kind != token.KindRightAngle {
+		return ast.Field{}, gotUnexpected(peek, token.KindRightAngle)
+	}
+	endType := p.tokens[p.idx]
+	p.nextToken()
+
+	fieldInfo, err := p.parseFieldIdentifierTagOption()
+
+	if err != nil {
+		return ast.Field{}, err
+	}
+
+	last := p.nextToken()
+	field.Name = fieldInfo.Name
+	field.Tag = fieldInfo.Tag
+	field.Options = fieldInfo.Options
+	field.OptionsID = fieldInfo.OptionsID
+	field.Type = ast.FieldTypeMessage
+	field.TypeID = p.fm.Merge(token.KindMap, first.ID, endType.ID)
+	field.ID = p.fm.Merge(token.KindField, first.ID, last.ID)
+	return field, nil
+}
+
 func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 	first := p.curr()
 
@@ -173,6 +224,12 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 				if reserved, err = p.parseReservedNames(); err == nil {
 					msg.ReservedNames = append(msg.ReservedNames, reserved)
 				}
+			}
+		case token.KindMap:
+			var field ast.Field
+
+			if field, err = p.parseMapField(); err == nil {
+				msg.Fields = append(msg.Fields, field)
 			}
 		case token.KindEnum:
 			var enum ast.Enum
