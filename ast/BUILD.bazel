@@ -7,6 +7,7 @@ go_library(
         "boolean.go",
         "edition.go",
         "enum.go",
+        "extension.go",
         "float.go",
         "identifier.go",
         "import.go",

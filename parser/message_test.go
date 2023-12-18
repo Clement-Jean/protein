@@ -57,6 +57,13 @@ func checkMessage(t *testing.T, got ast.Message, expected ast.Message) {
 	for i, opt := range got.Fields {
 		checkField(t, opt, expected.Fields[i])
 	}
+
+	if len(got.ExtensionRanges) != len(expected.ExtensionRanges) {
+		t.Fatalf("expected %d range, got %d", len(expected.ExtensionRanges), len(got.ExtensionRanges))
+	}
+	for j, item := range got.ExtensionRanges {
+		checkExtensionRange(t, item, expected.ExtensionRanges[j])
+	}
 }
 
 func TestParseMessage(t *testing.T) {
@@ -335,6 +342,40 @@ func TestParseMessage(t *testing.T) {
 				token.KindIdentifier, // Test2
 				token.KindLeftBrace,
 				token.KindRightBrace,
+				token.KindRightBrace,
+			},
+		},
+		{
+			name: internal.CaseName("message", true, "extension_range"),
+			expectedObj: ast.Message{
+				ID:   12,
+				Name: ast.Identifier{ID: 1},
+				ExtensionRanges: []ast.ExtensionRange{
+					{
+						ID: 11,
+						Ranges: []ast.Range{
+							{ID: 10, Start: ast.Integer{ID: 4}, End: ast.Integer{ID: 6}},
+						},
+					},
+				},
+			},
+
+			content: "message Test { extensions 1000 to max; }",
+			indices: "a------bc---defg---------hi---jk-lm--nopq",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'g', 'h'},
+				{'i', 'j'}, {'k', 'l'}, {'m', 'n'}, {'n', 'o'},
+				{'p', 'q'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier,
+				token.KindIdentifier, // Test
+				token.KindLeftBrace,
+				token.KindIdentifier, // extensions
+				token.KindInt,
+				token.KindIdentifier, // to
+				token.KindIdentifier, // max
+				token.KindSemicolon,
 				token.KindRightBrace,
 			},
 		},

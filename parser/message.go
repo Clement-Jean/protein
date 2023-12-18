@@ -257,6 +257,13 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 			if field, err = p.parseField(); err == nil {
 				msg.Fields = append(msg.Fields, field)
 			}
+		case token.KindExtensions:
+			var extensionRange ast.ExtensionRange
+
+			p.nextToken() // point to extensions keyword
+			if extensionRange, err = p.parseExtensionRange(); err == nil {
+				msg.ExtensionRanges = append(msg.ExtensionRanges, extensionRange)
+			}
 		default:
 			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier, token.KindRightBrace)
 		}

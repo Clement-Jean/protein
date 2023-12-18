@@ -59,15 +59,16 @@ func (f Field) String() string {
 }
 
 type Message struct {
-	Options       []Option
-	Fields        []Field
-	ReservedTags  []ReservedTags
-	ReservedNames []ReservedNames
-	Oneofs        []Oneof
-	Enums         []Enum
-	Messages      []Message
-	Name          Identifier
-	ID            token.UniqueID
+	Options         []Option
+	Fields          []Field
+	ReservedTags    []ReservedTags
+	ReservedNames   []ReservedNames
+	Oneofs          []Oneof
+	Enums           []Enum
+	Messages        []Message
+	ExtensionRanges []ExtensionRange
+	Name            Identifier
+	ID              token.UniqueID
 }
 
 func (m Message) String() string {

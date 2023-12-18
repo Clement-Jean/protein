@@ -52,6 +52,7 @@ const (
 	KindField
 	KindMap
 	KindOneOf
+	KindExtensions
 )
 
 var KindToStr = [...]string{
@@ -100,6 +101,7 @@ var KindToStr = [...]string{
 	"field",
 	"map",
 	"oneof",
+	"extensions",
 }
 
 func (k Kind) IsSymbol() bool  { return KindUnderscore <= k && k <= KindSlash }
