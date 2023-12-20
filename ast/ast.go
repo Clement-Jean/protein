@@ -7,6 +7,7 @@ type Ast struct {
 	Options  []Option
 	Enums    []Enum
 	Messages []Message
+	Services []Service
 	Package  Package
 	Syntax   Syntax
 	Edition  Edition

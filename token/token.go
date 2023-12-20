@@ -53,6 +53,9 @@ const (
 	KindMap
 	KindOneOf
 	KindExtensions
+	KindService
+	KindRpc
+	KindReturns
 )
 
 var KindToStr = [...]string{
@@ -102,10 +105,13 @@ var KindToStr = [...]string{
 	"map",
 	"oneof",
 	"extensions",
+	"service",
+	"rpc",
+	"returns",
 }
 
 func (k Kind) IsSymbol() bool  { return KindUnderscore <= k && k <= KindSlash }
-func (k Kind) IsKeyword() bool { return KindSyntax <= k && k <= KindTextMessageList }
+func (k Kind) IsKeyword() bool { return KindSyntax <= k && k <= KindRpc }
 func (k Kind) String() string  { return KindToStr[k] }
 
 type UniqueID = int

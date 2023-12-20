@@ -18,6 +18,7 @@ go_library(
         "package.go",
         "range.go",
         "reserved.go",
+        "service.go",
         "string.go",
         "syntax.go",
         "text_message.go",
