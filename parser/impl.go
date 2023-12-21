@@ -72,6 +72,7 @@ var literalToKind = map[string]token.Kind{
 	"extensions": token.KindExtensions,
 	"service":    token.KindService,
 	"rpc":        token.KindRpc,
+	"extend":     token.KindExtend,
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {
@@ -126,6 +127,13 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 
 			if svc, err = p.parseService(); err == nil {
 				a.Services = append(a.Services, svc)
+			}
+		case token.KindExtend:
+			var extend ast.Extend
+
+			p.nextToken() // point to extend keyword
+			if extend, err = p.parseExtend(); err == nil {
+				a.Extensions = append(a.Extensions, extend)
 			}
 		default:
 			err = gotUnexpected(

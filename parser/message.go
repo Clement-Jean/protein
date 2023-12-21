@@ -251,6 +251,13 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 			if innerMsg, err = p.parseMessage(recurseDepth + 1); err == nil {
 				msg.Messages = append(msg.Messages, innerMsg)
 			}
+		case token.KindExtend:
+			var innerExtend ast.Extend
+
+			p.nextToken() // point to extend keyword
+			if innerExtend, err = p.parseExtend(); err == nil {
+				msg.Extensions = append(msg.Extensions, innerExtend)
+			}
 		case token.KindIdentifier:
 			var field ast.Field
 

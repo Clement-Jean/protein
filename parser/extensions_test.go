@@ -29,7 +29,19 @@ func checkExtensionRange(t *testing.T, got ast.ExtensionRange, expected ast.Exte
 	}
 }
 
-func TestParseExtensions(t *testing.T) {
+func checkExtend(t *testing.T, got ast.Extend, expected ast.Extend) {
+	checkIDs(t, got.ID, expected.ID)
+	checkIDs(t, got.Name.ID, expected.Name.ID)
+
+	if len(got.Fields) != len(expected.Fields) {
+		t.Fatalf("expected %d options, got %d", len(expected.Fields), len(got.Fields))
+	}
+	for i, field := range got.Fields {
+		checkField(t, field, expected.Fields[i])
+	}
+}
+
+func TestParseExtensionRanges(t *testing.T) {
 	tests := []TestCase[ast.ExtensionRange]{
 		{
 			name: internal.CaseName("extension_range", true, "start"),
@@ -171,4 +183,162 @@ func TestParseExtensions(t *testing.T) {
 	}
 
 	runTestCases(t, tests, checkExtensionRange, (*impl).parseExtensionRange)
+}
+
+func TestParseExtends(t *testing.T) {
+	tests := []TestCase[ast.Extend]{
+		{
+			name: internal.CaseName("extend", true),
+			expectedObj: ast.Extend{
+				ID: 10, Name: ast.Identifier{ID: 9},
+			},
+
+			content: "extend google.protobuf.Empty {}",
+			indices: "a-----bc-----de-------fg----hijk",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'d', 'e'}, {'e', 'f'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'j', 'k'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // google
+				token.KindDot,
+				token.KindIdentifier, // protobuf
+				token.KindDot,
+				token.KindIdentifier, // Empty
+				token.KindLeftBrace,
+				token.KindRightBrace,
+			},
+		},
+		{
+			name: internal.CaseName("extend", true, "empty"),
+			expectedObj: ast.Extend{
+				ID: 11, Name: ast.Identifier{ID: 10},
+			},
+
+			content: "extend google.protobuf.Empty {;}",
+			indices: "a-----bc-----de-------fg----hijkl",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'d', 'e'}, {'e', 'f'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'j', 'k'},
+				{'k', 'l'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // google
+				token.KindDot,
+				token.KindIdentifier, // protobuf
+				token.KindDot,
+				token.KindIdentifier, // Empty
+				token.KindLeftBrace,
+				token.KindSemicolon,
+				token.KindRightBrace,
+			},
+		},
+		{
+			name: internal.CaseName("extend", true, "field"),
+			expectedObj: ast.Extend{
+				ID: 16, Name: ast.Identifier{ID: 14},
+				Fields: []ast.Field{
+					{
+						ID:     15,
+						TypeID: 7, Type: ast.FieldTypeUint64,
+						Name: ast.Identifier{ID: 8},
+						Tag:  ast.Integer{ID: 10},
+					},
+				},
+			},
+
+			content: "extend google.protobuf.Empty { uint64 id = 1; }",
+			indices: "a-----bc-----de-------fg----hijk-----lm-nopqrstu",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'d', 'e'}, {'e', 'f'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'o', 'p'}, {'q', 'r'}, {'r', 's'},
+				{'t', 'u'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // google
+				token.KindDot,
+				token.KindIdentifier, // protobuf
+				token.KindDot,
+				token.KindIdentifier, // Empty
+				token.KindLeftBrace,
+				token.KindIdentifier, // uint64
+				token.KindIdentifier, // id
+				token.KindEqual,
+				token.KindInt,
+				token.KindSemicolon,
+				token.KindRightBrace,
+			},
+		},
+		{
+			name: internal.CaseName("extend", false, "expected_identifier"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 1, Kind: token.KindLeftBrace}, token.KindIdentifier),
+			},
+
+			content: "extend {}",
+			indices: "a-----bcde",
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'d', 'e'}},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindLeftBrace,
+				token.KindRightBrace,
+			},
+		},
+		{
+			name: internal.CaseName("extend", false, "expected_left_brace"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 2, Kind: token.KindLeftSquare}, token.KindLeftBrace),
+			},
+
+			content: "extend Test [}",
+			indices: "a-----bc---defg",
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'g'}},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // Test
+				token.KindLeftSquare,
+				token.KindRightBrace,
+			},
+		},
+		{
+			name: internal.CaseName("extend", false, "expected_right_brace"),
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindEOF}, token.KindRightBrace),
+			},
+
+			content: "extend Test {",
+			indices: "a-----bc---def",
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // Test
+				token.KindLeftBrace,
+			},
+		},
+		{
+			name: internal.CaseName("extend", false, "expected_field"),
+			expectedErrs: []error{
+				gotUnexpected(
+					&token.Token{ID: 3, Kind: token.KindInt},
+					token.KindField, token.KindRightBrace),
+			},
+
+			content: "extend Test {2}",
+			indices: "a-----bc---defgh",
+			locs:    [][2]rune{{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'f', 'g'}, {'g', 'h'}},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // Test
+				token.KindLeftBrace,
+				token.KindInt,
+				token.KindRightBrace,
+			},
+		},
+	}
+
+	runTestCases(t, tests, checkExtend, (*impl).parseExtend)
 }

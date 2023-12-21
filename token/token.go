@@ -56,6 +56,7 @@ const (
 	KindService
 	KindRpc
 	KindReturns
+	KindExtend
 )
 
 var KindToStr = [...]string{
@@ -108,6 +109,7 @@ var KindToStr = [...]string{
 	"service",
 	"rpc",
 	"returns",
+	"extend",
 }
 
 func (k Kind) IsSymbol() bool  { return KindUnderscore <= k && k <= KindSlash }

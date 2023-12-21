@@ -16,3 +16,13 @@ type ExtensionRange struct {
 func (e ExtensionRange) String() string {
 	return fmt.Sprintf("{ type: ExtensionRange, id: %d }", e.ID)
 }
+
+type Extend struct {
+	Fields []Field
+	Name   Identifier
+	ID     token.UniqueID
+}
+
+func (e Extend) String() string {
+	return fmt.Sprintf("{ type: Extend, id: %d }", e.ID)
+}

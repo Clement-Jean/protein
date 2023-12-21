@@ -66,6 +66,7 @@ type Message struct {
 	Oneofs          []Oneof
 	Enums           []Enum
 	Messages        []Message
+	Extensions      []Extend
 	ExtensionRanges []ExtensionRange
 	Name            Identifier
 	ID              token.UniqueID
