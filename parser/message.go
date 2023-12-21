@@ -247,7 +247,7 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 		case token.KindMessage:
 			var innerMsg ast.Message
 
-			p.nextToken() // point to nessage keyword
+			p.nextToken() // point to message keyword
 			if innerMsg, err = p.parseMessage(recurseDepth + 1); err == nil {
 				msg.Messages = append(msg.Messages, innerMsg)
 			}
