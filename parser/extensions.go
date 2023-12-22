@@ -36,7 +36,7 @@ func (p *impl) parseExtensionRange() (er ast.ExtensionRange, err error) {
 			return ast.ExtensionRange{}, err
 		}
 
-		last := p.nextToken()
+		last := p.curr()
 		optsID = p.fm.Merge(token.KindOption, first.ID, last.ID)
 	}
 

@@ -104,11 +104,13 @@ func (p *impl) parseInlineOption() (ast.Option, error) {
 func (p *impl) parseInlineOptions() ([]ast.Option, error) {
 	var options []ast.Option
 	peek := p.peek()
+	curr := p.curr()
 
-	for ; peek.Kind != token.KindRightSquare && peek.Kind != token.KindEOF; peek = p.peek() {
-		if peek := p.peek(); peek.Kind == token.KindComma {
+	for ; curr.Kind != token.KindRightSquare && curr.Kind != token.KindEOF && peek.Kind != token.KindRightSquare && peek.Kind != token.KindEOF; peek = p.peek() {
+		if peek.Kind == token.KindComma {
 			p.nextToken()
 		}
+
 		option, err := p.parseInlineOption()
 
 		if err != nil {
@@ -116,11 +118,17 @@ func (p *impl) parseInlineOptions() ([]ast.Option, error) {
 		}
 
 		options = append(options, option)
+		curr = p.curr()
+	}
+
+	if curr.Kind == token.KindRightSquare {
+		return options, nil
 	}
 
 	if peek.Kind != token.KindRightSquare {
 		return nil, gotUnexpected(peek, token.KindRightSquare)
 	}
+	p.nextToken()
 	return options, nil
 }
 

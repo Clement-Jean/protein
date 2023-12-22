@@ -22,21 +22,18 @@ func (p *impl) parseEnumValue() (ast.EnumValue, error) {
 
 	var options []ast.Option
 	var optionsID token.UniqueID
-	var firstOption *token.Token
-	var lastOption *token.Token
 
 	peek := p.peek()
 	if peek.Kind == token.KindLeftSquare {
-		firstOption = p.nextToken()
+		firstOption := p.nextToken()
 		options, err = p.parseInlineOptions()
 
 		if err != nil {
 			return ast.EnumValue{}, err
 		}
 
-		lastOption = p.curr()
-		p.nextToken()
-		optionsID = p.fm.Merge(token.KindOption, firstOption.ID, lastOption.ID)
+		lastOption := options[len(options)-1].ID
+		optionsID = p.fm.Merge(token.KindOption, firstOption.ID, lastOption)
 	}
 
 	if peek = p.peek(); peek.Kind != token.KindSemicolon {

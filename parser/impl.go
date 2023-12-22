@@ -76,7 +76,7 @@ var literalToKind = map[string]token.Kind{
 }
 
 func (p *impl) Parse() (a ast.Ast, errs []error) {
-	for tok := p.nextToken(); tok != nil; tok = p.nextToken() {
+	for tok := p.nextToken(); tok.Kind != token.KindEOF; tok = p.nextToken() {
 		var err error
 
 		if tok.Kind == token.KindSemicolon {

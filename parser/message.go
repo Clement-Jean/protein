@@ -59,7 +59,7 @@ func (p *impl) parseFieldIdentifierTagOption() (ast.Field, error) {
 			return ast.Field{}, err
 		}
 
-		last := p.nextToken()
+		last := p.curr()
 		optsID = p.fm.Merge(token.KindOption, first.ID, last.ID)
 	}
 
