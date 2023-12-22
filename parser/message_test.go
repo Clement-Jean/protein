@@ -64,6 +64,13 @@ func checkMessage(t *testing.T, got ast.Message, expected ast.Message) {
 	for j, item := range got.ExtensionRanges {
 		checkExtensionRange(t, item, expected.ExtensionRanges[j])
 	}
+
+	if len(got.Extensions) != len(expected.Extensions) {
+		t.Fatalf("expected %d extensions, got %d", len(expected.Extensions), len(got.Extensions))
+	}
+	for j, item := range got.Extensions {
+		checkExtend(t, item, expected.Extensions[j])
+	}
 }
 
 func TestParseMessage(t *testing.T) {
@@ -346,6 +353,33 @@ func TestParseMessage(t *testing.T) {
 			},
 		},
 		{
+			name: internal.CaseName("message", true, "nested_extend"),
+			expectedObj: ast.Message{
+				ID:   10,
+				Name: ast.Identifier{ID: 1},
+				Extensions: []ast.Extend{
+					{ID: 9, Name: ast.Identifier{ID: 4}},
+				},
+			},
+
+			content: "message Test { extend Test2 {} }",
+			indices: "a------bc---defg-----hi----jklmno",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'g', 'h'},
+				{'i', 'j'}, {'k', 'l'}, {'l', 'm'}, {'n', 'o'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // message
+				token.KindIdentifier, // Test
+				token.KindLeftBrace,
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // Test2
+				token.KindLeftBrace,
+				token.KindRightBrace,
+				token.KindRightBrace,
+			},
+		},
+		{
 			name: internal.CaseName("message", true, "extension_range"),
 			expectedObj: ast.Message{
 				ID:   12,
@@ -556,6 +590,108 @@ func TestParseField(t *testing.T) {
 				token.KindIdentifier, // deprecated
 				token.KindEqual,
 				token.KindIdentifier, // true
+				token.KindRightSquare,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("field", true, "empty_option"),
+			expectedObj: ast.Field{
+				ID:   9,
+				Type: ast.FieldTypeUint64, TypeID: 0,
+				Name:      ast.Identifier{ID: 1},
+				Tag:       ast.Integer{ID: 3},
+				OptionsID: 8,
+			},
+
+			content: "uint64 id = 1 [];",
+			indices: "a-----bc-defghijkl",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'g', 'h'},
+				{'i', 'j'}, {'j', 'k'}, {'k', 'l'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // uint64
+				token.KindIdentifier, // id
+				token.KindEqual,
+				token.KindInt,
+				token.KindLeftSquare,
+				token.KindRightSquare,
+				token.KindSemicolon,
+			},
+		},
+		{
+			keepFirstToken: true,
+			name:           internal.CaseName("field", true, "options"),
+			expectedObj: ast.Field{
+				ID:        30,
+				TypeID:    0,
+				Type:      ast.FieldTypeUint64,
+				Name:      ast.Identifier{ID: 1},
+				Tag:       ast.Integer{ID: 3},
+				OptionsID: 29,
+				Options: []ast.Option{
+					{
+						ID: 25, Name: ast.Identifier{ID: 5},
+						Value: ast.TextMessage{
+							ID: 24,
+							Fields: []ast.TextField{
+								{
+									ID:    23,
+									Name:  ast.Identifier{ID: 8},
+									Value: ast.Identifier{ID: 10},
+								},
+							},
+						},
+					},
+					{
+						ID: 28, Name: ast.Identifier{ID: 13},
+						Value: ast.TextMessage{
+							ID: 27,
+							Fields: []ast.TextField{
+								{
+									ID:    26,
+									Name:  ast.Identifier{ID: 16},
+									Value: ast.Identifier{ID: 18},
+								},
+							},
+						},
+					},
+				},
+			},
+
+			content: "uint64 id = 1 [a = { b: c }, d = { e: f }];",
+			indices: "a-----bc-defghijklmnopqrstuvwxyz123456789ABC",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'e', 'f'}, {'g', 'h'},
+				{'i', 'j'}, {'j', 'k'}, {'l', 'm'}, {'n', 'o'},
+				{'p', 'q'}, {'q', 'r'}, {'s', 't'}, {'u', 'v'},
+				{'v', 'w'}, {'x', 'y'}, {'z', '1'}, {'2', '3'},
+				{'4', '5'}, {'5', '6'}, {'7', '8'}, {'9', 'A'},
+				{'A', 'B'}, {'B', 'C'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // uint64
+				token.KindIdentifier, // id
+				token.KindEqual,
+				token.KindInt,
+				token.KindLeftSquare,
+				token.KindIdentifier, // a
+				token.KindEqual,
+				token.KindLeftBrace,
+				token.KindIdentifier, // b
+				token.KindColon,
+				token.KindIdentifier, // c
+				token.KindRightBrace,
+				token.KindComma,
+				token.KindIdentifier, // d
+				token.KindEqual,
+				token.KindLeftBrace,
+				token.KindIdentifier, // e
+				token.KindColon,
+				token.KindIdentifier, // f
+				token.KindRightBrace,
 				token.KindRightSquare,
 				token.KindSemicolon,
 			},
