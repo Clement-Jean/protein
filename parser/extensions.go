@@ -28,6 +28,7 @@ func (p *impl) parseExtensionRange() (er ast.ExtensionRange, err error) {
 
 	var opts []ast.Option
 	var optsID token.UniqueID
+
 	if peek := p.peek(); peek.Kind == token.KindLeftSquare {
 		first := p.nextToken()
 		opts, err = p.parseInlineOptions()
@@ -52,16 +53,16 @@ func (p *impl) parseExtensionRange() (er ast.ExtensionRange, err error) {
 	return er, err
 }
 
-func (p *impl) parseExtend() (e ast.Extend, err error) {
+func (p *impl) parseExtend() (extend ast.Extend, errs []error) {
 	first := p.curr()
 	id, err := p.parseFullyQualifiedIdentifier()
 
 	if err != nil {
-		return ast.Extend{}, err
+		return ast.Extend{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindLeftBrace {
-		return ast.Extend{}, gotUnexpected(peek, token.KindLeftBrace)
+		return ast.Extend{}, []error{gotUnexpected(peek, token.KindLeftBrace)}
 	}
 	p.nextToken()
 
@@ -72,6 +73,7 @@ func (p *impl) parseExtend() (e ast.Extend, err error) {
 			continue
 		}
 
+		err = nil
 		kind := peek.Kind
 
 		if literal := p.fm.Lookup(peek.ID); literal != nil {
@@ -85,25 +87,31 @@ func (p *impl) parseExtend() (e ast.Extend, err error) {
 			var field ast.Field
 
 			if field, err = p.parseField(); err == nil {
-				e.Fields = append(e.Fields, field)
+				extend.Fields = append(extend.Fields, field)
 			}
 		default:
-			err = gotUnexpected(peek, token.KindField, token.KindRightBrace)
+			err = gotUnexpected(peek, token.KindField)
 		}
 
 		if err != nil {
-			//TODO report error
-			//TODO p.advanceTo(exprEnd)
-			return ast.Extend{}, err
+			errs = append(errs, err)
+			p.advanceTo(exprEnd)
+
+			if p.curr().Kind == token.KindRightBrace {
+				extend.Name = id
+				extend.ID = p.fm.Merge(token.KindExtend, first.ID, p.curr().ID)
+				return extend, errs
+			}
 		}
 	}
 
 	if peek.Kind != token.KindRightBrace {
-		return ast.Extend{}, gotUnexpected(peek, token.KindRightBrace)
+		errs = append(errs, gotUnexpected(peek, token.KindRightBrace))
+		return ast.Extend{}, errs
 	}
 
 	last := p.nextToken()
-	e.Name = id
-	e.ID = p.fm.Merge(token.KindExtend, first.ID, last.ID)
-	return e, nil
+	extend.Name = id
+	extend.ID = p.fm.Merge(token.KindExtend, first.ID, last.ID)
+	return extend, errs
 }

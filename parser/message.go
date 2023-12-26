@@ -31,7 +31,7 @@ var literalToLabel = map[string]ast.FieldLabel{
 	"repeated": ast.FieldLabelRepeated,
 }
 
-func (p *impl) parseFieldIdentifierTagOption() (ast.Field, error) {
+func (p *impl) parseFieldIdentifierTagOption() (field ast.Field, err error) {
 	name, err := p.parseIdentifier()
 
 	if err != nil {
@@ -67,7 +67,11 @@ func (p *impl) parseFieldIdentifierTagOption() (ast.Field, error) {
 		return ast.Field{}, gotUnexpected(peek, token.KindSemicolon)
 	}
 
-	return ast.Field{Name: name, Tag: tag, Options: opts, OptionsID: optsID}, nil
+	field.Name = name
+	field.Tag = tag
+	field.Options = opts
+	field.OptionsID = optsID
+	return field, nil
 }
 
 func (p *impl) parseField() (field ast.Field, err error) {
@@ -162,28 +166,26 @@ func (p *impl) parseMapField() (field ast.Field, err error) {
 	return field, nil
 }
 
-func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
+func (p *impl) parseMessage(recurseDepth uint8) (msg ast.Message, errs []error) {
 	first := p.curr()
 
 	if recurseDepth > 30 { // TODO make it configurable
-		return ast.Message{}, &Error{
+		return ast.Message{}, []error{&Error{
 			ID:  first.ID,
 			Msg: "Too many nested messages",
-		}
+		}}
 	}
 
 	id, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Message{}, err
+		return ast.Message{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindLeftBrace {
-		return ast.Message{}, gotUnexpected(peek, token.KindLeftBrace)
+		return ast.Message{}, []error{gotUnexpected(peek, token.KindLeftBrace)}
 	}
 	p.nextToken()
-
-	var msg ast.Message
 
 	peek := p.peek()
 	for ; peek.Kind != token.KindRightBrace && peek.Kind != token.KindEOF; peek = p.peek() {
@@ -192,6 +194,7 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 			continue
 		}
 
+		err = nil
 		kind := peek.Kind
 
 		if literal := p.fm.Lookup(peek.ID); literal != nil {
@@ -233,31 +236,43 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 			}
 		case token.KindOneOf:
 			var oneof ast.Oneof
+			var innerErrs []error
 
-			if oneof, err = p.parseOneof(); err == nil {
+			if oneof, innerErrs = p.parseOneof(); innerErrs == nil {
 				msg.Oneofs = append(msg.Oneofs, oneof)
+				break
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindEnum:
 			var enum ast.Enum
+			var innerErrs []error
 
 			p.nextToken() // point to enum keyword
-			if enum, err = p.parseEnum(); err == nil {
+			if enum, innerErrs = p.parseEnum(); innerErrs == nil {
 				msg.Enums = append(msg.Enums, enum)
+				break
 			}
+			errs = append(errs, err)
 		case token.KindMessage:
 			var innerMsg ast.Message
+			var innerErrs []error
 
 			p.nextToken() // point to message keyword
-			if innerMsg, err = p.parseMessage(recurseDepth + 1); err == nil {
+			if innerMsg, innerErrs = p.parseMessage(recurseDepth + 1); innerErrs == nil {
 				msg.Messages = append(msg.Messages, innerMsg)
+				break
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindExtend:
 			var innerExtend ast.Extend
+			var innerErrs []error
 
 			p.nextToken() // point to extend keyword
-			if innerExtend, err = p.parseExtend(); err == nil {
+			if innerExtend, innerErrs = p.parseExtend(); innerErrs == nil {
 				msg.Extensions = append(msg.Extensions, innerExtend)
+				break
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindIdentifier:
 			var field ast.Field
 
@@ -272,22 +287,28 @@ func (p *impl) parseMessage(recurseDepth uint8) (ast.Message, error) {
 				msg.ExtensionRanges = append(msg.ExtensionRanges, extensionRange)
 			}
 		default:
-			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier, token.KindRightBrace)
+			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier)
 		}
 
 		if err != nil {
-			// TODO report error
-			// TODO p.advanceTo(exprEnd)
-			return ast.Message{}, err
+			errs = append(errs, err)
+			p.advanceTo(exprEnd)
+
+			if p.curr().Kind == token.KindRightBrace {
+				msg.Name = id
+				msg.ID = p.fm.Merge(token.KindMessage, first.ID, p.curr().ID)
+				return msg, errs
+			}
 		}
 	}
 
 	if peek.Kind != token.KindRightBrace {
-		return ast.Message{}, gotUnexpected(peek, token.KindRightBrace)
+		errs = append(errs, gotUnexpected(peek, token.KindRightBrace))
+		return ast.Message{}, errs
 	}
 
 	last := p.nextToken()
 	msg.Name = id
 	msg.ID = p.fm.Merge(token.KindMessage, first.ID, last.ID)
-	return msg, nil
+	return msg, errs
 }

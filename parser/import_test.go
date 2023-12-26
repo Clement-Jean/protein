@@ -25,7 +25,7 @@ func TestImport(t *testing.T) {
 	tests := []TestCase[ast.Import]{
 		{
 			name:        internal.CaseName("import", true),
-			expectedObj: ast.Import{ID: 4, Value: ast.String{ID: 1}},
+			expectedObj: &ast.Import{ID: 4, Value: ast.String{ID: 1}},
 
 			content: "import 'google/protobuf/empty.proto';",
 			indices: "a-----bc----------------------------de",
@@ -39,7 +39,7 @@ func TestImport(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("import", true, "public"),
-			expectedObj: ast.Import{ID: 5, Value: ast.String{ID: 2}, IsPublic: true},
+			expectedObj: &ast.Import{ID: 5, Value: ast.String{ID: 2}, IsPublic: true},
 
 			content: "import public 'google/protobuf/empty.proto';",
 			indices: "a-----bc-----de----------------------------fg",
@@ -54,7 +54,7 @@ func TestImport(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("import", true, "weak"),
-			expectedObj: ast.Import{ID: 5, Value: ast.String{ID: 2}, IsWeak: true},
+			expectedObj: &ast.Import{ID: 5, Value: ast.String{ID: 2}, IsWeak: true},
 
 			content: "import weak 'google/protobuf/empty.proto';",
 			indices: "a-----bc---de----------------------------fg",
@@ -116,5 +116,9 @@ func TestImport(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkImport, (*impl).parseImport)
+	wrap := func(p *impl) (ast.Import, []error) {
+		imp, err := p.parseImport()
+		return imp, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkImport, wrap)
 }

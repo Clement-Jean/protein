@@ -57,7 +57,7 @@ func TestEnum(t *testing.T) {
 	tests := []TestCase[ast.Enum]{
 		{
 			name:        internal.CaseName("enum", true),
-			expectedObj: ast.Enum{ID: 5, Name: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Enum{ID: 5, Name: ast.Identifier{ID: 1}},
 
 			content: "enum Test {}",
 			indices: "a---bc---defg",
@@ -71,7 +71,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("enum", true, "empty_statement"),
-			expectedObj: ast.Enum{ID: 6, Name: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Enum{ID: 6, Name: ast.Identifier{ID: 1}},
 
 			content: "enum Test {;}",
 			indices: "a---bc---defgh",
@@ -86,7 +86,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", true, "option"),
-			expectedObj: ast.Enum{
+			expectedObj: &ast.Enum{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
 					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
@@ -114,7 +114,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", true, "value"),
-			expectedObj: ast.Enum{
+			expectedObj: &ast.Enum{
 				ID: 10, Name: ast.Identifier{ID: 1},
 				Values: []ast.EnumValue{{
 					ID: 9, Name: ast.Identifier{ID: 3}, Tag: ast.Integer{ID: 5},
@@ -140,7 +140,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", true, "reserved_tag"),
-			expectedObj: ast.Enum{
+			expectedObj: &ast.Enum{
 				ID: 8, Name: ast.Identifier{ID: 1},
 				ReservedTags: []ast.ReservedTags{
 					{ID: 4, Items: []ast.Range{{ID: 4, Start: ast.Integer{ID: 4}, End: ast.Integer{ID: 4}}}},
@@ -165,7 +165,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", true, "reserved_name"),
-			expectedObj: ast.Enum{
+			expectedObj: &ast.Enum{
 				ID: 8, Name: ast.Identifier{ID: 1},
 				ReservedNames: []ast.ReservedNames{
 					{ID: 4, Items: []ast.String{{ID: 4}}},
@@ -190,7 +190,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", true, "value_option"),
-			expectedObj: ast.Enum{
+			expectedObj: &ast.Enum{
 				ID: 17, Name: ast.Identifier{ID: 1},
 				Values: []ast.EnumValue{{
 					ID: 16, Name: ast.Identifier{ID: 3}, Tag: ast.Integer{ID: 5},
@@ -225,7 +225,7 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", true, "value_options"),
-			expectedObj: ast.Enum{
+			expectedObj: &ast.Enum{
 				ID: 22, Name: ast.Identifier{ID: 1},
 				Values: []ast.EnumValue{{
 					ID: 21, Name: ast.Identifier{ID: 3}, Tag: ast.Integer{ID: 5},
@@ -270,6 +270,7 @@ func TestEnum(t *testing.T) {
 			name: internal.CaseName("enum", false, "option_expected_right_square"),
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 10, Kind: token.KindEOF}, token.KindRightSquare),
+				gotUnexpected(&token.Token{ID: 10, Kind: token.KindEOF}, token.KindRightBrace),
 			},
 
 			content: "enum Test { TEST_UNSPECIFIED = 0 [deprecated = true",
@@ -320,7 +321,8 @@ func TestEnum(t *testing.T) {
 		{
 			name: internal.CaseName("enum", false, "expected_right_brace"),
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 8, Kind: token.KindRightSquare}, token.KindOption, token.KindReserved, token.KindIdentifier, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 8, Kind: token.KindRightSquare}, token.KindOption, token.KindReserved, token.KindIdentifier),
+				gotUnexpected(&token.Token{ID: 9, Kind: token.KindEOF}, token.KindRightBrace),
 			},
 
 			content: "enum Test { option deprecated = true; ]",
@@ -384,8 +386,12 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", false, "value_expected_identifier"),
+			expectedObj: &ast.Enum{
+				ID:   9,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 3, Kind: token.KindStr}, token.KindOption, token.KindReserved, token.KindIdentifier, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindStr}, token.KindOption, token.KindReserved, token.KindIdentifier),
 			},
 
 			content: "enum Test { 'a' = 1; }",
@@ -407,6 +413,10 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", false, "value_expected_int"),
+			expectedObj: &ast.Enum{
+				ID:   9,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 5, Kind: token.KindStr}, token.KindInt),
 			},
@@ -430,6 +440,10 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", false, "value_expected_equal"),
+			expectedObj: &ast.Enum{
+				ID:   7,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 4, Kind: token.KindInt}, token.KindEqual),
 			},
@@ -451,6 +465,10 @@ func TestEnum(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("enum", false, "value_expected_left_semicolon"),
+			expectedObj: &ast.Enum{
+				ID:   8,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 6, Kind: token.KindRightBrace}, token.KindSemicolon),
 			},

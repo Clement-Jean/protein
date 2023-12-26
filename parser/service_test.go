@@ -53,7 +53,7 @@ func TestParseService(t *testing.T) {
 	tests := []TestCase[ast.Service]{
 		{
 			name:        internal.CaseName("service", true),
-			expectedObj: ast.Service{ID: 5, Name: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Service{ID: 5, Name: ast.Identifier{ID: 1}},
 
 			content: "service Test {}",
 			indices: "a------bc---defg",
@@ -67,7 +67,7 @@ func TestParseService(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("service", true, "empty_statement"),
-			expectedObj: ast.Service{ID: 6, Name: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Service{ID: 6, Name: ast.Identifier{ID: 1}},
 
 			content: "service Test {;}",
 			indices: "a------bc---defgh",
@@ -82,7 +82,7 @@ func TestParseService(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("service", true, "option"),
-			expectedObj: ast.Service{
+			expectedObj: &ast.Service{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
 					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
@@ -110,7 +110,7 @@ func TestParseService(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("service", true, "rpc"),
-			expectedObj: ast.Service{
+			expectedObj: &ast.Service{
 				ID: 16, Name: ast.Identifier{ID: 1},
 				Rpcs: []ast.Rpc{
 					{ID: 15, Name: ast.Identifier{ID: 4}, InputType: ast.Identifier{ID: 6}, OutputType: ast.Identifier{ID: 10}},
@@ -196,8 +196,12 @@ func TestParseService(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("service", false, "unexpected_int"),
+			expectedObj: &ast.Service{
+				ID:   6,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindRpc, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindRpc),
 			},
 
 			content: "service Test { 2 }",
@@ -223,7 +227,7 @@ func TestParseRpc(t *testing.T) {
 	tests := []TestCase[ast.Rpc]{
 		{
 			name: internal.CaseName("rpc", true),
-			expectedObj: ast.Rpc{
+			expectedObj: &ast.Rpc{
 				ID: 11, Name: ast.Identifier{ID: 1}, InputType: ast.Identifier{ID: 3}, OutputType: ast.Identifier{ID: 7},
 			},
 
@@ -249,7 +253,7 @@ func TestParseRpc(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("rpc", true, "option"),
-			expectedObj: ast.Rpc{
+			expectedObj: &ast.Rpc{
 				ID: 18, Name: ast.Identifier{ID: 1}, InputType: ast.Identifier{ID: 3}, OutputType: ast.Identifier{ID: 7},
 				Options: []ast.Option{
 					{ID: 17, Name: ast.Identifier{ID: 11}, Value: &ast.Boolean{ID: 13}},
@@ -285,7 +289,7 @@ func TestParseRpc(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("rpc", true, "empty_statement_in_block"),
-			expectedObj: ast.Rpc{
+			expectedObj: &ast.Rpc{
 				ID: 13, Name: ast.Identifier{ID: 1}, InputType: ast.Identifier{ID: 3}, OutputType: ast.Identifier{ID: 7},
 			},
 
@@ -313,7 +317,7 @@ func TestParseRpc(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("rpc", true, "stream"),
-			expectedObj: ast.Rpc{
+			expectedObj: &ast.Rpc{
 				ID: 13, Name: ast.Identifier{ID: 1},
 				InputType: ast.Identifier{ID: 4}, OutputType: ast.Identifier{ID: 9},
 				IsServerStream: true, IsClientStream: true,
@@ -344,7 +348,7 @@ func TestParseRpc(t *testing.T) {
 		{
 			name: internal.CaseName("rpc", false, "unexpected_int"),
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 10, Kind: token.KindInt}, token.KindOption, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 10, Kind: token.KindInt}, token.KindOption),
 			},
 
 			content: "rpc T (Test) returns (Test) { 2 }",

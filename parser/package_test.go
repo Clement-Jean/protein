@@ -18,7 +18,7 @@ func TestPackage(t *testing.T) {
 	tests := []TestCase[ast.Package]{
 		{
 			name:        internal.CaseName("package", true, "identifier"),
-			expectedObj: ast.Package{ID: 4, Value: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Package{ID: 4, Value: ast.Identifier{ID: 1}},
 
 			content: "package google;",
 			indices: "a------bc-----de",
@@ -31,7 +31,7 @@ func TestPackage(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("package", true, "full_identifier"),
-			expectedObj: ast.Package{ID: 7, Value: ast.Identifier{ID: 6, Parts: []token.UniqueID{1, 3}}},
+			expectedObj: &ast.Package{ID: 7, Value: ast.Identifier{ID: 6, Parts: []token.UniqueID{1, 3}}},
 
 			content: "package google.protobuf;",
 			indices: "a------bc-----de-------fg",
@@ -75,5 +75,9 @@ func TestPackage(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkPackage, (*impl).parsePackage)
+	wrap := func(p *impl) (ast.Package, []error) {
+		pkg, err := p.parsePackage()
+		return pkg, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkPackage, wrap)
 }

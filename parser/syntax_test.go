@@ -17,7 +17,7 @@ func TestSyntax(t *testing.T) {
 	tests := []TestCase[ast.Syntax]{
 		{
 			name:        internal.CaseName("syntax", true),
-			expectedObj: ast.Syntax{ID: 5, Value: ast.String{ID: 2}},
+			expectedObj: &ast.Syntax{ID: 5, Value: ast.String{ID: 2}},
 
 			content: "syntax = 'proto2';",
 			indices: "a-----bcde-------fg",
@@ -77,5 +77,9 @@ func TestSyntax(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkSyntax, (*impl).parseSyntax)
+	wrap := func(p *impl) (ast.Syntax, []error) {
+		syntax, err := p.parseSyntax()
+		return syntax, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkSyntax, wrap)
 }

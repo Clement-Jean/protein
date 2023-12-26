@@ -40,35 +40,35 @@ func (p *impl) parseRpcType() (isStream bool, id ast.Identifier, err error) {
 	return isStream, id, err
 }
 
-func (p *impl) parseRpc() (rpc ast.Rpc, err error) {
+func (p *impl) parseRpc() (rpc ast.Rpc, errs []error) {
 	first := p.curr()
 	id, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Rpc{}, err
+		return ast.Rpc{}, []error{err}
 	}
 
 	isClientStream, inputType, err := p.parseRpcType()
 
 	if err != nil {
-		return ast.Rpc{}, err
+		return ast.Rpc{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindIdentifier {
-		return ast.Rpc{}, gotUnexpected(peek, token.KindReturns)
+		return ast.Rpc{}, []error{gotUnexpected(peek, token.KindReturns)}
 	}
 	tok := p.nextToken()
 	literal := p.fm.Lookup(tok.ID)
 	returns := internal_bytes.FromString("returns")
 
 	if bytes.Compare(literal, returns) != 0 {
-		return ast.Rpc{}, gotUnexpected(tok, token.KindReturns)
+		return ast.Rpc{}, []error{gotUnexpected(tok, token.KindReturns)}
 	}
 
 	isServerStream, outputType, err := p.parseRpcType()
 
 	if err != nil {
-		return ast.Rpc{}, err
+		return ast.Rpc{}, []error{err}
 	}
 
 	peek := p.peek()
@@ -97,15 +97,33 @@ func (p *impl) parseRpc() (rpc ast.Rpc, err error) {
 					rpc.Options = append(rpc.Options, option)
 				}
 			default:
-				return ast.Rpc{}, gotUnexpected(peek, token.KindOption, token.KindRightBrace)
+				err = gotUnexpected(peek, token.KindOption)
+			}
+
+			if err != nil {
+				errs = append(errs, err)
+				p.advanceTo(exprEnd)
+
+				if p.curr().Kind == token.KindRightBrace {
+					rpc.ID = p.fm.Merge(token.KindRpc, first.ID, p.curr().ID)
+					rpc.Name = id
+					rpc.InputType = inputType
+					rpc.OutputType = outputType
+					rpc.IsClientStream = isClientStream
+					rpc.IsServerStream = isServerStream
+					rpc.Name = id
+					return rpc, errs
+				}
 			}
 		}
 
 		if peek.Kind != token.KindRightBrace {
-			return ast.Rpc{}, gotUnexpected(peek, token.KindRightBrace)
+			errs = append(errs, gotUnexpected(peek, token.KindRightBrace))
+			return ast.Rpc{}, errs
 		}
 	} else if peek.Kind != token.KindSemicolon {
-		return ast.Rpc{}, gotUnexpected(peek, token.KindSemicolon)
+		errs = append(errs, gotUnexpected(peek, token.KindSemicolon))
+		return ast.Rpc{}, errs
 	}
 
 	last := p.nextToken()
@@ -116,19 +134,19 @@ func (p *impl) parseRpc() (rpc ast.Rpc, err error) {
 	rpc.OutputType = outputType
 	rpc.IsClientStream = isClientStream
 	rpc.IsServerStream = isServerStream
-	return rpc, err
+	return rpc, errs
 }
 
-func (p *impl) parseService() (service ast.Service, err error) {
+func (p *impl) parseService() (service ast.Service, errs []error) {
 	first := p.curr()
 	id, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Service{}, err
+		return ast.Service{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindLeftBrace {
-		return ast.Service{}, gotUnexpected(peek, token.KindLeftBrace)
+		return ast.Service{}, []error{gotUnexpected(peek, token.KindLeftBrace)}
 	}
 	p.nextToken()
 
@@ -139,6 +157,7 @@ func (p *impl) parseService() (service ast.Service, err error) {
 			continue
 		}
 
+		err = nil
 		kind := peek.Kind
 
 		if literal := p.fm.Lookup(peek.ID); literal != nil {
@@ -156,29 +175,33 @@ func (p *impl) parseService() (service ast.Service, err error) {
 				service.Options = append(service.Options, option)
 			}
 		case token.KindRpc:
-			var rpc ast.Rpc
-
 			p.nextToken() // point to rpc keyword
-			if rpc, err = p.parseRpc(); err == nil {
-				service.Rpcs = append(service.Rpcs, rpc)
-			}
+			rpc, innerErrs := p.parseRpc()
+			service.Rpcs = append(service.Rpcs, rpc)
+			errs = append(errs, innerErrs...)
 		default:
-			err = gotUnexpected(peek, token.KindOption, token.KindRpc, token.KindRightBrace)
+			err = gotUnexpected(peek, token.KindOption, token.KindRpc)
 		}
 
 		if err != nil {
-			// TODO report error
-			// TODO p.advanceTo(exprEnd)
-			return ast.Service{}, err
+			errs = append(errs, err)
+			p.advanceTo(exprEnd)
+
+			if p.curr().Kind == token.KindRightBrace {
+				service.Name = id
+				service.ID = p.fm.Merge(token.KindService, first.ID, p.curr().ID)
+				return service, errs
+			}
 		}
 	}
 
 	if peek.Kind != token.KindRightBrace {
-		return ast.Service{}, gotUnexpected(peek, token.KindRightBrace)
+		errs = append(errs, gotUnexpected(peek, token.KindRightBrace))
+		return ast.Service{}, errs
 	}
 
 	last := p.nextToken()
 	service.Name = id
 	service.ID = p.fm.Merge(token.KindService, first.ID, last.ID)
-	return service, nil
+	return service, errs
 }

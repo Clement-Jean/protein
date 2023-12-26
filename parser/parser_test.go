@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ type UnderTest interface {
 type TestCase[T UnderTest] struct {
 	name string
 
-	expectedObj  T
+	expectedObj  *T
 	expectedErrs []error
 
 	content string
@@ -35,13 +36,14 @@ type TestCase[T UnderTest] struct {
 	keepFirstToken bool
 }
 
-func checkErrs(t *testing.T, errs []error, expectedErrs []error) {
+func checkErrs(t *testing.T, errs, expectedErrs []error) {
 	t.Helper()
 	if len(errs) != len(expectedErrs) {
+		fmt.Printf("%v\n", errs)
 		t.Fatalf("expected %d errors, got %d", len(expectedErrs), len(errs))
 	}
 
-	for i, _ := range errs {
+	for i := range errs {
 		got := errs[i].(*Error)
 		expected := expectedErrs[i].(*Error)
 
@@ -62,8 +64,8 @@ func checkIDs(t *testing.T, got token.UniqueID, expected token.UniqueID) {
 func runTestCases[T UnderTest](
 	t *testing.T,
 	tests []TestCase[T],
-	onObj func(t *testing.T, got T, expected T),
-	parseFn func(p *impl) (T, error),
+	checkObj func(t *testing.T, got T, expected T),
+	parseFn func(p *impl) (T, []error),
 ) {
 	t.Helper()
 	cm := codemap.New()
@@ -90,43 +92,16 @@ func runTestCases[T UnderTest](
 			if !test.keepFirstToken {
 				i.nextToken()
 			}
-			obj, err := parseFn(i)
+			obj, errs := parseFn(i)
 
 			fm.PrintItems()
 
-			if test.expectedErrs != nil {
-				checkErrs(t, []error{err}, test.expectedErrs)
-			} else {
-				if err != nil {
-					t.Fatal(err)
-					return
-				}
-
-				onObj(t, obj, test.expectedObj)
+			checkErrs(t, errs, test.expectedErrs)
+			if test.expectedObj != nil {
+				checkObj(t, obj, *test.expectedObj)
 			}
-
 			cm.Remove(dummy)
 		})
-	}
-}
-
-func TestPeekEOF(t *testing.T) {
-	fm := &codemap.FileMap{}
-	p := New(nil, fm).(*impl)
-	tok := p.peek()
-
-	if tok != nil {
-		t.Fatalf("expected nil, got %v", tok)
-	}
-}
-
-func TestNextEOF(t *testing.T) {
-	fm := &codemap.FileMap{}
-	p := New(nil, fm).(*impl)
-	tok := p.nextToken()
-
-	if tok != nil {
-		t.Fatalf("expected nil, got %v", tok)
 	}
 }
 
@@ -146,7 +121,8 @@ func TestParseHandleUnknownIdentifier(t *testing.T) {
 
 	expectedKinds := []token.Kind{
 		token.KindSyntax, token.KindEdition,
-		token.KindPackage, token.KindImport,
+		token.KindPackage, token.KindImport, token.KindOption,
+		token.KindMessage, token.KindEnum, token.KindService, token.KindExtend,
 	}
 	expectErr := gotUnexpected(&tokens[0], expectedKinds...)
 	if strings.Compare(errs[0].Error(), expectErr.Error()) != 0 {

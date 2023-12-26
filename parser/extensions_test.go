@@ -45,7 +45,7 @@ func TestParseExtensionRanges(t *testing.T) {
 	tests := []TestCase[ast.ExtensionRange]{
 		{
 			name: internal.CaseName("extension_range", true, "start"),
-			expectedObj: ast.ExtensionRange{
+			expectedObj: &ast.ExtensionRange{
 				ID: 4,
 				Ranges: []ast.Range{
 					{ID: 1, Start: ast.Integer{ID: 1}, End: ast.Integer{ID: 1}},
@@ -63,7 +63,7 @@ func TestParseExtensionRanges(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("extension_range", true),
-			expectedObj: ast.ExtensionRange{
+			expectedObj: &ast.ExtensionRange{
 				ID: 7,
 				Ranges: []ast.Range{
 					{ID: 6, Start: ast.Integer{ID: 1}, End: ast.Integer{ID: 3}},
@@ -86,7 +86,7 @@ func TestParseExtensionRanges(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("extension_range", true, "multiple"),
-			expectedObj: ast.ExtensionRange{
+			expectedObj: &ast.ExtensionRange{
 				ID: 12,
 				Ranges: []ast.Range{
 					{ID: 10, Start: ast.Integer{ID: 1}, End: ast.Integer{ID: 3}},
@@ -115,7 +115,7 @@ func TestParseExtensionRanges(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("extension_range", true, "option"),
-			expectedObj: ast.ExtensionRange{
+			expectedObj: &ast.ExtensionRange{
 				ID: 14,
 				Ranges: []ast.Range{
 					{ID: 11, Start: ast.Integer{ID: 1}, End: ast.Integer{ID: 3}},
@@ -182,14 +182,18 @@ func TestParseExtensionRanges(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkExtensionRange, (*impl).parseExtensionRange)
+	wrap := func(p *impl) (ast.ExtensionRange, []error) {
+		extRange, err := p.parseExtensionRange()
+		return extRange, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkExtensionRange, wrap)
 }
 
 func TestParseExtends(t *testing.T) {
 	tests := []TestCase[ast.Extend]{
 		{
 			name: internal.CaseName("extend", true),
-			expectedObj: ast.Extend{
+			expectedObj: &ast.Extend{
 				ID: 10, Name: ast.Identifier{ID: 9},
 			},
 
@@ -212,7 +216,7 @@ func TestParseExtends(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("extend", true, "empty"),
-			expectedObj: ast.Extend{
+			expectedObj: &ast.Extend{
 				ID: 11, Name: ast.Identifier{ID: 10},
 			},
 
@@ -237,7 +241,7 @@ func TestParseExtends(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("extend", true, "field"),
-			expectedObj: ast.Extend{
+			expectedObj: &ast.Extend{
 				ID: 16, Name: ast.Identifier{ID: 14},
 				Fields: []ast.Field{
 					{
@@ -321,10 +325,12 @@ func TestParseExtends(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("extend", false, "expected_field"),
+			expectedObj: &ast.Extend{
+				ID:   6,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
-				gotUnexpected(
-					&token.Token{ID: 3, Kind: token.KindInt},
-					token.KindField, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindField),
 			},
 
 			content: "extend Test {2}",

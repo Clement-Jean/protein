@@ -65,3 +65,11 @@ func MakeSpansFromIndices(ref map[rune]int, indices [][2]rune) (spans []span.Spa
 	spans = append(spans, span.Span{Start: last.End, End: last.End})
 	return spans
 }
+
+func EmptyErrorSliceIfNil(item error) []error {
+	if item == nil {
+		return nil
+	}
+
+	return []error{item}
+}

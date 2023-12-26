@@ -18,7 +18,7 @@ func TestEdition(t *testing.T) {
 	tests := []TestCase[ast.Edition]{
 		{
 			name:        internal.CaseName("edition", true),
-			expectedObj: ast.Edition{ID: 5, Value: ast.String{ID: 2}},
+			expectedObj: &ast.Edition{ID: 5, Value: ast.String{ID: 2}},
 
 			content: "edition = '2023';",
 			indices: "a------bcde-----fg",
@@ -78,5 +78,9 @@ func TestEdition(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkEdition, (*impl).parseEdition)
+	wrap := func(p *impl) (ast.Edition, []error) {
+		edition, err := p.parseEdition()
+		return edition, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkEdition, wrap)
 }

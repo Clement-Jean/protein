@@ -32,7 +32,7 @@ func TestParseOneof(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("oneof", true, "empty_statement"),
-			expectedObj: ast.Oneof{
+			expectedObj: &ast.Oneof{
 				ID:   6,
 				Name: ast.Identifier{ID: 1},
 			},
@@ -54,7 +54,7 @@ func TestParseOneof(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("oneof", true),
-			expectedObj: ast.Oneof{
+			expectedObj: &ast.Oneof{
 				ID:   17,
 				Name: ast.Identifier{ID: 1},
 				Fields: []ast.Field{
@@ -91,7 +91,7 @@ func TestParseOneof(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("oneof", true, "option"),
-			expectedObj: ast.Oneof{
+			expectedObj: &ast.Oneof{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
 					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
@@ -174,8 +174,12 @@ func TestParseOneof(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("oneof", false, "unexpected_int"),
+			expectedObj: &ast.Oneof{
+				ID:   6,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindIdentifier, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindIdentifier),
 			},
 
 			content: "oneof Test { 2 }",

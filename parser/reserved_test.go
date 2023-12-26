@@ -45,7 +45,7 @@ func TestReservedTags(t *testing.T) {
 	tests := []TestCase[ast.ReservedTags]{
 		{
 			name: internal.CaseName("reserved_tag", true),
-			expectedObj: ast.ReservedTags{
+			expectedObj: &ast.ReservedTags{
 				ID: 1, Items: []ast.Range{{ID: 1, Start: ast.Integer{ID: 1}, End: ast.Integer{ID: 1}}},
 			},
 
@@ -62,7 +62,7 @@ func TestReservedTags(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("reserved_tag", true, "multiple_range"),
-			expectedObj: ast.ReservedTags{
+			expectedObj: &ast.ReservedTags{
 				ID: 12, Items: []ast.Range{
 					{ID: 10, Start: ast.Integer{ID: 1}, End: ast.Integer{ID: 3}},
 					{ID: 11, Start: ast.Integer{ID: 5}, End: ast.Integer{ID: 7}},
@@ -183,14 +183,18 @@ func TestReservedTags(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkReservedTags, (*impl).parseReservedTags)
+	wrap := func(p *impl) (ast.ReservedTags, []error) {
+		tags, err := p.parseReservedTags()
+		return tags, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkReservedTags, wrap)
 }
 
 func TestReservedNames(t *testing.T) {
 	tests := []TestCase[ast.ReservedNames]{
 		{
 			name: internal.CaseName("reserved_name", true),
-			expectedObj: ast.ReservedNames{
+			expectedObj: &ast.ReservedNames{
 				ID: 1, Items: []ast.String{{ID: 1}},
 			},
 
@@ -207,7 +211,7 @@ func TestReservedNames(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("reserved_name", true, "multiple_names"),
-			expectedObj: ast.ReservedNames{
+			expectedObj: &ast.ReservedNames{
 				ID: 6, Items: []ast.String{{ID: 1}, {ID: 3}},
 			},
 
@@ -280,5 +284,9 @@ func TestReservedNames(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkReservedNames, (*impl).parseReservedNames)
+	wrap := func(p *impl) (ast.ReservedNames, []error) {
+		names, err := p.parseReservedNames()
+		return names, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkReservedNames, wrap)
 }

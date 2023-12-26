@@ -12,6 +12,9 @@ type impl struct {
 	fm           *codemap.FileMap
 	tokens       []token.Token
 	prevIdx, idx int
+
+	syncPos int // last synchronization position
+	syncCnt int // number of parser.advance calls without progress
 }
 
 func New(tokens []token.Token, fm *codemap.FileMap) Parser {
@@ -37,7 +40,8 @@ func (p *impl) peek() *token.Token {
 	}
 
 	if i >= len(p.tokens) {
-		return nil
+		eofID := p.tokens[len(p.tokens)-1].ID
+		return &token.Token{ID: eofID, Kind: token.KindEOF}
 	}
 
 	return &p.tokens[i]
@@ -49,7 +53,8 @@ func (p *impl) nextToken() *token.Token {
 	}
 
 	if p.idx >= len(p.tokens) {
-		return nil
+		eofID := p.tokens[len(p.tokens)-1].ID
+		return &token.Token{ID: eofID, Kind: token.KindEOF}
 	}
 
 	tok := p.tokens[p.idx]
@@ -111,44 +116,37 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 				a.Options = append(a.Options, option)
 			}
 		case token.KindEnum:
-			var enum ast.Enum
-
-			if enum, err = p.parseEnum(); err == nil {
-				a.Enums = append(a.Enums, enum)
-			}
+			enum, innerErrs := p.parseEnum()
+			a.Enums = append(a.Enums, enum)
+			errs = append(errs, innerErrs...)
 		case token.KindMessage:
-			var msg ast.Message
-
-			if msg, err = p.parseMessage(1); err == nil {
-				a.Messages = append(a.Messages, msg)
-			}
+			msg, innerErrs := p.parseMessage(1)
+			a.Messages = append(a.Messages, msg)
+			errs = append(errs, innerErrs...)
 		case token.KindService:
-			var svc ast.Service
-
-			if svc, err = p.parseService(); err == nil {
-				a.Services = append(a.Services, svc)
-			}
+			svc, innerErrs := p.parseService()
+			a.Services = append(a.Services, svc)
+			errs = append(errs, innerErrs...)
 		case token.KindExtend:
-			var extend ast.Extend
-
-			p.nextToken() // point to extend keyword
-			if extend, err = p.parseExtend(); err == nil {
-				a.Extensions = append(a.Extensions, extend)
-			}
+			extend, innerErrs := p.parseExtend()
+			a.Extensions = append(a.Extensions, extend)
+			errs = append(errs, innerErrs...)
 		default:
 			err = gotUnexpected(
 				tok,
 				token.KindSyntax, token.KindEdition,
-				token.KindPackage, token.KindImport,
+				token.KindPackage, token.KindImport, token.KindOption,
+				token.KindMessage, token.KindEnum, token.KindService, token.KindExtend,
 			)
 		}
 
 		if err != nil {
 			errs = append(errs, err)
-			// TODO recover error instead of returning
-			return a, errs
+			p.advanceTo(protoTopLevelStart)
 		}
+
+		err = nil
 	}
 
-	return a, nil
+	return a, errs
 }

@@ -24,7 +24,7 @@ func TestOption(t *testing.T) {
 	tests := []TestCase[ast.Option]{
 		{
 			name:        internal.CaseName("option", true),
-			expectedObj: ast.Option{ID: 6, Name: ast.Identifier{ID: 1}, Value: &ast.Boolean{ID: 3}},
+			expectedObj: &ast.Option{ID: 6, Name: ast.Identifier{ID: 1}, Value: &ast.Boolean{ID: 3}},
 
 			content: "option deprecated = true;",
 			indices: "a-----bc---------defg---hi",
@@ -39,7 +39,7 @@ func TestOption(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("option", true, "extend"),
-			expectedObj: ast.Option{
+			expectedObj: &ast.Option{
 				ID:    11,
 				Name:  ast.Identifier{ID: 10, Parts: []token.UniqueID{1, 2, 3, 5}},
 				Value: &ast.Boolean{ID: 7},
@@ -66,7 +66,7 @@ func TestOption(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("option", true, "full_extend"),
-			expectedObj: ast.Option{
+			expectedObj: &ast.Option{
 				ID:    14,
 				Name:  ast.Identifier{ID: 13, Parts: []token.UniqueID{1, 5, 7, 12}},
 				Value: &ast.Boolean{ID: 9},
@@ -95,7 +95,7 @@ func TestOption(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("option", true, "dot_full_extend"),
-			expectedObj: ast.Option{
+			expectedObj: &ast.Option{
 				ID:    15,
 				Name:  ast.Identifier{ID: 14, Parts: []token.UniqueID{1, 6, 8, 13}},
 				Value: &ast.Boolean{ID: 10},
@@ -242,5 +242,9 @@ func TestOption(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkOption, (*impl).parseOption)
+	wrap := func(p *impl) (ast.Option, []error) {
+		opt, err := p.parseOption()
+		return opt, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkOption, wrap)
 }

@@ -6,22 +6,22 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
-func (p *impl) parseOneof() (oneof ast.Oneof, err error) {
+func (p *impl) parseOneof() (oneof ast.Oneof, errs []error) {
 	first := p.curr()
 
 	if peek := p.peek(); peek.Kind != token.KindIdentifier {
-		return ast.Oneof{}, gotUnexpected(peek, token.KindIdentifier)
+		return ast.Oneof{}, []error{gotUnexpected(peek, token.KindIdentifier)}
 	}
 	p.nextToken()
 
 	name, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Oneof{}, err
+		return ast.Oneof{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindLeftBrace {
-		return ast.Oneof{}, gotUnexpected(peek, token.KindLeftBrace)
+		return ast.Oneof{}, []error{gotUnexpected(peek, token.KindLeftBrace)}
 	}
 	p.nextToken()
 
@@ -32,6 +32,7 @@ func (p *impl) parseOneof() (oneof ast.Oneof, err error) {
 			continue
 		}
 
+		err = nil
 		kind := peek.Kind
 
 		if literal := p.fm.Lookup(peek.ID); literal != nil {
@@ -55,23 +56,29 @@ func (p *impl) parseOneof() (oneof ast.Oneof, err error) {
 				oneof.Fields = append(oneof.Fields, field)
 			}
 		default:
-			err = gotUnexpected(peek, token.KindOption, token.KindIdentifier, token.KindRightBrace)
+			err = gotUnexpected(peek, token.KindOption, token.KindIdentifier)
 		}
 
 		if err != nil {
-			// TODO report error
-			// TODO p.advanceTo(exprEnd)
-			return ast.Oneof{}, err
+			errs = append(errs, err)
+			p.advanceTo(exprEnd)
+
+			if p.curr().Kind == token.KindRightBrace {
+				oneof.Name = name
+				oneof.ID = p.fm.Merge(token.KindOneOf, first.ID, p.curr().ID)
+				return oneof, errs
+			}
 		}
 	}
 
 	if peek.Kind != token.KindRightBrace {
-		return ast.Oneof{}, gotUnexpected(peek, token.KindRightBrace)
+		errs = append(errs, gotUnexpected(peek, token.KindRightBrace))
+		return ast.Oneof{}, errs
 	}
 
 	last := p.nextToken()
 
 	oneof.ID = p.fm.Merge(token.KindOneOf, first.ID, last.ID)
 	oneof.Name = name
-	return oneof, nil
+	return oneof, errs
 }

@@ -77,7 +77,7 @@ func TestParseMessage(t *testing.T) {
 	tests := []TestCase[ast.Message]{
 		{
 			name:        internal.CaseName("message", true),
-			expectedObj: ast.Message{ID: 5, Name: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Message{ID: 5, Name: ast.Identifier{ID: 1}},
 
 			content: "message Test {}",
 			indices: "a------bc---defg",
@@ -91,7 +91,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name:        internal.CaseName("message", true, "empty_statement"),
-			expectedObj: ast.Message{ID: 6, Name: ast.Identifier{ID: 1}},
+			expectedObj: &ast.Message{ID: 6, Name: ast.Identifier{ID: 1}},
 
 			content: "message Test {;}",
 			indices: "a------bc---defgh",
@@ -106,7 +106,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "field"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   11,
 				Name: ast.Identifier{ID: 1},
 				Fields: []ast.Field{
@@ -135,7 +135,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "map_field"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   17,
 				Name: ast.Identifier{ID: 1},
 				Fields: []ast.Field{
@@ -175,7 +175,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "oneof"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   22,
 				Name: ast.Identifier{ID: 1},
 				Oneofs: []ast.Oneof{{
@@ -220,7 +220,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "reserved_tag"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   8,
 				Name: ast.Identifier{ID: 1},
 				ReservedTags: []ast.ReservedTags{
@@ -246,7 +246,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "reserved_name"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   8,
 				Name: ast.Identifier{ID: 1},
 				ReservedNames: []ast.ReservedNames{
@@ -272,7 +272,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "option"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
 					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
@@ -300,7 +300,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "nested_message"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   10,
 				Name: ast.Identifier{ID: 1},
 				Messages: []ast.Message{
@@ -327,7 +327,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "nested_enum"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   10,
 				Name: ast.Identifier{ID: 1},
 				Messages: []ast.Message{
@@ -354,7 +354,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "nested_extend"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   10,
 				Name: ast.Identifier{ID: 1},
 				Extensions: []ast.Extend{
@@ -381,7 +381,7 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", true, "extension_range"),
-			expectedObj: ast.Message{
+			expectedObj: &ast.Message{
 				ID:   12,
 				Name: ast.Identifier{ID: 1},
 				ExtensionRanges: []ast.ExtensionRange{
@@ -415,8 +415,12 @@ func TestParseMessage(t *testing.T) {
 		},
 		{
 			name: internal.CaseName("message", false, "unexpected_int"),
+			expectedObj: &ast.Message{
+				ID:   6,
+				Name: ast.Identifier{ID: 1},
+			},
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindReserved, token.KindIdentifier, token.KindRightBrace),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindReserved, token.KindIdentifier),
 			},
 
 			content: "message Test { 2 }",
@@ -487,7 +491,7 @@ func TestParseMessage(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.Message, error) { return p.parseMessage(1) }
+	wrap := func(p *impl) (ast.Message, []error) { return p.parseMessage(1) }
 	runTestCases(t, tests, checkMessage, wrap)
 }
 
@@ -496,7 +500,7 @@ func TestParseField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("field", true, "type_uint64"),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID: 6, Type: ast.FieldTypeUint64, TypeID: 0, Name: ast.Identifier{ID: 1}, Tag: ast.Integer{ID: 3},
 			},
 
@@ -517,7 +521,7 @@ func TestParseField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("field", true, "type_unknown"),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID: 6, Type: ast.FieldTypeUnknown, TypeID: 0, Name: ast.Identifier{ID: 1}, Tag: ast.Integer{ID: 3},
 			},
 
@@ -538,7 +542,7 @@ func TestParseField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("field", true, "label"),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID:    7,
 				Label: ast.FieldLabelRepeated, LabelID: 0,
 				Type: ast.FieldTypeUint64, TypeID: 1,
@@ -564,7 +568,7 @@ func TestParseField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("field", true, "option"),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID:   13,
 				Type: ast.FieldTypeUint64, TypeID: 0,
 				Name: ast.Identifier{ID: 1},
@@ -597,7 +601,7 @@ func TestParseField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("field", true, "empty_option"),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID:   9,
 				Type: ast.FieldTypeUint64, TypeID: 0,
 				Name:      ast.Identifier{ID: 1},
@@ -624,7 +628,7 @@ func TestParseField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("field", true, "options"),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID:        30,
 				TypeID:    0,
 				Type:      ast.FieldTypeUint64,
@@ -824,7 +828,11 @@ func TestParseField(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkField, (*impl).parseField)
+	wrap := func(p *impl) (ast.Field, []error) {
+		field, err := p.parseField()
+		return field, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkField, wrap)
 }
 
 func TestParseMapField(t *testing.T) {
@@ -832,7 +840,7 @@ func TestParseMapField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("map_field", true),
-			expectedObj: ast.Field{
+			expectedObj: &ast.Field{
 				ID: 12, Type: ast.FieldTypeMessage, TypeID: 11, Name: ast.Identifier{ID: 6}, Tag: ast.Integer{ID: 8},
 			},
 
@@ -1023,5 +1031,9 @@ func TestParseMapField(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkField, (*impl).parseMapField)
+	wrap := func(p *impl) (ast.Field, []error) {
+		field, err := p.parseMapField()
+		return field, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkField, wrap)
 }

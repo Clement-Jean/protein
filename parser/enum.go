@@ -6,7 +6,7 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
-func (p *impl) parseEnumValue() (ast.EnumValue, error) {
+func (p *impl) parseEnumValue() (enum ast.EnumValue, err error) {
 	name, _ := p.parseIdentifier()
 
 	if peek := p.peek(); peek.Kind != token.KindEqual {
@@ -45,20 +45,18 @@ func (p *impl) parseEnumValue() (ast.EnumValue, error) {
 	return ast.EnumValue{ID: id, Name: name, Tag: tag, Options: options, OptionsID: optionsID}, nil
 }
 
-func (p *impl) parseEnum() (ast.Enum, error) {
+func (p *impl) parseEnum() (enum ast.Enum, errs []error) {
 	first := p.curr()
 	id, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Enum{}, err
+		return ast.Enum{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindLeftBrace {
-		return ast.Enum{}, gotUnexpected(peek, token.KindLeftBrace)
+		return ast.Enum{}, []error{gotUnexpected(peek, token.KindLeftBrace)}
 	}
 	p.nextToken()
-
-	var enum ast.Enum
 
 	peek := p.peek()
 	for ; peek.Kind != token.KindRightBrace && peek.Kind != token.KindEOF; peek = p.peek() {
@@ -67,6 +65,7 @@ func (p *impl) parseEnum() (ast.Enum, error) {
 			continue
 		}
 
+		err = nil
 		kind := peek.Kind
 
 		if literal := p.fm.Lookup(peek.ID); literal != nil {
@@ -107,22 +106,28 @@ func (p *impl) parseEnum() (ast.Enum, error) {
 				enum.Values = append(enum.Values, value)
 			}
 		default:
-			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier, token.KindRightBrace)
+			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier)
 		}
 
 		if err != nil {
-			// TODO report error
-			// TODO p.advanceTo(exprEnd)
-			return ast.Enum{}, err
+			errs = append(errs, err)
+			p.advanceTo(exprEnd)
+
+			if p.curr().Kind == token.KindRightBrace {
+				enum.Name = id
+				enum.ID = p.fm.Merge(token.KindEnum, first.ID, p.curr().ID)
+				return enum, errs
+			}
 		}
 	}
 
 	if peek.Kind != token.KindRightBrace {
-		return ast.Enum{}, gotUnexpected(peek, token.KindRightBrace)
+		errs = append(errs, gotUnexpected(peek, token.KindRightBrace))
+		return ast.Enum{}, errs
 	}
 
 	last := p.nextToken()
 	enum.Name = id
 	enum.ID = p.fm.Merge(token.KindEnum, first.ID, last.ID)
-	return enum, nil
+	return enum, errs
 }

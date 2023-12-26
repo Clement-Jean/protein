@@ -137,7 +137,11 @@ func TestParseFullyQualifiedIdentifier(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkIdentifier, (*impl).parseFullyQualifiedIdentifier)
+	wrap := func(p *impl) (ast.Identifier, []error) {
+		name, err := p.parseFullyQualifiedIdentifier()
+		return name, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkIdentifier, wrap)
 }
 
 func TestParseTextFieldName(t *testing.T) {
@@ -145,7 +149,7 @@ func TestParseTextFieldName(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field_name", true),
-			expectedObj:    ast.Identifier{ID: 0},
+			expectedObj:    &ast.Identifier{ID: 0},
 
 			content: "reg_scalar",
 			indices: "a---------b",
@@ -157,7 +161,7 @@ func TestParseTextFieldName(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field_name", true, "between_square_brackets"),
-			expectedObj:    ast.Identifier{ID: 1},
+			expectedObj:    &ast.Identifier{ID: 1},
 
 			content: "[reg_scalar]",
 			indices: "ab---------cd",
@@ -171,7 +175,7 @@ func TestParseTextFieldName(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field_name", true, "fully_qualified_between_square_brackets"),
-			expectedObj:    ast.Identifier{ID: 6},
+			expectedObj:    &ast.Identifier{ID: 6},
 
 			content: "[reg_scalar.test]",
 			indices: "ab---------cd---ef",
@@ -187,7 +191,7 @@ func TestParseTextFieldName(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field_name", true, "domain_typename"),
-			expectedObj:    ast.Identifier{ID: 16, Parts: []token.UniqueID{14, 15}},
+			expectedObj:    &ast.Identifier{ID: 16, Parts: []token.UniqueID{14, 15}},
 
 			content: "[type.googleapis.com/com.foo.any]",
 			indices: "ab---cd---------ef--gh--ij--kl--mn",
@@ -278,7 +282,11 @@ func TestParseTextFieldName(t *testing.T) {
 		},
 	}
 
-	runTestCases(t, tests, checkIdentifier, (*impl).parseTextFieldName)
+	wrap := func(p *impl) (ast.Identifier, []error) {
+		name, err := p.parseTextFieldName()
+		return name, internal.EmptyErrorSliceIfNil(err)
+	}
+	runTestCases(t, tests, checkIdentifier, wrap)
 }
 
 func TestParseTextField(t *testing.T) {
@@ -286,7 +294,7 @@ func TestParseTextField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field", true),
-			expectedObj:    ast.TextField{ID: 4, Value: ast.Integer{ID: 2}},
+			expectedObj:    &ast.TextField{ID: 4, Value: ast.Integer{ID: 2}},
 
 			content: "reg_scalar: 10",
 			indices: "a---------bcd-e",
@@ -300,7 +308,7 @@ func TestParseTextField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field", true, "skip_semicolon"),
-			expectedObj:    ast.TextField{ID: 5, Value: ast.Integer{ID: 2}},
+			expectedObj:    &ast.TextField{ID: 5, Value: ast.Integer{ID: 2}},
 
 			content: "reg_scalar: 10;",
 			indices: "a---------bcd-ef",
@@ -315,7 +323,7 @@ func TestParseTextField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field", true, "list"),
-			expectedObj: ast.TextField{ID: 9, Value: ast.TextScalarList{ID: 8, Values: []ast.Expression{
+			expectedObj: &ast.TextField{ID: 9, Value: ast.TextScalarList{ID: 8, Values: []ast.Expression{
 				ast.Integer{ID: 3}, ast.Integer{ID: 5},
 			}}},
 
@@ -338,7 +346,7 @@ func TestParseTextField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field", true, "message"),
-			expectedObj:    ast.TextField{ID: 6, Value: ast.TextMessage{ID: 5}},
+			expectedObj:    &ast.TextField{ID: 6, Value: ast.TextMessage{ID: 5}},
 
 			content: "reg_scalar: {}",
 			indices: "a---------bcdef",
@@ -353,7 +361,7 @@ func TestParseTextField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field", true, "message_without_colon"),
-			expectedObj:    ast.TextField{ID: 5, Value: ast.TextMessage{ID: 4}},
+			expectedObj:    &ast.TextField{ID: 5, Value: ast.TextMessage{ID: 4}},
 
 			content: "reg_scalar {}",
 			indices: "a---------bcde",
@@ -367,7 +375,7 @@ func TestParseTextField(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_field", true, "message_list"),
-			expectedObj: ast.TextField{ID: 12, Name: ast.Identifier{ID: 0}, Value: ast.TextMessageList{
+			expectedObj: &ast.TextField{ID: 12, Name: ast.Identifier{ID: 0}, Value: ast.TextMessageList{
 				ID: 11, Values: []ast.TextMessage{
 					{ID: 9},
 					{ID: 10},
@@ -425,7 +433,10 @@ func TestParseTextField(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.TextField, error) { return p.parseTextField(1) }
+	wrap := func(p *impl) (ast.TextField, []error) {
+		tf, err := p.parseTextField(1)
+		return tf, internal.EmptyErrorSliceIfNil(err)
+	}
 	runTestCases(t, tests, checkTextField, wrap)
 }
 
@@ -434,7 +445,7 @@ func TestParseTextMessage(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_message", true, "brace"),
-			expectedObj: ast.TextMessage{ID: 7, Fields: []ast.TextField{
+			expectedObj: &ast.TextMessage{ID: 7, Fields: []ast.TextField{
 				{ID: 6, Name: ast.Identifier{ID: 1}, Value: ast.Integer{ID: 3}},
 			}},
 
@@ -452,7 +463,7 @@ func TestParseTextMessage(t *testing.T) {
 		{
 			keepFirstToken: true,
 			name:           internal.CaseName("text_message", true, "angle"),
-			expectedObj: ast.TextMessage{ID: 7, Fields: []ast.TextField{
+			expectedObj: &ast.TextMessage{ID: 7, Fields: []ast.TextField{
 				{ID: 6, Name: ast.Identifier{ID: 1}, Value: ast.Integer{ID: 3}},
 			}},
 
@@ -469,6 +480,9 @@ func TestParseTextMessage(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.TextMessage, error) { return p.parseTextMessage(1) }
+	wrap := func(p *impl) (ast.TextMessage, []error) {
+		msg, err := p.parseTextMessage(1)
+		return msg, internal.EmptyErrorSliceIfNil(err)
+	}
 	runTestCases(t, tests, checkTextMessage, wrap)
 }
