@@ -83,6 +83,13 @@ func (p *impl) parseExtend() (extend ast.Extend, errs []error) {
 		}
 
 		switch kind {
+		case token.KindOption:
+			p.nextToken()
+			opt, innerErrs := p.parseOption()
+			if len(innerErrs) == 0 {
+				extend.Options = append(extend.Options, opt)
+			}
+			errs = append(errs, innerErrs...)
 		case token.KindIdentifier:
 			var field ast.Field
 
@@ -90,7 +97,7 @@ func (p *impl) parseExtend() (extend ast.Extend, errs []error) {
 				extend.Fields = append(extend.Fields, field)
 			}
 		default:
-			err = gotUnexpected(peek, token.KindField)
+			err = gotUnexpected(peek, token.KindOption, token.KindField)
 		}
 
 		if err != nil {
