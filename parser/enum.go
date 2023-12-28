@@ -6,43 +6,52 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
-func (p *impl) parseEnumValue() (enum ast.EnumValue, err error) {
+func (p *impl) parseEnumValue() (value ast.EnumValue, errs []error) {
 	name, _ := p.parseIdentifier()
 
 	if peek := p.peek(); peek.Kind != token.KindEqual {
-		return ast.EnumValue{}, gotUnexpected(peek, token.KindEqual)
+		return ast.EnumValue{}, []error{gotUnexpected(peek, token.KindEqual)}
 	}
 	p.nextToken()
 
 	tag, err := p.parseInt()
 
 	if err != nil {
-		return ast.EnumValue{}, err
+		return ast.EnumValue{}, []error{err}
 	}
 
 	var options []ast.Option
+	var innerErrs []error
 	var optionsID token.UniqueID
 
 	peek := p.peek()
 	if peek.Kind == token.KindLeftSquare {
 		firstOption := p.nextToken()
-		options, err = p.parseInlineOptions()
+		options, innerErrs = p.parseInlineOptions()
+		errs = append(errs, innerErrs...)
 
-		if err != nil {
-			return ast.EnumValue{}, err
+		var lastOptionID token.UniqueID
+		if len(options) != 0 {
+			lastOptionID = options[len(options)-1].ID
+		} else {
+			lastOptionID = firstOption.ID
 		}
-
-		lastOption := options[len(options)-1].ID
-		optionsID = p.fm.Merge(token.KindOption, firstOption.ID, lastOption)
+		optionsID = p.fm.Merge(token.KindOption, firstOption.ID, lastOptionID)
 	}
 
 	if peek = p.peek(); peek.Kind != token.KindSemicolon {
-		return ast.EnumValue{}, gotUnexpected(peek, token.KindSemicolon)
+		errs = append(errs, gotUnexpected(peek, token.KindSemicolon))
+		return ast.EnumValue{}, errs
 	}
 
 	last := p.nextToken()
 	id := p.fm.Merge(token.KindEnumValue, name.ID, last.ID)
-	return ast.EnumValue{ID: id, Name: name, Tag: tag, Options: options, OptionsID: optionsID}, nil
+	value.ID = id
+	value.Name = name
+	value.Tag = tag
+	value.Options = options
+	value.OptionsID = optionsID
+	return value, errs
 }
 
 func (p *impl) parseEnum() (enum ast.Enum, errs []error) {
@@ -66,6 +75,7 @@ func (p *impl) parseEnum() (enum ast.Enum, errs []error) {
 		}
 
 		err = nil
+		prevErrsLen := len(errs)
 		kind := peek.Kind
 
 		if literal := p.fm.Lookup(peek.ID); literal != nil {
@@ -76,12 +86,12 @@ func (p *impl) parseEnum() (enum ast.Enum, errs []error) {
 
 		switch kind {
 		case token.KindOption:
-			var option ast.Option
-
 			p.nextToken() // point to option keyword
-			if option, err = p.parseOption(); err == nil {
-				enum.Options = append(enum.Options, option)
+			opt, innerErrs := p.parseOption()
+			if len(innerErrs) == 0 {
+				enum.Options = append(enum.Options, opt)
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindReserved:
 			p.nextToken() // point to reserved keyword
 
@@ -100,17 +110,19 @@ func (p *impl) parseEnum() (enum ast.Enum, errs []error) {
 				}
 			}
 		case token.KindIdentifier:
-			var value ast.EnumValue
-
-			if value, err = p.parseEnumValue(); err == nil {
+			value, innerErrs := p.parseEnumValue()
+			if len(innerErrs) == 0 {
 				enum.Values = append(enum.Values, value)
 			}
+			errs = append(errs, innerErrs...)
 		default:
 			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier)
 		}
 
-		if err != nil {
-			errs = append(errs, err)
+		if err != nil || prevErrsLen != len(errs) {
+			if err != nil {
+				errs = append(errs, err)
+			}
 			p.advanceTo(exprEnd)
 
 			if p.curr().Kind == token.KindRightBrace {

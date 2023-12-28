@@ -270,6 +270,7 @@ func TestEnum(t *testing.T) {
 			name: internal.CaseName("enum", false, "option_expected_right_square"),
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 10, Kind: token.KindEOF}, token.KindRightSquare),
+				gotUnexpected(&token.Token{ID: 10, Kind: token.KindEOF}, token.KindSemicolon),
 				gotUnexpected(&token.Token{ID: 10, Kind: token.KindEOF}, token.KindRightBrace),
 			},
 

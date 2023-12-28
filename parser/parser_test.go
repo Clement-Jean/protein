@@ -15,7 +15,7 @@ import (
 )
 
 type UnderTest interface {
-	ast.Identifier | ast.Syntax | ast.Edition | ast.Package | ast.Import | ast.Option |
+	ast.Identifier | ast.Syntax | ast.Edition | ast.Package | ast.Import | ast.Option | []ast.Option |
 		ast.TextField | ast.TextMessage | ast.TextScalarList | ast.Enum | ast.EnumValue |
 		ast.ReservedTags | ast.ReservedNames | ast.Message | ast.Field | ast.Oneof | ast.ExtensionRange |
 		ast.Service | ast.Rpc | ast.Extend

@@ -168,16 +168,18 @@ func (p *impl) parseService() (service ast.Service, errs []error) {
 
 		switch kind {
 		case token.KindOption:
-			var option ast.Option
-
 			p.nextToken() // point to option keyword
-			if option, err = p.parseOption(); err == nil {
-				service.Options = append(service.Options, option)
+			opt, innerErrs := p.parseOption()
+			if len(innerErrs) == 0 {
+				service.Options = append(service.Options, opt)
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindRpc:
 			p.nextToken() // point to rpc keyword
 			rpc, innerErrs := p.parseRpc()
-			service.Rpcs = append(service.Rpcs, rpc)
+			if len(innerErrs) == 0 {
+				service.Rpcs = append(service.Rpcs, rpc)
+			}
 			errs = append(errs, innerErrs...)
 		default:
 			err = gotUnexpected(peek, token.KindOption, token.KindRpc)

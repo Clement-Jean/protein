@@ -420,7 +420,7 @@ func TestParseMessage(t *testing.T) {
 				Name: ast.Identifier{ID: 1},
 			},
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindReserved, token.KindIdentifier),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindReserved, token.KindField),
 			},
 
 			content: "message Test { 2 }",
@@ -807,6 +807,7 @@ func TestParseField(t *testing.T) {
 			name:           internal.CaseName("field", false, "expected_right_square"),
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 8, Kind: token.KindEOF}, token.KindRightSquare),
+				gotUnexpected(&token.Token{ID: 8, Kind: token.KindEOF}, token.KindSemicolon),
 			},
 
 			content: "uint64 id = 1 [deprecated = true",
@@ -828,11 +829,7 @@ func TestParseField(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.Field, []error) {
-		field, err := p.parseField()
-		return field, internal.EmptyErrorSliceIfNil(err)
-	}
-	runTestCases(t, tests, checkField, wrap)
+	runTestCases(t, tests, checkField, (*impl).parseField)
 }
 
 func TestParseMapField(t *testing.T) {
@@ -1003,6 +1000,7 @@ func TestParseMapField(t *testing.T) {
 			name:           internal.CaseName("map_field", false, "expected_right_square"),
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 13, Kind: token.KindEOF}, token.KindRightSquare),
+				gotUnexpected(&token.Token{ID: 13, Kind: token.KindEOF}, token.KindSemicolon),
 			},
 
 			content: "map<string, uint64> ids = 1 [deprecated = true",
@@ -1031,9 +1029,5 @@ func TestParseMapField(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.Field, []error) {
-		field, err := p.parseMapField()
-		return field, internal.EmptyErrorSliceIfNil(err)
-	}
-	runTestCases(t, tests, checkField, wrap)
+	runTestCases(t, tests, checkField, (*impl).parseMapField)
 }

@@ -31,40 +31,40 @@ var literalToLabel = map[string]ast.FieldLabel{
 	"repeated": ast.FieldLabelRepeated,
 }
 
-func (p *impl) parseFieldIdentifierTagOption() (field ast.Field, err error) {
+func (p *impl) parseFieldIdentifierTagOption() (field ast.Field, errs []error) {
 	name, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Field{}, err
+		return ast.Field{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindEqual {
-		return ast.Field{}, gotUnexpected(peek, token.KindEqual)
+		return ast.Field{}, []error{gotUnexpected(peek, token.KindEqual)}
 	}
 	p.nextToken()
 
 	tag, err := p.parseInt()
 
 	if err != nil {
-		return ast.Field{}, err
+		return ast.Field{}, []error{err}
 	}
 
 	var opts []ast.Option
+	var innerErrs []error
 	var optsID token.UniqueID
+
 	if peek := p.peek(); peek.Kind == token.KindLeftSquare {
 		first := p.nextToken()
-		opts, err = p.parseInlineOptions()
-
-		if err != nil {
-			return ast.Field{}, err
-		}
+		opts, innerErrs = p.parseInlineOptions()
+		errs = append(errs, innerErrs...)
 
 		last := p.curr()
 		optsID = p.fm.Merge(token.KindOption, first.ID, last.ID)
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindSemicolon {
-		return ast.Field{}, gotUnexpected(peek, token.KindSemicolon)
+		errs = append(errs, gotUnexpected(peek, token.KindSemicolon))
+		return ast.Field{}, errs
 	}
 
 	field.Name = name
@@ -74,18 +74,20 @@ func (p *impl) parseFieldIdentifierTagOption() (field ast.Field, err error) {
 	return field, nil
 }
 
-func (p *impl) parseField() (field ast.Field, err error) {
+func (p *impl) parseField() (field ast.Field, errs []error) {
 	id, _ := p.parseFullyQualifiedIdentifier()
 	literal := internal_bytes.ToString(p.fm.Lookup(id.ID))
 
 	switch label, ok := literalToLabel[literal]; ok {
 	case true:
+		var err error
+
 		field.LabelID = id.ID
 		field.Label = label
 		id, err = p.parseIdentifier()
 
 		if err != nil {
-			return ast.Field{}, err
+			return ast.Field{}, []error{err}
 		}
 
 		literal = internal_bytes.ToString(p.fm.Lookup(id.ID))
@@ -100,11 +102,8 @@ func (p *impl) parseField() (field ast.Field, err error) {
 		field.TypeID = id.ID
 	}
 
-	fieldInfo, err := p.parseFieldIdentifierTagOption()
-
-	if err != nil {
-		return ast.Field{}, err
-	}
+	fieldInfo, innerErrs := p.parseFieldIdentifierTagOption()
+	errs = append(errs, innerErrs...)
 
 	last := p.nextToken()
 	field.ID = p.fm.Merge(token.KindField, id.ID, last.ID)
@@ -112,48 +111,45 @@ func (p *impl) parseField() (field ast.Field, err error) {
 	field.Tag = fieldInfo.Tag
 	field.Options = fieldInfo.Options
 	field.OptionsID = fieldInfo.OptionsID
-	return field, nil
+	return field, errs
 }
 
-func (p *impl) parseMapField() (field ast.Field, err error) {
+func (p *impl) parseMapField() (field ast.Field, errs []error) {
 	if peek := p.peek(); peek.Kind != token.KindIdentifier {
-		return ast.Field{}, gotUnexpected(peek, token.KindIdentifier)
+		return ast.Field{}, []error{gotUnexpected(peek, token.KindIdentifier)}
 	}
 	first := p.nextToken()
 
 	if peek := p.peek(); peek.Kind != token.KindLeftAngle {
-		return ast.Field{}, gotUnexpected(peek, token.KindLeftAngle)
+		return ast.Field{}, []error{gotUnexpected(peek, token.KindLeftAngle)}
 	}
 	p.nextToken()
 
-	_, err = p.parseIdentifier()
+	_, err := p.parseIdentifier()
 
 	if err != nil {
-		return ast.Field{}, err
+		return ast.Field{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindComma {
-		return ast.Field{}, gotUnexpected(peek, token.KindComma)
+		return ast.Field{}, []error{gotUnexpected(peek, token.KindComma)}
 	}
 	p.nextToken()
 
 	_, err = p.parseIdentifier()
 
 	if err != nil {
-		return ast.Field{}, err
+		return ast.Field{}, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindRightAngle {
-		return ast.Field{}, gotUnexpected(peek, token.KindRightAngle)
+		return ast.Field{}, []error{gotUnexpected(peek, token.KindRightAngle)}
 	}
 	endType := p.tokens[p.idx]
 	p.nextToken()
 
-	fieldInfo, err := p.parseFieldIdentifierTagOption()
-
-	if err != nil {
-		return ast.Field{}, err
-	}
+	fieldInfo, innerErrs := p.parseFieldIdentifierTagOption()
+	errs = append(errs, innerErrs...)
 
 	last := p.nextToken()
 	field.Name = fieldInfo.Name
@@ -163,7 +159,7 @@ func (p *impl) parseMapField() (field ast.Field, err error) {
 	field.Type = ast.FieldTypeMessage
 	field.TypeID = p.fm.Merge(token.KindMap, first.ID, endType.ID)
 	field.ID = p.fm.Merge(token.KindField, first.ID, last.ID)
-	return field, nil
+	return field, errs
 }
 
 func (p *impl) parseMessage(recurseDepth uint8) (msg ast.Message, errs []error) {
@@ -205,12 +201,12 @@ func (p *impl) parseMessage(recurseDepth uint8) (msg ast.Message, errs []error) 
 
 		switch kind {
 		case token.KindOption:
-			var option ast.Option
-
 			p.nextToken() // point to option keyword
-			if option, err = p.parseOption(); err == nil {
-				msg.Options = append(msg.Options, option)
+			opt, innerErrs := p.parseOption()
+			if len(innerErrs) == 0 {
+				msg.Options = append(msg.Options, opt)
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindReserved:
 			p.nextToken() // point to reserved keyword
 
@@ -229,11 +225,9 @@ func (p *impl) parseMessage(recurseDepth uint8) (msg ast.Message, errs []error) 
 				}
 			}
 		case token.KindMap:
-			var field ast.Field
-
-			if field, err = p.parseMapField(); err == nil {
-				msg.Fields = append(msg.Fields, field)
-			}
+			field, innerErrs := p.parseMapField()
+			msg.Fields = append(msg.Fields, field)
+			errs = append(errs, innerErrs...)
 		case token.KindOneOf:
 			var oneof ast.Oneof
 			var innerErrs []error
@@ -264,30 +258,28 @@ func (p *impl) parseMessage(recurseDepth uint8) (msg ast.Message, errs []error) 
 			}
 			errs = append(errs, innerErrs...)
 		case token.KindExtend:
-			var innerExtend ast.Extend
-			var innerErrs []error
-
 			p.nextToken() // point to extend keyword
-			if innerExtend, innerErrs = p.parseExtend(); innerErrs == nil {
+			innerExtend, innerErrs := p.parseExtend()
+
+			if len(innerErrs) == 0 {
 				msg.Extensions = append(msg.Extensions, innerExtend)
-				break
 			}
 			errs = append(errs, innerErrs...)
 		case token.KindIdentifier:
-			var field ast.Field
-
-			if field, err = p.parseField(); err == nil {
+			field, innerErrs := p.parseField()
+			if len(innerErrs) == 0 {
 				msg.Fields = append(msg.Fields, field)
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindExtensions:
-			var extensionRange ast.ExtensionRange
-
 			p.nextToken() // point to extensions keyword
-			if extensionRange, err = p.parseExtensionRange(); err == nil {
+			extensionRange, innerErrs := p.parseExtensionRange()
+			if len(innerErrs) == 0 {
 				msg.ExtensionRanges = append(msg.ExtensionRanges, extensionRange)
 			}
+			errs = append(errs, innerErrs...)
 		default:
-			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindIdentifier)
+			err = gotUnexpected(peek, token.KindOption, token.KindReserved, token.KindField)
 		}
 
 		if err != nil {

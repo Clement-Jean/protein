@@ -8,7 +8,17 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
-func checkOption(t *testing.T, got ast.Option, expected ast.Option) {
+func checkOptions(t *testing.T, got, expected []ast.Option) {
+	if len(expected) != len(got) {
+		t.Fatalf("expected %d options, got %d", len(expected), len(got))
+	}
+
+	for i := range expected {
+		checkOption(t, got[i], expected[i])
+	}
+}
+
+func checkOption(t *testing.T, got, expected ast.Option) {
 	if got.Value == nil {
 		t.Fatalf("expected Option.Value not nil")
 	}
@@ -243,9 +253,5 @@ func TestOption(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.Option, []error) {
-		opt, err := p.parseOption()
-		return opt, internal.EmptyErrorSliceIfNil(err)
-	}
-	runTestCases(t, tests, checkOption, wrap)
+	runTestCases(t, tests, checkOption, (*impl).parseOption)
 }

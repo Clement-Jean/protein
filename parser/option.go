@@ -59,50 +59,45 @@ func (p *impl) parseOptionName() (ast.Identifier, error) {
 	return ast.Identifier{ID: ids[0]}, nil
 }
 
-func (p *impl) parseOptionValue() (ast.Expression, error) {
-	lit, err := p.parseConstant(1)
+func (p *impl) parseOptionIdentifierEqualValue() (name ast.Identifier, value ast.Expression, errs []error) {
+	var err error
+
+	name, err = p.parseOptionName()
 
 	if err != nil {
-		return nil, err
-	}
-
-	return lit, err
-}
-
-func (p *impl) parseOptionIdentifierEqualValue() (ast.Identifier, ast.Expression, error) {
-	name, err := p.parseOptionName()
-
-	if err != nil {
-		return name, nil, err
+		p.advanceTo(exprEnd)
+		return name, nil, []error{err}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindEqual {
-		return name, nil, gotUnexpected(peek, token.KindEqual)
+		p.advanceTo(exprEnd)
+		errs = append(errs, gotUnexpected(peek, token.KindEqual))
+		return name, value, errs
 	}
 	p.nextToken()
 
-	value, err := p.parseOptionValue()
+	value, errs = p.parseConstant(1)
 
-	if err != nil {
-		return name, nil, err
+	if len(errs) != 0 {
+		return name, value, errs
 	}
 
-	return name, value, nil
+	return name, value, errs
 }
 
-func (p *impl) parseInlineOption() (ast.Option, error) {
-	name, value, err := p.parseOptionIdentifierEqualValue()
+func (p *impl) parseInlineOption() (opt ast.Option, errs []error) {
+	opt.Name, opt.Value, errs = p.parseOptionIdentifierEqualValue()
 
-	if err != nil {
-		return ast.Option{}, err
+	if errs != nil {
+		return ast.Option{}, errs
 	}
 
-	id := p.fm.Merge(token.KindOption, name.ID, value.GetID())
-	return ast.Option{ID: id, Name: name, Value: value}, nil
+	id := p.fm.Merge(token.KindOption, opt.Name.ID, opt.Value.GetID())
+	opt.ID = id
+	return opt, errs
 }
 
-func (p *impl) parseInlineOptions() ([]ast.Option, error) {
-	var options []ast.Option
+func (p *impl) parseInlineOptions() (opts []ast.Option, errs []error) {
 	peek := p.peek()
 	curr := p.curr()
 
@@ -111,40 +106,48 @@ func (p *impl) parseInlineOptions() ([]ast.Option, error) {
 			p.nextToken()
 		}
 
-		option, err := p.parseInlineOption()
+		option, innerErrs := p.parseInlineOption()
 
-		if err != nil {
-			return nil, err
+		if len(innerErrs) != 0 {
+			errs = append(errs, innerErrs...)
+			continue
 		}
 
-		options = append(options, option)
+		opts = append(opts, option)
 		curr = p.curr()
 	}
 
 	if curr.Kind == token.KindRightSquare {
-		return options, nil
+		return opts, errs
 	}
 
 	if peek.Kind != token.KindRightSquare {
-		return nil, gotUnexpected(peek, token.KindRightSquare)
+		errs = append(errs, gotUnexpected(peek, token.KindRightSquare))
+		return nil, errs
 	}
 	p.nextToken()
-	return options, nil
+	return opts, errs
 }
 
-func (p *impl) parseOption() (ast.Option, error) {
+func (p *impl) parseOption() (opt ast.Option, errs []error) {
 	first := p.curr()
-	name, value, err := p.parseOptionIdentifierEqualValue()
+	name, value, innerErrs := p.parseOptionIdentifierEqualValue()
 
-	if err != nil {
-		return ast.Option{}, err
+	if len(innerErrs) != 0 {
+		errs = append(errs, innerErrs...)
+
+		if p.curr().Kind == token.KindSemicolon {
+			id := p.fm.Merge(token.KindOption, first.ID, p.curr().ID)
+			return ast.Option{ID: id, Name: name, Value: value}, errs
+		}
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindSemicolon {
-		return ast.Option{}, gotUnexpected(peek, token.KindSemicolon)
+		errs = append(errs, gotUnexpected(peek, token.KindSemicolon))
+		return ast.Option{}, errs
 	}
 
 	last := p.nextToken()
 	id := p.fm.Merge(token.KindOption, first.ID, last.ID)
-	return ast.Option{ID: id, Name: name, Value: value}, nil
+	return ast.Option{ID: id, Name: name, Value: value}, errs
 }

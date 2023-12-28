@@ -182,11 +182,7 @@ func TestParseExtensionRanges(t *testing.T) {
 		},
 	}
 
-	wrap := func(p *impl) (ast.ExtensionRange, []error) {
-		extRange, err := p.parseExtensionRange()
-		return extRange, internal.EmptyErrorSliceIfNil(err)
-	}
-	runTestCases(t, tests, checkExtensionRange, wrap)
+	runTestCases(t, tests, checkExtensionRange, (*impl).parseExtensionRange)
 }
 
 func TestParseExtends(t *testing.T) {
@@ -367,7 +363,7 @@ func TestParseExtends(t *testing.T) {
 				Name: ast.Identifier{ID: 1},
 			},
 			expectedErrs: []error{
-				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindField),
+				gotUnexpected(&token.Token{ID: 3, Kind: token.KindInt}, token.KindOption, token.KindField),
 			},
 
 			content: "extend Test {2}",

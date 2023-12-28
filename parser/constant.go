@@ -103,7 +103,7 @@ func (p *impl) parseTextFieldName() (ast.Identifier, error) {
 	return ast.Identifier{}, gotUnexpected(peek, token.KindIdentifier, token.KindLeftSquare)
 }
 
-func (p *impl) parseTextMessageList(recurseDepth uint8) (ast.TextMessageList, error) {
+func (p *impl) parseTextMessageList(recurseDepth uint8) (list ast.TextMessageList, errs []error) {
 	first := p.curr()
 	peek := p.peek()
 	msgs := []ast.TextMessage{}
@@ -111,17 +111,19 @@ func (p *impl) parseTextMessageList(recurseDepth uint8) (ast.TextMessageList, er
 		if peek.Kind == token.KindComma {
 			p.nextToken()
 		}
-		msg, err := p.parseTextMessage(recurseDepth)
+		msg, innerErrs := p.parseTextMessage(recurseDepth)
 
-		if err != nil {
-			return ast.TextMessageList{}, err
+		if len(innerErrs) != 0 {
+			errs = append(errs, innerErrs...)
+			continue
 		}
 
 		msgs = append(msgs, msg)
 	}
 
 	if peek.Kind != token.KindRightSquare {
-		return ast.TextMessageList{}, gotUnexpected(peek, token.KindRightSquare)
+		errs = append(errs, gotUnexpected(peek, token.KindRightSquare))
+		return ast.TextMessageList{}, errs
 	}
 
 	last := p.nextToken()
@@ -129,7 +131,7 @@ func (p *impl) parseTextMessageList(recurseDepth uint8) (ast.TextMessageList, er
 	return ast.TextMessageList{ID: id, Values: msgs}, nil
 }
 
-func (p *impl) parseTextScalarList(recurseDepth uint8) (ast.TextScalarList, error) {
+func (p *impl) parseTextScalarList(recurseDepth uint8) (list ast.TextScalarList, errs []error) {
 	first := p.curr()
 	peek := p.peek()
 	values := []ast.Expression{}
@@ -138,17 +140,19 @@ func (p *impl) parseTextScalarList(recurseDepth uint8) (ast.TextScalarList, erro
 			p.nextToken()
 		}
 
-		value, err := p.parseConstant(recurseDepth)
+		value, innerErrs := p.parseConstant(recurseDepth)
 
-		if err != nil {
-			return ast.TextScalarList{}, err
+		if len(innerErrs) != 0 {
+			errs = append(errs, innerErrs...)
+			continue
 		}
 
 		values = append(values, value)
 	}
 
 	if peek.Kind != token.KindRightSquare {
-		return ast.TextScalarList{}, gotUnexpected(peek, token.KindRightSquare)
+		errs = append(errs, gotUnexpected(peek, token.KindRightSquare))
+		return ast.TextScalarList{}, errs
 	}
 
 	last := p.nextToken()
@@ -156,13 +160,14 @@ func (p *impl) parseTextScalarList(recurseDepth uint8) (ast.TextScalarList, erro
 	return ast.TextScalarList{ID: id, Values: values}, nil
 }
 
-func (p *impl) parseTextField(recurseDepth uint8) (ast.TextField, error) {
+func (p *impl) parseTextField(recurseDepth uint8) (field ast.TextField, errs []error) {
 	name, err := p.parseTextFieldName()
 
 	if err != nil {
-		return ast.TextField{}, err
+		return ast.TextField{}, []error{err}
 	}
 
+	var innerErrs []error
 	var value ast.Expression
 
 	peek := p.peek()
@@ -177,34 +182,35 @@ func (p *impl) parseTextField(recurseDepth uint8) (ast.TextField, error) {
 		peek := p.peek()
 
 		if peek.Kind == token.KindLeftBrace || peek.Kind == token.KindLeftAngle {
-			value, err = p.parseTextMessageList(recurseDepth)
+			value, innerErrs = p.parseTextMessageList(recurseDepth)
+			errs = append(errs, innerErrs...)
 		} else if hasColon {
-			value, err = p.parseTextScalarList(recurseDepth)
+			value, innerErrs = p.parseTextScalarList(recurseDepth)
+			errs = append(errs, innerErrs...)
 		} else {
-			return ast.TextField{}, gotUnexpected(curr, token.KindColon)
+			err = gotUnexpected(curr, token.KindColon)
 		}
 
 		if err != nil {
-			return ast.TextField{}, err
+			errs = append(errs, err)
+			p.advanceTo(exprEnd)
 		}
 	} else {
 		if !hasColon && peek.Kind != token.KindLeftBrace && peek.Kind != token.KindLeftAngle {
-			return ast.TextField{}, gotUnexpected(peek, token.KindColon)
+			errs = append(errs, gotUnexpected(peek, token.KindColon))
+			return ast.TextField{}, errs
 		}
 
-		value, err = p.parseConstant(recurseDepth)
-
-		if err != nil {
-			return ast.TextField{}, err
-		}
+		value, innerErrs = p.parseConstant(recurseDepth + 1)
+		errs = append(errs, innerErrs...)
 	}
 
 	last := p.curr()
 	id := p.fm.Merge(token.KindTextField, name.ID, last.ID)
-	return ast.TextField{ID: id, Name: name, Value: value}, err
+	return ast.TextField{ID: id, Name: name, Value: value}, errs
 }
 
-func (p *impl) parseTextMessage(recurseDepth uint8) (msg ast.TextMessage, err error) {
+func (p *impl) parseTextMessage(recurseDepth uint8) (msg ast.TextMessage, errs []error) {
 	open := p.peek()
 
 	var closeKind token.Kind
@@ -214,12 +220,11 @@ func (p *impl) parseTextMessage(recurseDepth uint8) (msg ast.TextMessage, err er
 	} else if open.Kind == token.KindLeftAngle {
 		closeKind = token.KindRightAngle
 	} else {
-		return ast.TextMessage{}, gotUnexpected(open, token.KindLeftBrace, token.KindLeftAngle)
+		return ast.TextMessage{}, []error{gotUnexpected(open, token.KindLeftBrace, token.KindLeftAngle)}
 	}
 
 	p.nextToken()
 	peek := p.peek()
-	msg = ast.TextMessage{}
 
 	for ; peek.Kind != closeKind && peek.Kind != token.KindEOF; peek = p.peek() {
 		if peek.Kind == token.KindComma || peek.Kind == token.KindSemicolon {
@@ -227,22 +232,24 @@ func (p *impl) parseTextMessage(recurseDepth uint8) (msg ast.TextMessage, err er
 			continue
 		}
 
-		field, err := p.parseTextField(recurseDepth)
+		field, innerErrs := p.parseTextField(recurseDepth)
 
-		if err != nil {
-			return ast.TextMessage{}, err
+		if len(innerErrs) != 0 {
+			errs = append(errs, innerErrs...)
+			p.advanceTo(exprEnd)
+			continue
 		}
 
 		msg.Fields = append(msg.Fields, field)
 	}
 
 	if peek.Kind != closeKind {
-		return ast.TextMessage{}, gotUnexpected(peek, closeKind)
+		errs = append(errs, gotUnexpected(peek, closeKind))
+		return ast.TextMessage{}, errs
 	}
 	last := p.nextToken()
-
 	msg.ID = p.fm.Merge(token.KindTextMessage, open.ID, last.ID)
-	return msg, nil
+	return msg, errs
 }
 
 var expectedConstants = []token.Kind{
@@ -254,17 +261,16 @@ var expectedConstants = []token.Kind{
 	token.KindLeftAngle,
 }
 
-func (p *impl) parseConstant(recurseDepth uint8) (ast.Expression, error) {
+func (p *impl) parseConstant(recurseDepth uint8) (value ast.Expression, errs []error) {
 	curr := p.curr()
 
 	if recurseDepth > 30 { // TODO make it configurable
-		return nil, &Error{
+		return nil, []error{&Error{
 			ID:  curr.ID,
 			Msg: "Too many nested constants",
-		}
+		}}
 	}
 
-	var value ast.Expression
 	var err error
 
 	peek := p.peek()
@@ -285,17 +291,31 @@ func (p *impl) parseConstant(recurseDepth uint8) (ast.Expression, error) {
 	case token.KindStr:
 		value = ast.String{ID: peek.ID}
 	case token.KindLeftBrace:
-		value, err = p.parseTextMessage(recurseDepth)
+		var innerErrs []error
+		value, innerErrs = p.parseTextMessage(recurseDepth)
+		errs = append(errs, innerErrs...)
+
+		if p.curr().Kind == token.KindRightBrace {
+			return value, errs
+		}
 	case token.KindLeftAngle:
-		value, err = p.parseTextMessage(recurseDepth)
+		var innerErrs []error
+		value, innerErrs = p.parseTextMessage(recurseDepth)
+		errs = append(errs, innerErrs...)
+
+		if p.curr().Kind == token.KindRightBrace {
+			return value, errs
+		}
 	default:
-		return nil, gotUnexpected(peek, expectedConstants...)
+		err = gotUnexpected(peek, expectedConstants...)
 	}
 
 	if err != nil {
-		return nil, err
+		errs = append(errs, err)
+		p.advanceTo(exprEnd)
+		return value, errs
 	}
 
 	p.nextToken()
-	return value, err
+	return value, errs
 }

@@ -43,18 +43,18 @@ func (p *impl) parseOneof() (oneof ast.Oneof, errs []error) {
 
 		switch kind {
 		case token.KindOption:
-			var option ast.Option
-
 			p.nextToken() // point to option keyword
-			if option, err = p.parseOption(); err == nil {
-				oneof.Options = append(oneof.Options, option)
+			opt, innerErrs := p.parseOption()
+			if len(innerErrs) == 0 {
+				oneof.Options = append(oneof.Options, opt)
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindIdentifier:
-			var field ast.Field
-
-			if field, err = p.parseField(); err == nil {
+			field, innerErrs := p.parseField()
+			if len(innerErrs) == 0 {
 				oneof.Fields = append(oneof.Fields, field)
 			}
+			errs = append(errs, innerErrs...)
 		default:
 			err = gotUnexpected(peek, token.KindOption, token.KindIdentifier)
 		}

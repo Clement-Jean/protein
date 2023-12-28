@@ -110,26 +110,34 @@ func (p *impl) Parse() (a ast.Ast, errs []error) {
 				a.Imports = append(a.Imports, imp)
 			}
 		case token.KindOption:
-			var option ast.Option
-
-			if option, err = p.parseOption(); err == nil {
-				a.Options = append(a.Options, option)
+			opt, innerErrs := p.parseOption()
+			if len(innerErrs) == 0 {
+				a.Options = append(a.Options, opt)
 			}
+			errs = append(errs, innerErrs...)
 		case token.KindEnum:
 			enum, innerErrs := p.parseEnum()
-			a.Enums = append(a.Enums, enum)
+			if len(innerErrs) == 0 {
+				a.Enums = append(a.Enums, enum)
+			}
 			errs = append(errs, innerErrs...)
 		case token.KindMessage:
 			msg, innerErrs := p.parseMessage(1)
-			a.Messages = append(a.Messages, msg)
+			if len(innerErrs) == 0 {
+				a.Messages = append(a.Messages, msg)
+			}
 			errs = append(errs, innerErrs...)
 		case token.KindService:
 			svc, innerErrs := p.parseService()
-			a.Services = append(a.Services, svc)
+			if len(innerErrs) == 0 {
+				a.Services = append(a.Services, svc)
+			}
 			errs = append(errs, innerErrs...)
 		case token.KindExtend:
 			extend, innerErrs := p.parseExtend()
-			a.Extensions = append(a.Extensions, extend)
+			if len(innerErrs) == 0 {
+				a.Extensions = append(a.Extensions, extend)
+			}
 			errs = append(errs, innerErrs...)
 		default:
 			err = gotUnexpected(

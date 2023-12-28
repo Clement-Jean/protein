@@ -6,12 +6,12 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
-func (p *impl) parseExtensionRange() (er ast.ExtensionRange, err error) {
+func (p *impl) parseExtensionRange() (er ast.ExtensionRange, errs []error) {
 	first := p.curr()
 	r, err := p.parseRange()
 
 	if err != nil {
-		return ast.ExtensionRange{}, err
+		return ast.ExtensionRange{}, []error{err}
 	}
 
 	ranges := []ast.Range{r}
@@ -20,29 +20,27 @@ func (p *impl) parseExtensionRange() (er ast.ExtensionRange, err error) {
 		p.nextToken()
 
 		if r, err = p.parseRange(); err != nil {
-			return er, err
+			return er, []error{err}
 		}
 
 		ranges = append(ranges, r)
 	}
 
 	var opts []ast.Option
+	var innerErrs []error
 	var optsID token.UniqueID
 
 	if peek := p.peek(); peek.Kind == token.KindLeftSquare {
 		first := p.nextToken()
-		opts, err = p.parseInlineOptions()
-
-		if err != nil {
-			return ast.ExtensionRange{}, err
-		}
-
+		opts, innerErrs = p.parseInlineOptions()
+		errs = append(errs, innerErrs...)
 		last := p.curr()
 		optsID = p.fm.Merge(token.KindOption, first.ID, last.ID)
 	}
 
 	if peek := p.peek(); peek.Kind != token.KindSemicolon {
-		return ast.ExtensionRange{}, gotUnexpected(peek, token.KindSemicolon)
+		errs = append(errs, gotUnexpected(peek, token.KindSemicolon))
+		return ast.ExtensionRange{}, errs
 	}
 	last := p.nextToken()
 
@@ -50,7 +48,7 @@ func (p *impl) parseExtensionRange() (er ast.ExtensionRange, err error) {
 	er.OptionsID = optsID
 	er.ID = p.fm.Merge(token.KindExtensions, first.ID, last.ID)
 	er.Ranges = ranges
-	return er, err
+	return er, errs
 }
 
 func (p *impl) parseExtend() (extend ast.Extend, errs []error) {
@@ -91,11 +89,11 @@ func (p *impl) parseExtend() (extend ast.Extend, errs []error) {
 			}
 			errs = append(errs, innerErrs...)
 		case token.KindIdentifier:
-			var field ast.Field
-
-			if field, err = p.parseField(); err == nil {
+			field, innerErrs := p.parseField()
+			if len(innerErrs) == 0 {
 				extend.Fields = append(extend.Fields, field)
 			}
+			errs = append(errs, innerErrs...)
 		default:
 			err = gotUnexpected(peek, token.KindOption, token.KindField)
 		}

@@ -437,8 +437,7 @@ func TestParseTextField(t *testing.T) {
 	}
 
 	wrap := func(p *impl) (ast.TextField, []error) {
-		tf, err := p.parseTextField(1)
-		return tf, internal.EmptyErrorSliceIfNil(err)
+		return p.parseTextField(1)
 	}
 	runTestCases(t, tests, checkTextField, wrap)
 }
@@ -484,8 +483,7 @@ func TestParseTextMessage(t *testing.T) {
 	}
 
 	wrap := func(p *impl) (ast.TextMessage, []error) {
-		msg, err := p.parseTextMessage(1)
-		return msg, internal.EmptyErrorSliceIfNil(err)
+		return p.parseTextMessage(1)
 	}
 	runTestCases(t, tests, checkTextMessage, wrap)
 }
