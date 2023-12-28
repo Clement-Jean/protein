@@ -21,7 +21,6 @@ var exprEnd = map[token.Kind]bool{
 	token.KindComma:       true,
 	token.KindColon:       true,
 	token.KindSemicolon:   true,
-	token.KindRightParen:  true,
 	token.KindRightSquare: true,
 	token.KindRightAngle:  true,
 	token.KindRightBrace:  true,
