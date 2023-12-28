@@ -89,7 +89,7 @@ func TestEnum(t *testing.T) {
 			expectedObj: &ast.Enum{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
-					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
+					ID: 10, Name: ast.Identifier{ID: 4}, Value: ast.Boolean{ID: 6},
 				}},
 			},
 
@@ -195,7 +195,7 @@ func TestEnum(t *testing.T) {
 				Values: []ast.EnumValue{{
 					ID: 16, Name: ast.Identifier{ID: 3}, Tag: ast.Integer{ID: 5},
 					OptionsID: 15,
-					Options:   []ast.Option{{ID: 14, Name: ast.Identifier{ID: 7}, Value: &ast.Boolean{ID: 9}}},
+					Options:   []ast.Option{{ID: 14, Name: ast.Identifier{ID: 7}, Value: ast.Boolean{ID: 9}}},
 				}},
 			},
 
@@ -231,8 +231,8 @@ func TestEnum(t *testing.T) {
 					ID: 21, Name: ast.Identifier{ID: 3}, Tag: ast.Integer{ID: 5},
 					OptionsID: 20,
 					Options: []ast.Option{
-						{ID: 18, Name: ast.Identifier{ID: 7}, Value: &ast.Boolean{ID: 9}},
-						{ID: 19, Name: ast.Identifier{ID: 11}, Value: &ast.Boolean{ID: 13}},
+						{ID: 18, Name: ast.Identifier{ID: 7}, Value: ast.Boolean{ID: 9}},
+						{ID: 19, Name: ast.Identifier{ID: 11}, Value: ast.Boolean{ID: 13}},
 					},
 				}},
 			},

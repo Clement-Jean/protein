@@ -85,7 +85,7 @@ func TestParseService(t *testing.T) {
 			expectedObj: &ast.Service{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
-					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
+					ID: 10, Name: ast.Identifier{ID: 4}, Value: ast.Boolean{ID: 6},
 				}},
 			},
 
@@ -256,7 +256,7 @@ func TestParseRpc(t *testing.T) {
 			expectedObj: &ast.Rpc{
 				ID: 18, Name: ast.Identifier{ID: 1}, InputType: ast.Identifier{ID: 3}, OutputType: ast.Identifier{ID: 7},
 				Options: []ast.Option{
-					{ID: 17, Name: ast.Identifier{ID: 11}, Value: &ast.Boolean{ID: 13}},
+					{ID: 17, Name: ast.Identifier{ID: 11}, Value: ast.Boolean{ID: 13}},
 				},
 			},
 

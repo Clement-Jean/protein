@@ -122,7 +122,7 @@ func TestParseExtensionRanges(t *testing.T) {
 				},
 				OptionsID: 13,
 				Options: []ast.Option{
-					{ID: 12, Name: ast.Identifier{ID: 5}, Value: ast.Identifier{ID: 7}},
+					{ID: 12, Name: ast.Identifier{ID: 5}, Value: ast.Boolean{ID: 7}},
 				},
 			},
 

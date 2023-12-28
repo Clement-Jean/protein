@@ -8,19 +8,16 @@ import (
 	"github.com/Clement-Jean/protein/token"
 )
 
-func checkTextField(t *testing.T, got, expected ast.TextField) {
-	checkIDs(t, got.ID, expected.ID)
-	checkIdentifier(t, got.Name, expected.Name)
-
-	switch any(expected.Value).(type) {
+func checkConstantValue(t *testing.T, got, expected ast.Expression) {
+	switch any(expected).(type) {
 	case ast.TextScalarList:
-		gotValueType, ok := got.Value.(ast.TextScalarList)
+		gotValueType, ok := got.(ast.TextScalarList)
 
 		if !ok {
-			t.Fatalf("expected scalar list, got %s", got.Value)
+			t.Fatalf("expected scalar list, got %s", got)
 		}
 
-		expectedValueType := expected.Value.(ast.TextScalarList)
+		expectedValueType := expected.(ast.TextScalarList)
 		checkIDs(t, gotValueType.ID, expectedValueType.ID)
 
 		if len(gotValueType.Values) != len(expectedValueType.Values) {
@@ -31,13 +28,13 @@ func checkTextField(t *testing.T, got, expected ast.TextField) {
 			checkIDs(t, gotValueType.Values[i].GetID(), value.GetID())
 		}
 	case ast.TextMessageList:
-		gotValueType, ok := got.Value.(ast.TextMessageList)
+		gotValueType, ok := got.(ast.TextMessageList)
 
 		if !ok {
-			t.Fatalf("expected scalar list, got %s", got.Value)
+			t.Fatalf("expected scalar list, got %s", got)
 		}
 
-		expectedValueType := expected.Value.(ast.TextMessageList)
+		expectedValueType := expected.(ast.TextMessageList)
 		checkIDs(t, gotValueType.ID, expectedValueType.ID)
 
 		if len(gotValueType.Values) != len(expectedValueType.Values) {
@@ -48,48 +45,48 @@ func checkTextField(t *testing.T, got, expected ast.TextField) {
 			checkIDs(t, gotValueType.Values[i].GetID(), value.GetID())
 		}
 	case ast.Identifier:
-		gotValueType, ok := got.Value.(ast.Identifier)
+		gotValueType, ok := got.(ast.Identifier)
 
 		if !ok {
-			t.Fatalf("expected scalar identifier, got %s", got.Value)
+			t.Fatalf("expected scalar identifier, got %s", got)
 		}
-		checkIDs(t, gotValueType.ID, expected.Value.(ast.Identifier).ID)
+		checkIDs(t, gotValueType.ID, expected.(ast.Identifier).ID)
 	case ast.Integer:
-		gotValueType, ok := got.Value.(ast.Integer)
+		gotValueType, ok := got.(ast.Integer)
 
 		if !ok {
-			t.Fatalf("expected scalar integer, got %s", got.Value)
+			t.Fatalf("expected scalar integer, got %s", got)
 		}
-		checkIDs(t, gotValueType.ID, expected.Value.(ast.Integer).ID)
+		checkIDs(t, gotValueType.ID, expected.(ast.Integer).ID)
 	case ast.Boolean:
-		gotValueType, ok := got.Value.(ast.Boolean)
+		gotValueType, ok := got.(ast.Boolean)
 
 		if !ok {
-			t.Fatalf("expected scalar boolean, got %s", got.Value)
+			t.Fatalf("expected scalar boolean, got %s", got)
 		}
-		checkIDs(t, gotValueType.ID, expected.Value.(ast.Boolean).ID)
+		checkIDs(t, gotValueType.ID, expected.(ast.Boolean).ID)
 	case ast.String:
-		gotValueType, ok := got.Value.(ast.String)
+		gotValueType, ok := got.(ast.String)
 
 		if !ok {
-			t.Fatalf("expected scalar string, got %s", got.Value)
+			t.Fatalf("expected scalar string, got %s", got)
 		}
-		checkIDs(t, gotValueType.ID, expected.Value.(ast.String).ID)
+		checkIDs(t, gotValueType.ID, expected.(ast.String).ID)
 	case ast.Float:
-		gotValueType, ok := got.Value.(ast.Float)
+		gotValueType, ok := got.(ast.Float)
 
 		if !ok {
-			t.Fatalf("expected scalar float, got %s", got.Value)
+			t.Fatalf("expected scalar float, got %s", got)
 		}
-		checkIDs(t, gotValueType.ID, expected.Value.(ast.Float).ID)
+		checkIDs(t, gotValueType.ID, expected.(ast.Float).ID)
 	case ast.TextMessage:
-		gotValueType, ok := got.Value.(ast.TextMessage)
+		gotValueType, ok := got.(ast.TextMessage)
 
 		if !ok {
-			t.Fatalf("expected text message, got %s", got.Value)
+			t.Fatalf("expected text message, got %s", got)
 		}
 
-		expectedValueType := expected.Value.(ast.TextMessage)
+		expectedValueType := expected.(ast.TextMessage)
 		checkIDs(t, gotValueType.ID, expectedValueType.ID)
 		if len(gotValueType.Fields) != len(expectedValueType.Fields) {
 			t.Fatalf("expected %d fields, got %d", len(expectedValueType.Fields), len(gotValueType.Fields))
@@ -101,6 +98,12 @@ func checkTextField(t *testing.T, got, expected ast.TextField) {
 	default:
 		t.Fatal("this should never happen!")
 	}
+}
+
+func checkTextField(t *testing.T, got, expected ast.TextField) {
+	checkIDs(t, got.ID, expected.ID)
+	checkIdentifier(t, got.Name, expected.Name)
+	checkConstantValue(t, got.Value, expected.Value)
 }
 
 func checkTextMessage(t *testing.T, got, expected ast.TextMessage) {

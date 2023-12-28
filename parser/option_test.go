@@ -18,13 +18,14 @@ func checkOption(t *testing.T, got ast.Option, expected ast.Option) {
 	checkIDs(t, got.Value.GetID(), expected.Value.GetID())
 	checkIdentifier(t, got.Name, expected.Name)
 	checkIdentifierParts(t, got.Name.Parts, expected.Name.Parts)
+	checkConstantValue(t, got.Value, expected.Value)
 }
 
 func TestOption(t *testing.T) {
 	tests := []TestCase[ast.Option]{
 		{
 			name:        internal.CaseName("option", true),
-			expectedObj: &ast.Option{ID: 6, Name: ast.Identifier{ID: 1}, Value: &ast.Boolean{ID: 3}},
+			expectedObj: &ast.Option{ID: 6, Name: ast.Identifier{ID: 1}, Value: ast.Boolean{ID: 3}},
 
 			content: "option deprecated = true;",
 			indices: "a-----bc---------defg---hi",
@@ -42,7 +43,7 @@ func TestOption(t *testing.T) {
 			expectedObj: &ast.Option{
 				ID:    11,
 				Name:  ast.Identifier{ID: 10, Parts: []token.UniqueID{1, 2, 3, 5}},
-				Value: &ast.Boolean{ID: 7},
+				Value: ast.Boolean{ID: 7},
 			},
 
 			content: "option (custom).deprecated = true;",
@@ -69,7 +70,7 @@ func TestOption(t *testing.T) {
 			expectedObj: &ast.Option{
 				ID:    14,
 				Name:  ast.Identifier{ID: 13, Parts: []token.UniqueID{1, 5, 7, 12}},
-				Value: &ast.Boolean{ID: 9},
+				Value: ast.Boolean{ID: 9},
 			},
 
 			content: "option (protein.custom).deprecated = true;",
@@ -98,7 +99,7 @@ func TestOption(t *testing.T) {
 			expectedObj: &ast.Option{
 				ID:    15,
 				Name:  ast.Identifier{ID: 14, Parts: []token.UniqueID{1, 6, 8, 13}},
-				Value: &ast.Boolean{ID: 10},
+				Value: ast.Boolean{ID: 10},
 			},
 
 			content: "option (.protein.custom).deprecated = true;",

@@ -275,7 +275,7 @@ func TestParseMessage(t *testing.T) {
 			expectedObj: &ast.Message{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
-					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
+					ID: 10, Name: ast.Identifier{ID: 4}, Value: ast.Boolean{ID: 6},
 				}},
 			},
 
@@ -574,7 +574,7 @@ func TestParseField(t *testing.T) {
 				Name: ast.Identifier{ID: 1},
 				Tag:  ast.Integer{ID: 3},
 				Options: []ast.Option{
-					{ID: 11, Name: ast.Identifier{ID: 5}, Value: &ast.Boolean{ID: 7}},
+					{ID: 11, Name: ast.Identifier{ID: 5}, Value: ast.Boolean{ID: 7}},
 				}, OptionsID: 12,
 			},
 

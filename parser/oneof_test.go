@@ -94,7 +94,7 @@ func TestParseOneof(t *testing.T) {
 			expectedObj: &ast.Oneof{
 				ID: 11, Name: ast.Identifier{ID: 1},
 				Options: []ast.Option{{
-					ID: 10, Name: ast.Identifier{ID: 4}, Value: &ast.Boolean{ID: 6},
+					ID: 10, Name: ast.Identifier{ID: 4}, Value: ast.Boolean{ID: 6},
 				}},
 			},
 
