@@ -278,6 +278,43 @@ func TestParseExtends(t *testing.T) {
 			},
 		},
 		{
+			name: internal.CaseName("extend", true, "option"),
+			expectedObj: &ast.Extend{
+				ID: 16, Name: ast.Identifier{ID: 14},
+				Options: []ast.Option{
+					{
+						ID:    15,
+						Name:  ast.Identifier{ID: 13},
+						Value: ast.Identifier{ID: 15},
+					},
+				},
+			},
+
+			content: "extend google.protobuf.Empty { option deprecated = true; }",
+			indices: "a-----bc-----de-------fg----hijk-----lm---------nopq---rstu",
+			locs: [][2]rune{
+				{'a', 'b'}, {'c', 'd'}, {'d', 'e'}, {'e', 'f'},
+				{'f', 'g'}, {'g', 'h'}, {'i', 'j'}, {'k', 'l'},
+				{'m', 'n'}, {'o', 'p'}, {'q', 'r'}, {'r', 's'},
+				{'t', 'u'},
+			},
+			kinds: []token.Kind{
+				token.KindIdentifier, // extend
+				token.KindIdentifier, // google
+				token.KindDot,
+				token.KindIdentifier, // protobuf
+				token.KindDot,
+				token.KindIdentifier, // Empty
+				token.KindLeftBrace,
+				token.KindIdentifier, // option
+				token.KindIdentifier, // deprecated
+				token.KindEqual,
+				token.KindIdentifier, // true
+				token.KindSemicolon,
+				token.KindRightBrace,
+			},
+		},
+		{
 			name: internal.CaseName("extend", false, "expected_identifier"),
 			expectedErrs: []error{
 				gotUnexpected(&token.Token{ID: 1, Kind: token.KindLeftBrace}, token.KindIdentifier),

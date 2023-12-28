@@ -18,9 +18,10 @@ func (e ExtensionRange) String() string {
 }
 
 type Extend struct {
-	Fields []Field
-	Name   Identifier
-	ID     token.UniqueID
+	Options []Option
+	Fields  []Field
+	Name    Identifier
+	ID      token.UniqueID
 }
 
 func (e Extend) String() string {
