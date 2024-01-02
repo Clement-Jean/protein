@@ -118,6 +118,18 @@ func checkTextMessage(t *testing.T, got, expected ast.TextMessage) {
 	}
 }
 
+func checkTextMessageList(t *testing.T, got, expected ast.TextMessageList) {
+	checkIDs(t, got.ID, expected.ID)
+
+	if len(got.Values) != len(expected.Values) {
+		t.Fatalf("expected %d values, got %d", len(expected.Values), len(got.Values))
+	}
+
+	for i, msg := range got.Values {
+		checkTextMessage(t, msg, expected.Values[i])
+	}
+}
+
 func TestParseFullyQualifiedIdentifier(t *testing.T) {
 	tests := []TestCase[ast.Identifier]{
 		{

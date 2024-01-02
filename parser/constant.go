@@ -115,6 +115,12 @@ func (p *impl) parseTextMessageList(recurseDepth uint8) (list ast.TextMessageLis
 
 		if len(innerErrs) != 0 {
 			errs = append(errs, innerErrs...)
+
+			if p.curr().Kind == token.KindRightSquare {
+				id := p.fm.Merge(token.KindTextMessageList, first.ID, p.curr().ID)
+				return ast.TextMessageList{ID: id, Values: msgs}, errs
+			}
+
 			continue
 		}
 
@@ -128,7 +134,7 @@ func (p *impl) parseTextMessageList(recurseDepth uint8) (list ast.TextMessageLis
 
 	last := p.nextToken()
 	id := p.fm.Merge(token.KindTextMessageList, first.ID, last.ID)
-	return ast.TextMessageList{ID: id, Values: msgs}, nil
+	return ast.TextMessageList{ID: id, Values: msgs}, errs
 }
 
 func (p *impl) parseTextScalarList(recurseDepth uint8) (list ast.TextScalarList, errs []error) {
@@ -220,6 +226,7 @@ func (p *impl) parseTextMessage(recurseDepth uint8) (msg ast.TextMessage, errs [
 	} else if open.Kind == token.KindLeftAngle {
 		closeKind = token.KindRightAngle
 	} else {
+		p.advanceTo(exprEnd)
 		return ast.TextMessage{}, []error{gotUnexpected(open, token.KindLeftBrace, token.KindLeftAngle)}
 	}
 
@@ -237,6 +244,12 @@ func (p *impl) parseTextMessage(recurseDepth uint8) (msg ast.TextMessage, errs [
 		if len(innerErrs) != 0 {
 			errs = append(errs, innerErrs...)
 			p.advanceTo(exprEnd)
+
+			if p.curr().Kind == closeKind {
+				msg.ID = p.fm.Merge(token.KindTextMessage, open.ID, p.curr().ID)
+				return msg, errs
+			}
+
 			continue
 		}
 

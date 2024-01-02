@@ -299,4 +299,56 @@ func TestSyncExtend(t *testing.T) {
 	runTestCases(t, tests, checkExtend, (*impl).parseExtend)
 }
 
-// TODO error in text message list
+func TestSyncTextMessageList(t *testing.T) {
+	tests := []TestCase[ast.TextMessageList]{
+		{
+			name: internal.CaseName("sync", true, "text_message_list"),
+			expectedObj: &ast.TextMessageList{
+				ID: 17,
+				Values: []ast.TextMessage{
+					{
+						ID: 16,
+						Fields: []ast.TextField{
+							{
+								ID:    15,
+								Name:  ast.Identifier{ID: 8},
+								Value: ast.Identifier{ID: 10},
+							},
+						},
+					},
+				},
+			},
+			expectedErrs: []error{
+				gotUnexpected(&token.Token{ID: 2, Kind: token.KindStr}, token.KindIdentifier, token.KindLeftSquare),
+				gotUnexpected(&token.Token{ID: 5, Kind: token.KindStr}, token.KindLeftBrace, token.KindLeftAngle),
+			},
+
+			content: "[{'a'}, 'a', {a: b}]",
+			indices: "abc--defg--hijklmnopq",
+			locs: [][2]rune{
+				{'a', 'b'}, {'b', 'c'}, {'c', 'd'}, {'d', 'e'},
+				{'e', 'f'}, {'g', 'h'}, {'h', 'i'}, {'j', 'k'},
+				{'k', 'l'}, {'l', 'm'}, {'n', 'o'}, {'o', 'p'},
+				{'p', 'q'},
+			},
+			kinds: []token.Kind{
+				token.KindLeftSquare,
+				token.KindLeftBrace,
+				token.KindStr,
+				token.KindRightBrace,
+				token.KindComma,
+				token.KindStr,
+				token.KindComma,
+				token.KindLeftBrace,
+				token.KindIdentifier, // a
+				token.KindColon,
+				token.KindIdentifier, // b
+				token.KindRightBrace,
+				token.KindRightSquare,
+			},
+		},
+	}
+
+	wrap := func(p *impl) (ast.TextMessageList, []error) { return p.parseTextMessageList(1) }
+	runTestCases(t, tests, checkTextMessageList, wrap)
+}
