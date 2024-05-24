@@ -46,7 +46,7 @@ func (l *Lexer) next() byte {
 }
 
 func (l *Lexer) backup() {
-	if l.readPos >= 0 {
+	if l.readPos <= 0 {
 		return
 	}
 	l.readPos--

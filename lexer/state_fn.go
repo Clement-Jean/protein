@@ -4,6 +4,28 @@ import "fmt"
 
 type stateFn func() stateFn
 
+func (l *Lexer) lexLineComment() (state stateFn) {
+	const prefixLen = 2
+
+	len := l.goToEndOfLineComment()
+	state = l.emit(TokenKindComment, l.tokPos)
+	l.tokPos += len + prefixLen
+	return state
+}
+
+func (l *Lexer) goToEndOfLineComment() (len int) {
+	var ch byte
+
+	for ch = l.next(); ch != 0 && ch != '\n'; ch = l.next() {
+		len++
+	}
+
+	if ch == '\n' {
+		l.backup()
+	}
+	return len
+}
+
 func (l *Lexer) lexProto() (state stateFn) {
 	switch ch := l.next(); ch {
 	case 0:
@@ -49,7 +71,18 @@ func (l *Lexer) lexProto() (state stateFn) {
 	default:
 		switch {
 		case ch == '/':
-			state = l.emit(TokenKindSlash, l.tokPos)
+			if l.readPos >= len(l.src) {
+				state = l.emit(TokenKindSlash, l.tokPos)
+				break
+			}
+
+			switch l.src[l.readPos] {
+			case '/':
+				l.next()
+				return l.lexLineComment
+			default:
+				state = l.emit(TokenKindSlash, l.tokPos)
+			}
 		default:
 			state = l.error(fmt.Errorf("invalid char %q", ch))
 		}

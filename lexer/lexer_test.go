@@ -149,6 +149,31 @@ func TestLexer(t *testing.T) {
 				{Start: 2, Len: 0},
 			},
 		},
+		{
+			name:  "line_comment_eof",
+			input: "//this is a comment",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindComment},
+				{Kind: lexer.TokenKindEOF, Column: 19},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 19},
+			},
+		},
+		{
+			name:  "line_comment_newline",
+			input: "//this is a comment\n",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindComment},
+				{Kind: lexer.TokenKindEOF, LineIdx: 1},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 19},
+				{Start: 20, Len: 0},
+			},
+		},
 	}
 
 	runTestCases(t, tests)
