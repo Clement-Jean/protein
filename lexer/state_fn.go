@@ -23,6 +23,14 @@ func isQuote(b byte) bool {
 	return b == '"' || b == '\''
 }
 
+func isHexadecimalDigit(b byte) bool {
+	return isDigit(b) || (b >= 'a' && b <= 'f') || (b >= 'A' && b <= 'F')
+}
+
+func isOctalDigit(b byte) bool {
+	return b >= '0' && b <= '7'
+}
+
 func (l *Lexer) lexLineComment() (state stateFn) {
 	const prefixLen = 2
 
@@ -118,6 +126,48 @@ func (l *Lexer) lexString() (state stateFn) {
 	return state
 }
 
+func (l *Lexer) lexNumber() (state stateFn) {
+	kind := TokenKindInt
+	len := 0
+
+	if ok := l.accept("+-"); ok {
+		len++
+	}
+
+	digits := isDigit
+
+	if ok := l.accept("0"); ok { // starts with 0
+		len++
+		if ok := l.accept("xX"); ok {
+			digits = isHexadecimalDigit
+			len++
+		} else {
+			digits = isOctalDigit
+		}
+	}
+
+	len += l.acceptWhile(digits)
+
+	if ok := l.accept("."); ok {
+		kind = TokenKindFloat
+		len++
+		len += l.acceptWhile(isDigit)
+	}
+
+	if ok := l.accept("eE"); ok { // exponent
+		kind = TokenKindFloat
+		len++
+		if ok = l.accept("+-"); ok {
+			len++
+		}
+		len += l.acceptWhile(isDigit)
+	}
+
+	state = l.emit(kind, l.tokPos)
+	l.tokPos += len
+	return state
+}
+
 func (l *Lexer) lexProto() (state stateFn) {
 	switch ch := l.next(); ch {
 	case 0:
@@ -143,7 +193,17 @@ func (l *Lexer) lexProto() (state stateFn) {
 	case ';':
 		state = l.emit(TokenKindSemicolon, l.tokPos)
 	case '.':
-		state = l.emit(TokenKindDot, l.tokPos)
+		if l.readPos >= len(l.src) {
+			state = l.emit(TokenKindDot, l.tokPos)
+			break
+		}
+
+		if !isDigit(l.src[l.readPos]) {
+			state = l.emit(TokenKindDot, l.tokPos)
+			break
+		}
+		l.backup()
+		return l.lexNumber
 	case '{':
 		state = l.emit(TokenKindLeftBrace, l.tokPos)
 	case '}':
@@ -168,6 +228,9 @@ func (l *Lexer) lexProto() (state stateFn) {
 		case isQuote(ch):
 			l.backup()
 			return l.lexString
+		case isDigit(ch) || ch == '-' || ch == '+' || ch == '.':
+			l.backup()
+			return l.lexNumber
 		case ch == '/':
 			if l.readPos >= len(l.src) {
 				state = l.emit(TokenKindSlash, l.tokPos)

@@ -305,6 +305,66 @@ func TestLexer(t *testing.T) {
 			},
 			errs: []error{errors.New("unclosed string")},
 		},
+		{
+			name:  "decimal",
+			input: "5 0 -5 +5",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindInt},
+				{Kind: lexer.TokenKindInt, Column: 2},
+				{Kind: lexer.TokenKindInt, Column: 4},
+				{Kind: lexer.TokenKindInt, Column: 7},
+				{Kind: lexer.TokenKindEOF, Column: 9},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 9},
+			},
+		},
+		{
+			name:  "hexadecimal",
+			input: "0xff 0XFF",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindInt},
+				{Kind: lexer.TokenKindInt, Column: 5},
+				{Kind: lexer.TokenKindEOF, Column: 9},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 9},
+			},
+		},
+		{
+			name:  "octal",
+			input: "056",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindInt},
+				{Kind: lexer.TokenKindEOF, Column: 3},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 3},
+			},
+		},
+		{
+			name:  "float",
+			input: "-8.8 +0.8 -.8 +.8 .8 .8e8 .8e+8 .8e-8 8e8",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindFloat},
+				{Kind: lexer.TokenKindFloat, Column: 5},
+				{Kind: lexer.TokenKindFloat, Column: 10},
+				{Kind: lexer.TokenKindFloat, Column: 14},
+				{Kind: lexer.TokenKindFloat, Column: 18},
+				{Kind: lexer.TokenKindFloat, Column: 21},
+				{Kind: lexer.TokenKindFloat, Column: 26},
+				{Kind: lexer.TokenKindFloat, Column: 32},
+				{Kind: lexer.TokenKindFloat, Column: 38},
+				{Kind: lexer.TokenKindEOF, Column: 41},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 41},
+			},
+		},
 	}
 
 	runTestCases(t, tests)

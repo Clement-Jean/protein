@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"math"
+	"strings"
 )
 
 type Lexer struct {
@@ -50,6 +51,18 @@ func (l *Lexer) backup() {
 		return
 	}
 	l.readPos--
+}
+
+func (l *Lexer) accept(valid string) bool {
+	ch := l.next()
+	if strings.IndexByte(valid, ch) != -1 {
+		return true
+	}
+
+	if ch != 0 {
+		l.backup()
+	}
+	return false
 }
 
 func (l *Lexer) acceptWhile(fn func(byte) bool) (length int) {
