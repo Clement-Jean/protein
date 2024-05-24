@@ -65,17 +65,15 @@ func (l *Lexer) accept(valid string) bool {
 	return false
 }
 
-func (l *Lexer) acceptWhile(fn func(byte) bool) (length int) {
-	var ch byte
-
-	for ch = l.next(); fn(ch); ch = l.next() {
-		length++
+func (l *Lexer) acceptWhile(fn func(byte) bool) {
+	ch := l.next()
+	for fn(ch) {
+		ch = l.next()
 	}
 
 	if ch != 0 {
 		l.backup()
 	}
-	return length
 }
 
 func (l *Lexer) computeColumn(position int) uint32 {

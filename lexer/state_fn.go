@@ -32,74 +32,63 @@ func isOctalDigit(b byte) bool {
 }
 
 func (l *Lexer) lexLineComment() (state stateFn) {
-	const prefixLen = 2
-
 	len := l.goToEndOfLineComment()
 	state = l.emit(TokenKindComment, l.tokPos)
-	l.tokPos += len + prefixLen
+	l.tokPos += len
 	return state
 }
 
 func (l *Lexer) goToEndOfLineComment() (len int) {
-	var ch byte
-
-	for ch = l.next(); ch != 0 && ch != '\n'; ch = l.next() {
-		len++
+	start := l.readPos
+	ch := l.next()
+	for ch != 0 && ch != '\n' {
+		ch = l.next()
 	}
 
 	if ch == '\n' {
 		l.backup()
 	}
-	return len
+	return l.readPos - start
 }
 
 func (l *Lexer) lexMultilineComment() (state stateFn) {
-	const (
-		prefixLen = 2
-		suffixLen = 2
-	)
-
 	len, ok := l.goToEndOfMultilineComment()
 	if ok {
 		state = l.emit(TokenKindComment, l.tokPos)
-		l.tokPos += len + prefixLen + suffixLen
+		l.tokPos += len
 		return state
 	}
 
 	state = l.error(errors.New("unclosed multiline comment"))
-	l.tokPos += len + prefixLen
-	return state
-}
-
-func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
-	for ch := l.next(); ch != 0; ch = l.next() {
-		if ch == '*' {
-			if peek := l.next(); peek == '/' {
-				return len, true
-			}
-			len++
-		}
-		len++
-	}
-	return len, false
-}
-
-func (l *Lexer) lexIdentifier() (state stateFn) {
-	len := l.acceptWhile(isIdentifier)
-	state = l.emit(TokenKindIdentifier, l.tokPos)
 	l.tokPos += len
 	return state
 }
 
+func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
+	start := l.readPos
+	for ch := l.next(); ch != 0; ch = l.next() {
+		if ch == '*' {
+			if peek := l.next(); peek == '/' {
+				return l.readPos - start, true
+			}
+		}
+	}
+	return l.readPos - start, false
+}
+
+func (l *Lexer) lexIdentifier() (state stateFn) {
+	start := l.readPos
+	l.acceptWhile(isIdentifier)
+	state = l.emit(TokenKindIdentifier, l.tokPos)
+	l.tokPos += l.readPos - start
+	return state
+}
+
 func (l *Lexer) lexString() (state stateFn) {
-	const (
-		escape    = '\\'
-		prefixLen = 1
-		suffixLen = 1
-	)
+	const escape = '\\'
 
 	inEscape := false
-	len := 0
+	start := l.readPos
 	open := l.next()
 
 	ch := l.next()
@@ -111,10 +100,9 @@ func (l *Lexer) lexString() (state stateFn) {
 			inEscape = true
 		case ch == open: // open and not escaped
 			state = l.emit(TokenKindStr, l.tokPos)
-			l.tokPos += len + prefixLen + suffixLen
+			l.tokPos += l.readPos - start
 			return state
 		}
-		len++
 	}
 
 	if ch == '\n' {
@@ -122,49 +110,41 @@ func (l *Lexer) lexString() (state stateFn) {
 	}
 
 	state = l.error(errors.New("unclosed string"))
-	l.tokPos += len + prefixLen
+	l.tokPos += l.readPos - start
 	return state
 }
 
 func (l *Lexer) lexNumber() (state stateFn) {
 	kind := TokenKindInt
-	len := 0
+	start := l.readPos
 
-	if ok := l.accept("+-"); ok {
-		len++
-	}
+	l.accept("+-")
 
 	digits := isDigit
 
 	if ok := l.accept("0"); ok { // starts with 0
-		len++
 		if ok := l.accept("xX"); ok {
 			digits = isHexadecimalDigit
-			len++
 		} else {
 			digits = isOctalDigit
 		}
 	}
 
-	len += l.acceptWhile(digits)
+	l.acceptWhile(digits)
 
 	if ok := l.accept("."); ok {
 		kind = TokenKindFloat
-		len++
-		len += l.acceptWhile(isDigit)
+		l.acceptWhile(isDigit)
 	}
 
 	if ok := l.accept("eE"); ok { // exponent
 		kind = TokenKindFloat
-		len++
-		if ok = l.accept("+-"); ok {
-			len++
-		}
-		len += l.acceptWhile(isDigit)
+		l.accept("+-")
+		l.acceptWhile(isDigit)
 	}
 
 	state = l.emit(kind, l.tokPos)
-	l.tokPos += len
+	l.tokPos += l.readPos - start
 	return state
 }
 
@@ -239,10 +219,10 @@ func (l *Lexer) lexProto() (state stateFn) {
 
 			switch l.src[l.readPos] {
 			case '/':
-				l.next()
+				l.backup()
 				return l.lexLineComment
 			case '*':
-				l.next()
+				l.backup()
 				return l.lexMultilineComment
 			default:
 				state = l.emit(TokenKindSlash, l.tokPos)
