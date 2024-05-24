@@ -174,6 +174,43 @@ func TestLexer(t *testing.T) {
 				{Start: 20, Len: 0},
 			},
 		},
+		{
+			name:  "multiline_comment",
+			input: "/*this is a comment*/",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindComment},
+				{Kind: lexer.TokenKindEOF, Column: 21},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 21},
+			},
+		},
+		{
+			name:  "multiline_comment_inner_asterisk",
+			input: "/*this is * a comment*/",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindComment},
+				{Kind: lexer.TokenKindEOF, Column: 23},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 23},
+			},
+		},
+		{
+			name:  "multiline_comment_eof",
+			input: "/*this is a comment",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindError},
+				{Kind: lexer.TokenKindEOF, Column: 19},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 19},
+			},
+			errs: []error{errors.New("unclosed multiline comment")},
+		},
 	}
 
 	runTestCases(t, tests)

@@ -1,6 +1,9 @@
 package lexer
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type stateFn func() stateFn
 
@@ -24,6 +27,35 @@ func (l *Lexer) goToEndOfLineComment() (len int) {
 		l.backup()
 	}
 	return len
+}
+
+func (l *Lexer) lexMultilineComment() (state stateFn) {
+	const prefixLen = 2
+	const suffixLen = 2
+
+	len, ok := l.goToEndOfMultilineComment()
+	if ok {
+		state = l.emit(TokenKindComment, l.tokPos)
+		l.tokPos += len + prefixLen + suffixLen
+		return state
+	}
+
+	state = l.error(errors.New("unclosed multiline comment"))
+	l.tokPos += len + prefixLen
+	return state
+}
+
+func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
+	for ch := l.next(); ch != 0; ch = l.next() {
+		if ch == '*' {
+			if peek := l.next(); peek == '/' {
+				return len, true
+			}
+			len++
+		}
+		len++
+	}
+	return len, false
 }
 
 func (l *Lexer) lexProto() (state stateFn) {
@@ -80,6 +112,9 @@ func (l *Lexer) lexProto() (state stateFn) {
 			case '/':
 				l.next()
 				return l.lexLineComment
+			case '*':
+				l.next()
+				return l.lexMultilineComment
 			default:
 				state = l.emit(TokenKindSlash, l.tokPos)
 			}
