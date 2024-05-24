@@ -7,6 +7,18 @@ import (
 
 type stateFn func() stateFn
 
+func isDigit(b byte) bool {
+	return b >= '0' && b <= '9'
+}
+
+func isLetter(b byte) bool {
+	return b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z'
+}
+
+func isIdentifier(b byte) bool {
+	return isLetter(b) || b == '_' || isDigit(b)
+}
+
 func (l *Lexer) lexLineComment() (state stateFn) {
 	const prefixLen = 2
 
@@ -58,6 +70,13 @@ func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
 	return len, false
 }
 
+func (l *Lexer) lexIdentifier() (state stateFn) {
+	len := l.acceptWhile(isIdentifier)
+	state = l.emit(TokenKindIdentifier, l.tokPos)
+	l.tokPos += len
+	return state
+}
+
 func (l *Lexer) lexProto() (state stateFn) {
 	switch ch := l.next(); ch {
 	case 0:
@@ -102,6 +121,9 @@ func (l *Lexer) lexProto() (state stateFn) {
 		state = l.emit(TokenKindRightAngle, l.tokPos)
 	default:
 		switch {
+		case isLetter(ch):
+			l.backup()
+			return l.lexIdentifier
 		case ch == '/':
 			if l.readPos >= len(l.src) {
 				state = l.emit(TokenKindSlash, l.tokPos)

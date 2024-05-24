@@ -211,6 +211,19 @@ func TestLexer(t *testing.T) {
 			},
 			errs: []error{errors.New("unclosed multiline comment")},
 		},
+		{
+			name:  "identifier",
+			input: "hello_world2024 HelloWorld2024",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindIdentifier},
+				{Kind: lexer.TokenKindIdentifier, Column: 16},
+				{Kind: lexer.TokenKindEOF, Column: 30},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 30},
+			},
+		},
 	}
 
 	runTestCases(t, tests)
