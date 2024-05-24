@@ -99,7 +99,7 @@ func (l *Lexer) start() {
 	l.emit(TokenKindBOF, l.tokPos)
 }
 
-func (l *Lexer) Lex() *TokenizedBuffer {
+func (l *Lexer) Lex() (*TokenizedBuffer, []error) {
 	l.makeLines()
 	l.start()
 
@@ -110,5 +110,5 @@ func (l *Lexer) Lex() *TokenizedBuffer {
 		}
 		lastKind = l.toks.TokenInfos[len(l.toks.TokenInfos)-1].Kind
 	}
-	return l.toks
+	return l.toks, l.errs
 }

@@ -41,7 +41,7 @@ func (l *Lexer) lexProto() (state stateFn) {
 		case ch == '/':
 			state = l.emit(TokenKindSlash, l.tokPos)
 		default:
-			state = l.error(fmt.Errorf("invalid char %c", ch))
+			state = l.error(fmt.Errorf("invalid char %q", ch))
 		}
 	}
 

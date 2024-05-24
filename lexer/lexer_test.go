@@ -1,6 +1,8 @@
 package lexer_test
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -26,7 +28,13 @@ func runTestCases(t *testing.T, tests []TestCase) {
 				t.Fatal(err)
 			}
 
-			tb := l.Lex()
+			tb, errs := l.Lex()
+
+			if !reflect.DeepEqual(test.errs, errs) {
+				t.Fatalf(`
+expected errors: %+v
+            got: %+v`, test.errs, errs)
+			}
 
 			if !reflect.DeepEqual(test.tokenInfos, tb.TokenInfos) {
 				t.Fatalf(`
@@ -70,6 +78,40 @@ func symbolsTestCase() TestCase {
 func TestLexer(t *testing.T) {
 	tests := []TestCase{
 		symbolsTestCase(),
+		{
+			name:  "invalid",
+			input: "&",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindError},
+				{Kind: lexer.TokenKindEOF, Column: 1},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 1},
+			},
+			errs: []error{errors.New("invalid char '&'")},
+		},
+		{
+			name:  "invalid_utf8",
+			input: "🙈",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindError},
+				{Kind: lexer.TokenKindError, Column: 1},
+				{Kind: lexer.TokenKindError, Column: 2},
+				{Kind: lexer.TokenKindError, Column: 3},
+				{Kind: lexer.TokenKindEOF, Column: 4},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 4},
+			},
+			errs: []error{
+				fmt.Errorf("invalid char %q", "🙈"[0]),
+				fmt.Errorf("invalid char %q", "🙈"[1]),
+				fmt.Errorf("invalid char %q", "🙈"[2]),
+				fmt.Errorf("invalid char %q", "🙈"[3]),
+			},
+		},
 	}
 
 	runTestCases(t, tests)
