@@ -112,6 +112,17 @@ func TestLexer(t *testing.T) {
 				fmt.Errorf("invalid char %q", "🙈"[3]),
 			},
 		},
+		{
+			name:  "skip_utf8_bom",
+			input: string([]byte{0xEF, 0xBB, 0xBF}),
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF, Column: 3},
+				{Kind: lexer.TokenKindEOF, Column: 3},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 3, Len: 0},
+			},
+		},
 	}
 
 	runTestCases(t, tests)
