@@ -123,6 +123,32 @@ func TestLexer(t *testing.T) {
 				{Start: 3, Len: 0},
 			},
 		},
+		{
+			name:  "spaces",
+			input: "\t\n\v\f\n ",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindEOF, LineIdx: 2, Column: 1},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 1},
+				{Start: 2, Len: 2},
+				{Start: 5, Len: 1},
+			},
+		},
+		{
+			name:  "double_newline",
+			input: "\n\n",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindEOF, LineIdx: 2},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 0},
+				{Start: 1, Len: 0},
+				{Start: 2, Len: 0},
+			},
+		},
 	}
 
 	runTestCases(t, tests)

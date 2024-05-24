@@ -8,6 +8,16 @@ func (l *Lexer) lexProto() (state stateFn) {
 	switch ch := l.next(); ch {
 	case 0:
 		return l.emit(TokenKindEOF, l.tokPos)
+	case '\v', '\f', '\r', '\t', ' ', 0x85, 0xA0:
+		break // skip
+	case '\n':
+		l.currLineIdx++
+		if int(l.currLineIdx) >= len(l.toks.LineInfos) {
+			l.currLineIdx--
+			return l.emit(TokenKindEOF, l.tokPos)
+		}
+		l.tokPos = l.toks.LineInfos[l.currLineIdx].Start
+		return nil
 	case '_':
 		state = l.emit(TokenKindUnderscore, l.tokPos)
 	case '=':
