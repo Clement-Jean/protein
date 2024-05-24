@@ -3,7 +3,10 @@ package lexer_test
 import (
 	"errors"
 	"fmt"
+	"io/fs"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -16,6 +19,19 @@ type TestCase struct {
 	tokenInfos []lexer.TokenInfo
 	lineInfos  []lexer.LineInfo
 	errs       []error
+}
+
+func findFiles(root, ext string) (files []string) {
+	filepath.WalkDir(root, func(s string, d fs.DirEntry, e error) error {
+		if e != nil {
+			return e
+		}
+		if filepath.Ext(d.Name()) == ext {
+			files = append(files, s)
+		}
+		return nil
+	})
+	return files
 }
 
 func runTestCases(t *testing.T, tests []TestCase) {
@@ -371,6 +387,30 @@ func TestLexer(t *testing.T) {
 }
 
 var toks *lexer.TokenizedBuffer
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	basepath   = filepath.Dir(b)
+)
+
+func BenchmarkLexer(b *testing.B) {
+	corpusPath := filepath.Join(basepath, "../corpus/")
+
+	for _, s := range findFiles(corpusPath, ".proto") {
+		l, err := lexer.NewFromFile(s)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		b.Run(s, func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for range b.N {
+				toks, _ = l.Lex()
+			}
+		})
+	}
+}
 
 func FuzzLexer(f *testing.F) {
 	for _, tc := range tests {

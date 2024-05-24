@@ -173,12 +173,12 @@ func (l *Lexer) lexProto() (state stateFn) {
 	case ';':
 		state = l.emit(TokenKindSemicolon, l.tokPos)
 	case '.':
-		if l.readPos >= len(l.src) {
+		if l.readPos >= l.src.Len() {
 			state = l.emit(TokenKindDot, l.tokPos)
 			break
 		}
 
-		if !isDigit(l.src[l.readPos]) {
+		if !isDigit(l.src.At(l.readPos)) {
 			state = l.emit(TokenKindDot, l.tokPos)
 			break
 		}
@@ -212,12 +212,12 @@ func (l *Lexer) lexProto() (state stateFn) {
 			l.backup()
 			return l.lexNumber
 		case ch == '/':
-			if l.readPos >= len(l.src) {
+			if l.readPos >= l.src.Len() {
 				state = l.emit(TokenKindSlash, l.tokPos)
 				break
 			}
 
-			switch l.src[l.readPos] {
+			switch l.src.At(l.readPos) {
 			case '/':
 				l.backup()
 				return l.lexLineComment

@@ -5,26 +5,23 @@ import (
 	"io"
 	"math"
 	"strings"
+
+	"github.com/Clement-Jean/protein/source"
 )
 
 type Lexer struct {
-	src         []byte
-	errs        []error
+	src         *source.Buffer
 	toks        *TokenizedBuffer
+	errs        []error
 	currLineIdx LineIdx
 	srcPos      int // the idx at which the file content really starts
 	tokPos      int // the begining of a token
 	readPos     int // the idx we are reading at in src
 }
 
-func NewFromReader(r io.Reader) (*Lexer, error) {
-	src, err := io.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
+func newLexer(src *source.Buffer) (*Lexer, error) {
 	srcPos := 0
-	if len(src) >= 3 && bytes.Equal(src[:3], []byte{0xEF, 0xBB, 0xBF}) {
+	if bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
 		// skip UTF8 BOM
 		srcPos = 3
 	}
@@ -37,11 +34,27 @@ func NewFromReader(r io.Reader) (*Lexer, error) {
 	}, nil
 }
 
+func NewFromFile(filename string) (*Lexer, error) {
+	src, err := source.NewFromFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return newLexer(src)
+}
+
+func NewFromReader(r io.Reader) (*Lexer, error) {
+	src, err := source.NewFromReader(r)
+	if err != nil {
+		return nil, err
+	}
+	return newLexer(src)
+}
+
 func (l *Lexer) next() byte {
-	if l.readPos >= len(l.src) {
+	if l.readPos >= l.src.Len() {
 		return 0
 	}
-	ch := l.src[l.readPos]
+	ch := l.src.At(l.readPos)
 	l.readPos++
 	return ch
 }
@@ -98,13 +111,13 @@ func (l *Lexer) error(err error) stateFn {
 }
 
 func (l *Lexer) makeLines() {
-	nbLines := bytes.Count(l.src, []byte{'\n'}) + 1
+	nbLines := bytes.Count(l.src.Bytes(), []byte{'\n'}) + 1
 	l.toks.LineInfos = make([]LineInfo, nbLines)
 
 	i := 0
 	start := l.srcPos
 	for i = range nbLines {
-		rest := l.src[start:]
+		rest := l.src.From(start)
 		idx := bytes.IndexByte(rest, '\n')
 		newlineIdx := start + idx
 		info := &l.toks.LineInfos[i]
@@ -115,7 +128,7 @@ func (l *Lexer) makeLines() {
 
 	info := &l.toks.LineInfos[i]
 	info.Start = start
-	info.Len = uint32(len(l.src) - start)
+	info.Len = uint32(l.src.Len() - start)
 }
 
 func (l *Lexer) start() {
