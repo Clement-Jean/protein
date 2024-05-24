@@ -19,6 +19,10 @@ func isIdentifier(b byte) bool {
 	return isLetter(b) || b == '_' || isDigit(b)
 }
 
+func isQuote(b byte) bool {
+	return b == '"' || b == '\''
+}
+
 func (l *Lexer) lexLineComment() (state stateFn) {
 	const prefixLen = 2
 
@@ -42,8 +46,10 @@ func (l *Lexer) goToEndOfLineComment() (len int) {
 }
 
 func (l *Lexer) lexMultilineComment() (state stateFn) {
-	const prefixLen = 2
-	const suffixLen = 2
+	const (
+		prefixLen = 2
+		suffixLen = 2
+	)
 
 	len, ok := l.goToEndOfMultilineComment()
 	if ok {
@@ -74,6 +80,41 @@ func (l *Lexer) lexIdentifier() (state stateFn) {
 	len := l.acceptWhile(isIdentifier)
 	state = l.emit(TokenKindIdentifier, l.tokPos)
 	l.tokPos += len
+	return state
+}
+
+func (l *Lexer) lexString() (state stateFn) {
+	const (
+		escape    = '\\'
+		prefixLen = 1
+		suffixLen = 1
+	)
+
+	inEscape := false
+	len := 0
+	open := l.next()
+
+	ch := l.next()
+	for ; ch != 0 && ch != '\n'; ch = l.next() {
+		switch {
+		case inEscape:
+			inEscape = false
+		case ch == escape:
+			inEscape = true
+		case ch == open: // open and not escaped
+			state = l.emit(TokenKindStr, l.tokPos)
+			l.tokPos += len + prefixLen + suffixLen
+			return state
+		}
+		len++
+	}
+
+	if ch == '\n' {
+		l.backup()
+	}
+
+	state = l.error(errors.New("unclosed string"))
+	l.tokPos += len + prefixLen
 	return state
 }
 
@@ -124,6 +165,9 @@ func (l *Lexer) lexProto() (state stateFn) {
 		case isLetter(ch):
 			l.backup()
 			return l.lexIdentifier
+		case isQuote(ch):
+			l.backup()
+			return l.lexString
 		case ch == '/':
 			if l.readPos >= len(l.src) {
 				state = l.emit(TokenKindSlash, l.tokPos)

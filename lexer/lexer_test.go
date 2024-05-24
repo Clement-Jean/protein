@@ -224,6 +224,87 @@ func TestLexer(t *testing.T) {
 				{Start: 0, Len: 30},
 			},
 		},
+		{
+			name:  "string",
+			input: "'test' \"test\"",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindStr},
+				{Kind: lexer.TokenKindStr, Column: 7},
+				{Kind: lexer.TokenKindEOF, Column: 13},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 13},
+			},
+		},
+		{
+			name:  "string_utf8",
+			input: "'🙈🙉🙊'",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindStr},
+				{Kind: lexer.TokenKindEOF, Column: 14},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 14},
+			},
+		},
+		{
+			name:  "escaped_string",
+			input: "'this is a \\\"123string\\\"'",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindStr},
+				{Kind: lexer.TokenKindEOF, Column: 25},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 25},
+			},
+		},
+		{
+			name:  "unterminated_string_eof",
+			input: "'test",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindError},
+				{Kind: lexer.TokenKindEOF, Column: 5},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 5},
+			},
+			errs: []error{errors.New("unclosed string")},
+		},
+		{
+			name:  "unterminated_string_newline",
+			input: "'test\n'",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindError},
+				{Kind: lexer.TokenKindError, LineIdx: 1},
+				{Kind: lexer.TokenKindEOF, LineIdx: 1, Column: 1},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 5},
+				{Start: 6, Len: 1},
+			},
+			errs: []error{
+				errors.New("unclosed string"),
+				errors.New("unclosed string"),
+			},
+		},
+		{
+			name:  "unterminated_string_mismatch",
+			input: "\"test'",
+			tokenInfos: []lexer.TokenInfo{
+				{Kind: lexer.TokenKindBOF},
+				{Kind: lexer.TokenKindError},
+				{Kind: lexer.TokenKindEOF, Column: 6},
+			},
+			lineInfos: []lexer.LineInfo{
+				{Start: 0, Len: 6},
+			},
+			errs: []error{errors.New("unclosed string")},
+		},
 	}
 
 	runTestCases(t, tests)
