@@ -76,10 +76,37 @@ func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
 	return l.readPos - start, false
 }
 
+var literalToKind = map[string]TokenKind{
+	"syntax":     TokenKindSyntax,
+	"edition":    TokenKindEdition,
+	"package":    TokenKindPackage,
+	"import":     TokenKindImport,
+	"public":     TokenKindPublic,
+	"weak":       TokenKindWeak,
+	"option":     TokenKindOption,
+	"reserved":   TokenKindReserved,
+	"max":        TokenKindMax,
+	"enum":       TokenKindEnum,
+	"message":    TokenKindMessage,
+	"map":        TokenKindMap,
+	"oneof":      TokenKindOneOf,
+	"extensions": TokenKindExtensions,
+	"service":    TokenKindService,
+	"rpc":        TokenKindRpc,
+	"returns":    TokenKindReturns,
+	"extend":     TokenKindExtend,
+}
+
 func (l *Lexer) lexIdentifier() (state stateFn) {
 	start := l.readPos
 	l.acceptWhile(isIdentifier)
-	state = l.emit(TokenKindIdentifier, l.tokPos)
+
+	kind := TokenKindIdentifier
+	if k, ok := literalToKind[string(l.src.Range(start, l.readPos))]; ok {
+		kind = k
+	}
+
+	state = l.emit(kind, l.tokPos)
 	l.tokPos += l.readPos - start
 	return state
 }

@@ -380,6 +380,18 @@ var tests = []TestCase{
 			{Start: 0, Len: 41},
 		},
 	},
+	{
+		name:  "syntax",
+		input: "syntax",
+		tokenInfos: []lexer.TokenInfo{
+			{Kind: lexer.TokenKindBOF},
+			{Kind: lexer.TokenKindSyntax},
+			{Kind: lexer.TokenKindEOF, Column: 6},
+		},
+		lineInfos: []lexer.LineInfo{
+			{Start: 0, Len: 6},
+		},
+	},
 }
 
 func TestLexer(t *testing.T) {

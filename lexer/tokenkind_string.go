@@ -12,34 +12,63 @@ func _() {
 	_ = x[TokenKindBOF-1]
 	_ = x[TokenKindError-2]
 	_ = x[TokenKindComment-3]
-	_ = x[TokenKindIdentifier-4]
-	_ = x[TokenKindInt-5]
-	_ = x[TokenKindFloat-6]
-	_ = x[TokenKindStr-7]
-	_ = x[TokenKindUnderscore-8]
-	_ = x[TokenKindEqual-9]
-	_ = x[TokenKindComma-10]
-	_ = x[TokenKindColon-11]
-	_ = x[TokenKindSemicolon-12]
-	_ = x[TokenKindDot-13]
-	_ = x[TokenKindLeftBrace-14]
-	_ = x[TokenKindRightBrace-15]
-	_ = x[TokenKindLeftSquare-16]
-	_ = x[TokenKindRightSquare-17]
-	_ = x[TokenKindLeftParen-18]
-	_ = x[TokenKindRightParen-19]
-	_ = x[TokenKindLeftAngle-20]
-	_ = x[TokenKindRightAngle-21]
-	_ = x[TokenKindSlash-22]
+	_ = x[TokenKindUnderscore-4]
+	_ = x[TokenKindEqual-5]
+	_ = x[TokenKindComma-6]
+	_ = x[TokenKindColon-7]
+	_ = x[TokenKindSemicolon-8]
+	_ = x[TokenKindDot-9]
+	_ = x[TokenKindLeftBrace-10]
+	_ = x[TokenKindRightBrace-11]
+	_ = x[TokenKindLeftSquare-12]
+	_ = x[TokenKindRightSquare-13]
+	_ = x[TokenKindLeftParen-14]
+	_ = x[TokenKindRightParen-15]
+	_ = x[TokenKindLeftAngle-16]
+	_ = x[TokenKindRightAngle-17]
+	_ = x[TokenKindSlash-18]
+	_ = x[TokenKindInt-19]
+	_ = x[TokenKindFloat-20]
+	_ = x[TokenKindStr-21]
+	_ = x[TokenKindIdentifier-128]
+	_ = x[TokenKindSyntax-129]
+	_ = x[TokenKindEdition-130]
+	_ = x[TokenKindPackage-131]
+	_ = x[TokenKindImport-132]
+	_ = x[TokenKindPublic-133]
+	_ = x[TokenKindWeak-134]
+	_ = x[TokenKindOption-135]
+	_ = x[TokenKindReserved-136]
+	_ = x[TokenKindMax-137]
+	_ = x[TokenKindEnum-138]
+	_ = x[TokenKindMessage-139]
+	_ = x[TokenKindMap-140]
+	_ = x[TokenKindOneOf-141]
+	_ = x[TokenKindExtensions-142]
+	_ = x[TokenKindService-143]
+	_ = x[TokenKindRpc-144]
+	_ = x[TokenKindReturns-145]
+	_ = x[TokenKindExtend-146]
 }
 
-const _TokenKind_name = "TokenKindEOFTokenKindBOFTokenKindErrorTokenKindCommentTokenKindIdentifierTokenKindIntTokenKindFloatTokenKindStrTokenKindUnderscoreTokenKindEqualTokenKindCommaTokenKindColonTokenKindSemicolonTokenKindDotTokenKindLeftBraceTokenKindRightBraceTokenKindLeftSquareTokenKindRightSquareTokenKindLeftParenTokenKindRightParenTokenKindLeftAngleTokenKindRightAngleTokenKindSlash"
+const (
+	_TokenKind_name_0 = "TokenKindEOFTokenKindBOFTokenKindErrorTokenKindCommentTokenKindUnderscoreTokenKindEqualTokenKindCommaTokenKindColonTokenKindSemicolonTokenKindDotTokenKindLeftBraceTokenKindRightBraceTokenKindLeftSquareTokenKindRightSquareTokenKindLeftParenTokenKindRightParenTokenKindLeftAngleTokenKindRightAngleTokenKindSlashTokenKindIntTokenKindFloatTokenKindStr"
+	_TokenKind_name_1 = "TokenKindIdentifierTokenKindSyntaxTokenKindEditionTokenKindPackageTokenKindImportTokenKindPublicTokenKindWeakTokenKindOptionTokenKindReservedTokenKindMaxTokenKindEnumTokenKindMessageTokenKindMapTokenKindOneOfTokenKindExtensionsTokenKindServiceTokenKindRpcTokenKindReturnsTokenKindExtend"
+)
 
-var _TokenKind_index = [...]uint16{0, 12, 24, 38, 54, 73, 85, 99, 111, 130, 144, 158, 172, 190, 202, 220, 239, 258, 278, 296, 315, 333, 352, 366}
+var (
+	_TokenKind_index_0 = [...]uint16{0, 12, 24, 38, 54, 73, 87, 101, 115, 133, 145, 163, 182, 201, 221, 239, 258, 276, 295, 309, 321, 335, 347}
+	_TokenKind_index_1 = [...]uint16{0, 19, 34, 50, 66, 81, 96, 109, 124, 141, 153, 166, 182, 194, 208, 227, 243, 255, 271, 286}
+)
 
 func (i TokenKind) String() string {
-	if i >= TokenKind(len(_TokenKind_index)-1) {
+	switch {
+	case i <= 21:
+		return _TokenKind_name_0[_TokenKind_index_0[i]:_TokenKind_index_0[i+1]]
+	case 128 <= i && i <= 146:
+		i -= 128
+		return _TokenKind_name_1[_TokenKind_index_1[i]:_TokenKind_index_1[i+1]]
+	default:
 		return "TokenKind(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _TokenKind_name[_TokenKind_index[i]:_TokenKind_index[i+1]]
 }

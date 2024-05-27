@@ -9,11 +9,6 @@ const (
 	TokenKindError                    // Error
 	TokenKindComment                  // Comment (single line or multiline)
 
-	TokenKindIdentifier // Identifier
-	TokenKindInt        // Integer
-	TokenKindFloat      // Float
-	TokenKindStr        // String ('...' or "...")
-
 	TokenKindUnderscore  // _
 	TokenKindEqual       // =
 	TokenKindComma       // ,
@@ -29,4 +24,35 @@ const (
 	TokenKindLeftAngle   // <
 	TokenKindRightAngle  // >
 	TokenKindSlash       // /
+
+	TokenKindInt   // Integer
+	TokenKindFloat // Float
+	TokenKindStr   // String ('...' or "...")
 )
+
+// every token kind with the MSB set is also an identifier
+const (
+	TokenKindIdentifier TokenKind = 128 + iota // Identifier
+	TokenKindSyntax
+	TokenKindEdition
+	TokenKindPackage
+	TokenKindImport
+	TokenKindPublic
+	TokenKindWeak
+	TokenKindOption
+	TokenKindReserved
+	TokenKindMax
+	TokenKindEnum
+	TokenKindMessage
+	TokenKindMap
+	TokenKindOneOf
+	TokenKindExtensions
+	TokenKindService
+	TokenKindRpc
+	TokenKindReturns
+	TokenKindExtend
+)
+
+func (k TokenKind) isIdentifier() bool {
+	return k > 127
+}
