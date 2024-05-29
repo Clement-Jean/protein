@@ -97,6 +97,21 @@ var literalToKind = map[string]TokenKind{
 	"extend":     TokenKindExtend,
 	"true":       TokenKindTrue,
 	"false":      TokenKindFalse,
+	"float":      TokenKindTypeFloat,
+	"double":     TokenKindTypeDouble,
+	"int32":      TokenKindTypeInt32,
+	"int64":      TokenKindTypeInt64,
+	"uint32":     TokenKindTypeUint32,
+	"uint64":     TokenKindTypeUint64,
+	"sint32":     TokenKindTypeSint32,
+	"sint64":     TokenKindTypeSint64,
+	"fixed32":    TokenKindTypeFixed32,
+	"fixed64":    TokenKindTypeFixed64,
+	"sfixed32":   TokenKindTypeSfixed32,
+	"sfixed64":   TokenKindTypeSfixed64,
+	"bool":       TokenKindTypeBool,
+	"string":     TokenKindTypeString,
+	"bytes":      TokenKindTypeBytes,
 }
 
 func (l *Lexer) lexIdentifier() (state stateFn) {
