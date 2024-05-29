@@ -51,8 +51,10 @@ const (
 	TokenKindRpc
 	TokenKindReturns
 	TokenKindExtend
+	TokenKindTrue
+	TokenKindFalse
 )
 
-func (k TokenKind) isIdentifier() bool {
+func (k TokenKind) IsIdentifier() bool {
 	return k > 127
 }

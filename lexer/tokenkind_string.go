@@ -49,23 +49,25 @@ func _() {
 	_ = x[TokenKindRpc-144]
 	_ = x[TokenKindReturns-145]
 	_ = x[TokenKindExtend-146]
+	_ = x[TokenKindTrue-147]
+	_ = x[TokenKindFalse-148]
 }
 
 const (
 	_TokenKind_name_0 = "TokenKindEOFTokenKindBOFTokenKindErrorTokenKindCommentTokenKindUnderscoreTokenKindEqualTokenKindCommaTokenKindColonTokenKindSemicolonTokenKindDotTokenKindLeftBraceTokenKindRightBraceTokenKindLeftSquareTokenKindRightSquareTokenKindLeftParenTokenKindRightParenTokenKindLeftAngleTokenKindRightAngleTokenKindSlashTokenKindIntTokenKindFloatTokenKindStr"
-	_TokenKind_name_1 = "TokenKindIdentifierTokenKindSyntaxTokenKindEditionTokenKindPackageTokenKindImportTokenKindPublicTokenKindWeakTokenKindOptionTokenKindReservedTokenKindMaxTokenKindEnumTokenKindMessageTokenKindMapTokenKindOneOfTokenKindExtensionsTokenKindServiceTokenKindRpcTokenKindReturnsTokenKindExtend"
+	_TokenKind_name_1 = "TokenKindIdentifierTokenKindSyntaxTokenKindEditionTokenKindPackageTokenKindImportTokenKindPublicTokenKindWeakTokenKindOptionTokenKindReservedTokenKindMaxTokenKindEnumTokenKindMessageTokenKindMapTokenKindOneOfTokenKindExtensionsTokenKindServiceTokenKindRpcTokenKindReturnsTokenKindExtendTokenKindTrueTokenKindFalse"
 )
 
 var (
 	_TokenKind_index_0 = [...]uint16{0, 12, 24, 38, 54, 73, 87, 101, 115, 133, 145, 163, 182, 201, 221, 239, 258, 276, 295, 309, 321, 335, 347}
-	_TokenKind_index_1 = [...]uint16{0, 19, 34, 50, 66, 81, 96, 109, 124, 141, 153, 166, 182, 194, 208, 227, 243, 255, 271, 286}
+	_TokenKind_index_1 = [...]uint16{0, 19, 34, 50, 66, 81, 96, 109, 124, 141, 153, 166, 182, 194, 208, 227, 243, 255, 271, 286, 299, 313}
 )
 
 func (i TokenKind) String() string {
 	switch {
 	case i <= 21:
 		return _TokenKind_name_0[_TokenKind_index_0[i]:_TokenKind_index_0[i+1]]
-	case 128 <= i && i <= 146:
+	case 128 <= i && i <= 148:
 		i -= 128
 		return _TokenKind_name_1[_TokenKind_index_1[i]:_TokenKind_index_1[i+1]]
 	default:

@@ -95,6 +95,8 @@ var literalToKind = map[string]TokenKind{
 	"rpc":        TokenKindRpc,
 	"returns":    TokenKindReturns,
 	"extend":     TokenKindExtend,
+	"true":       TokenKindTrue,
+	"false":      TokenKindFalse,
 }
 
 func (l *Lexer) lexIdentifier() (state stateFn) {
