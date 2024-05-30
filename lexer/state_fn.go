@@ -3,6 +3,7 @@ package lexer
 import (
 	"errors"
 	"fmt"
+	"slices"
 )
 
 type stateFn func() stateFn
@@ -76,51 +77,14 @@ func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
 	return l.readPos - start, false
 }
 
-var literalToKind = map[string]TokenKind{
-	"syntax":     TokenKindSyntax,
-	"edition":    TokenKindEdition,
-	"package":    TokenKindPackage,
-	"import":     TokenKindImport,
-	"public":     TokenKindPublic,
-	"weak":       TokenKindWeak,
-	"option":     TokenKindOption,
-	"reserved":   TokenKindReserved,
-	"max":        TokenKindMax,
-	"enum":       TokenKindEnum,
-	"message":    TokenKindMessage,
-	"map":        TokenKindMap,
-	"oneof":      TokenKindOneOf,
-	"extensions": TokenKindExtensions,
-	"service":    TokenKindService,
-	"rpc":        TokenKindRpc,
-	"returns":    TokenKindReturns,
-	"extend":     TokenKindExtend,
-	"true":       TokenKindTrue,
-	"false":      TokenKindFalse,
-	"float":      TokenKindTypeFloat,
-	"double":     TokenKindTypeDouble,
-	"int32":      TokenKindTypeInt32,
-	"int64":      TokenKindTypeInt64,
-	"uint32":     TokenKindTypeUint32,
-	"uint64":     TokenKindTypeUint64,
-	"sint32":     TokenKindTypeSint32,
-	"sint64":     TokenKindTypeSint64,
-	"fixed32":    TokenKindTypeFixed32,
-	"fixed64":    TokenKindTypeFixed64,
-	"sfixed32":   TokenKindTypeSfixed32,
-	"sfixed64":   TokenKindTypeSfixed64,
-	"bool":       TokenKindTypeBool,
-	"string":     TokenKindTypeString,
-	"bytes":      TokenKindTypeBytes,
-}
-
 func (l *Lexer) lexIdentifier() (state stateFn) {
 	start := l.readPos
 	l.acceptWhile(isIdentifier)
 
 	kind := TokenKindIdentifier
-	if k, ok := literalToKind[string(l.src.Range(start, l.readPos))]; ok {
-		kind = k
+	literal := string(l.src.Range(start, l.readPos))
+	if idx := slices.Index(literals, literal); idx != -1 {
+		kind = kinds[idx]
 	}
 
 	state = l.emit(kind, l.tokPos)

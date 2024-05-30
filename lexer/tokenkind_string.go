@@ -46,7 +46,7 @@ func _() {
 	_ = x[TokenKindOneOf-141]
 	_ = x[TokenKindExtensions-142]
 	_ = x[TokenKindService-143]
-	_ = x[TokenKindRpc-144]
+	_ = x[TokenKindRPC-144]
 	_ = x[TokenKindReturns-145]
 	_ = x[TokenKindExtend-146]
 	_ = x[TokenKindTrue-147]

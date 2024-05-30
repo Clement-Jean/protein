@@ -48,7 +48,7 @@ const (
 	TokenKindOneOf                               // oneof
 	TokenKindExtensions                          // extensions
 	TokenKindService                             // service
-	TokenKindRpc                                 // rpc
+	TokenKindRPC                                 // rpc
 	TokenKindReturns                             // returns
 	TokenKindExtend                              // extend
 	TokenKindTrue                                // true
@@ -69,6 +69,81 @@ const (
 	TokenKindTypeString                          // string
 	TokenKindTypeBytes                           // bytes
 )
+
+var literals = []string{
+	"syntax",
+	"edition",
+	"package",
+	"import",
+	"public",
+	"weak",
+	"option",
+	"reserved",
+	"max",
+	"enum",
+	"message",
+	"map",
+	"oneof",
+	"extensions",
+	"service",
+	"rpc",
+	"returns",
+	"extend",
+	"true",
+	"false",
+	"float",
+	"double",
+	"int32",
+	"int64",
+	"uint32",
+	"uint64",
+	"sint32",
+	"sint64",
+	"fixed32",
+	"fixed64",
+	"sfixed32",
+	"sfixed64",
+	"bool",
+	"string",
+	"bytes",
+}
+var kinds = [...]TokenKind{
+	TokenKindSyntax,
+	TokenKindEdition,
+	TokenKindPackage,
+	TokenKindImport,
+	TokenKindPublic,
+	TokenKindWeak,
+	TokenKindOption,
+	TokenKindReserved,
+	TokenKindMax,
+	TokenKindEnum,
+	TokenKindMessage,
+	TokenKindMap,
+	TokenKindOneOf,
+	TokenKindExtensions,
+	TokenKindService,
+	TokenKindRPC,
+	TokenKindReturns,
+	TokenKindExtend,
+	TokenKindTrue,
+	TokenKindFalse,
+	TokenKindTypeFloat,
+	TokenKindTypeDouble,
+	TokenKindTypeInt32,
+	TokenKindTypeInt64,
+	TokenKindTypeUint32,
+	TokenKindTypeUint64,
+	TokenKindTypeSint32,
+	TokenKindTypeSint64,
+	TokenKindTypeFixed32,
+	TokenKindTypeFixed64,
+	TokenKindTypeSfixed32,
+	TokenKindTypeSfixed64,
+	TokenKindTypeBool,
+	TokenKindTypeString,
+	TokenKindTypeBytes,
+}
 
 func (k TokenKind) IsIdentifier() bool {
 	return k > 127
