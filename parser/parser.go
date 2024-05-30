@@ -1,6 +1,10 @@
 package parser
 
-import "github.com/Clement-Jean/protein/lexer"
+import (
+	"fmt"
+
+	"github.com/Clement-Jean/protein/lexer"
+)
 
 type Parser struct {
 	toks    *lexer.TokenizedBuffer
@@ -57,6 +61,14 @@ func (p *Parser) addLeafNode(hasError bool) {
 		SubtreeSize: 1,
 		HasError:    hasError,
 	})
+}
+
+func (p *Parser) error(err error) {
+	p.errs = append(p.errs, err)
+}
+
+func (p *Parser) expectedCurr(kind lexer.TokenKind) {
+	p.error(fmt.Errorf("expected %s, got %s", kind, p.curr()))
 }
 
 func (p *Parser) parseTopLevel() {
