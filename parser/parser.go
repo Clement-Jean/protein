@@ -65,6 +65,15 @@ func (p *Parser) parseTopLevel() {
 		p.addLeafNode(false)
 		return
 	}
+
+	curr := p.curr()
+	p.addLeafNode(false)
+	p.next()
+
+	switch curr {
+	case lexer.TokenKindComment:
+		return
+	}
 }
 
 func (p *Parser) Parse() (ParseTree, []error) {
