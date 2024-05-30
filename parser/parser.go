@@ -36,12 +36,31 @@ func (p *Parser) topState() stateStackEntry {
 	return p.stack[len(p.stack)-1]
 }
 
+func (p *Parser) next() lexer.TokenKind {
+	if p.currTok+1 >= len(p.toks.TokenInfos) {
+		return lexer.TokenKindEOF
+	}
+	p.currTok++
+	return p.toks.TokenInfos[p.currTok].Kind
+}
+
+func (p *Parser) curr() lexer.TokenKind {
+	if p.currTok >= len(p.toks.TokenInfos) {
+		return lexer.TokenKindEOF
+	}
+	return p.toks.TokenInfos[p.currTok].Kind
+}
+
 func (p *Parser) parseTopLevel() {
-	p.popState()
+	if p.curr() == lexer.TokenKindEOF {
+		p.popState()
+		return
+	}
 }
 
 func (p *Parser) Parse() (ParseTree, []error) {
 	p.pushState(stateTopLevel)
+	p.next()
 
 	for len(p.stack) != 0 && p.currTok < len(p.toks.TokenInfos) {
 		switch p.topState().st {
