@@ -63,6 +63,14 @@ func (p *Parser) addLeafNode(hasError bool) {
 	})
 }
 
+func (p *Parser) addNode(tokIdx int, state stateStackEntry) {
+	p.tree = append(p.tree, Node{
+		TokIdx:      tokIdx,
+		SubtreeSize: int32(len(p.tree)) - state.subtreeStart + 1,
+		HasError:    state.hasError,
+	})
+}
+
 func (p *Parser) error(err error) {
 	p.errs = append(p.errs, err)
 }
@@ -85,6 +93,8 @@ func (p *Parser) parseTopLevel() {
 	switch curr {
 	case lexer.TokenKindComment:
 		return
+	case lexer.TokenKindSyntax:
+		p.parseSyntax()
 	}
 }
 
@@ -97,6 +107,10 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		switch p.topState().st {
 		case stateTopLevel:
 			p.parseTopLevel()
+		case stateSyntaxAssign:
+			p.parseSyntaxAssign()
+		case stateSyntaxFinish:
+			p.parseSyntaxFinish()
 		}
 	}
 	return p.tree, p.errs

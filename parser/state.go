@@ -7,6 +7,8 @@ type state uint8
 
 const (
 	stateTopLevel state = iota
+	stateSyntaxAssign
+	stateSyntaxFinish
 )
 
 type stateStackEntry struct {
