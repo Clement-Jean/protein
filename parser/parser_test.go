@@ -12,6 +12,8 @@ import (
 
 	"github.com/Clement-Jean/protein/lexer"
 	"github.com/Clement-Jean/protein/parser"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 var headersRegexp = *regexp.MustCompile(
@@ -114,8 +116,8 @@ func runParseTestCase(t *testing.T, tests []ParseTestCase) {
 			}
 
 			trimmed := strings.TrimSpace(buf.String())
-			if trimmed != test.expectedTree {
-				t.Fatalf("expected tree:\n%s\ngot:\n%s", test.expectedTree, trimmed)
+			if diff := cmp.Diff(test.expectedTree, trimmed); diff != "" {
+				t.Errorf("%s mismatch (-want +got):\n%s", t.Name(), diff)
 			}
 		})
 	}
