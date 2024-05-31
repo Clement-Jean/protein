@@ -14,6 +14,8 @@ const (
 	stateImportValue
 	stateImportFinish
 	statePackageFinish
+	stateOptionAssign
+	stateOptionFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest

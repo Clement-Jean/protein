@@ -109,6 +109,8 @@ func (p *Parser) parseTopLevel() {
 		p.parseImport()
 	case lexer.TokenKindPackage:
 		p.parsePackage()
+	case lexer.TokenKindOption:
+		p.parseOption()
 	}
 }
 
@@ -135,6 +137,10 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseImportFinish()
 		case statePackageFinish:
 			p.parsePackageFinish()
+		case stateOptionAssign:
+			p.parseOptionAssign()
+		case stateOptionFinish:
+			p.parseOptionFinish()
 
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()
