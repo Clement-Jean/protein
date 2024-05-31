@@ -63,7 +63,7 @@ parseTree = [
   {kind: ;, subtreeSize: 3},
   {kind: EOF},
 ]
-errs = [expected String, got ;]
+errs = [expected [String], got ;]
 
 ================================================================================
 expected string after modifier
@@ -81,7 +81,7 @@ parseTree = [
   {kind: ;, subtreeSize: 4},
   {kind: EOF},
 ]
-errs = [expected String, got ;]
+errs = [expected [String], got ;]
 
 ================================================================================
 expected semicolon
@@ -97,4 +97,4 @@ parseTree = [
     {kind: String},
   {kind: EOF, hasError: true, subtreeSize: 3},
 ]
-errs = [expected ;, got EOF]
+errs = [expected [;], got EOF]

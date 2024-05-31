@@ -48,7 +48,7 @@ parseTree = [
   {kind: ;, subtreeSize: 3},
   {kind: EOF},
 ]
-errs = [expected Identifier, got ;]
+errs = [expected [Identifier], got ;]
 
 ================================================================================
 expected identifier after dot
@@ -67,7 +67,7 @@ parseTree = [
   {kind: ;, subtreeSize: 5},
   {kind: EOF},
 ]
-errs = [expected Identifier, got ;]
+errs = [expected [Identifier], got ;]
 
 ================================================================================
 expected semicolon
@@ -85,4 +85,4 @@ parseTree = [
     {kind: ., subtreeSize: 3},
   {kind: EOF, hasError: true, subtreeSize: 5},
 ]
-errs = [expected ;, got EOF]
+errs = [expected [;], got EOF]

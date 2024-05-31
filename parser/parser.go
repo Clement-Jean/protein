@@ -83,8 +83,8 @@ func (p *Parser) error(err error) {
 	p.errs = append(p.errs, err)
 }
 
-func (p *Parser) expectedCurr(kind lexer.TokenKind) {
-	p.error(fmt.Errorf("expected %s, got %s", kind, p.curr()))
+func (p *Parser) expectedCurr(kind ...lexer.TokenKind) {
+	p.error(fmt.Errorf("expected %v, got %s", kind, p.curr()))
 }
 
 func (p *Parser) parseTopLevel() {
