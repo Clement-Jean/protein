@@ -11,6 +11,8 @@ const (
 	stateSyntaxFinish
 	stateEditionAssign
 	stateEditionFinish
+	stateImportValue
+	stateImportFinish
 )
 
 type stateStackEntry struct {
