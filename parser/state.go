@@ -14,6 +14,9 @@ const (
 	stateImportValue
 	stateImportFinish
 	statePackageFinish
+	stateOptionName
+	stateOptionNameRest
+	stateOptionNameParenFinish
 	stateOptionAssign
 	stateOptionFinish
 

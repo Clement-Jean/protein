@@ -137,6 +137,12 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseImportFinish()
 		case statePackageFinish:
 			p.parsePackageFinish()
+		case stateOptionName:
+			p.parseOptionName()
+		case stateOptionNameRest:
+			p.parseOptionNameRest()
+		case stateOptionNameParenFinish:
+			p.parseOptionNameParenFinish()
 		case stateOptionAssign:
 			p.parseOptionAssign()
 		case stateOptionFinish:

@@ -12,10 +12,10 @@ func (p *Parser) parseFullIdentifierRoot() {
 		p.next()
 	} else {
 		p.expectedCurr(lexer.TokenKindIdentifier)
-		p.skipPastLikelyEnd(p.currTok)
+		//		p.skipPastLikelyEnd(p.currTok)
 	}
 
-	if state := p.stack[len(p.stack)-1]; state.st == stateFullIdentifierRest {
+	if state := p.topState(); state.st == stateFullIdentifierRest {
 		// we are coming back from a dot
 		p.popState()
 		p.addNode(state.tokIdx, state)
@@ -34,9 +34,4 @@ func (p *Parser) parseFullIdentifierRest() {
 	tok := p.currTok
 	p.next()
 	p.pushStateWithIdx(stateFullIdentifierRoot, tok)
-	//	} else {
-	//		p.popState()
-	//		p.expectedCurr(lexer.TokenKindIdentifier)
-	//		p.skipPastLikelyEnd(p.currTok)
-	//	}
 }

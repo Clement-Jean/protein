@@ -9,29 +9,99 @@ import (
 func (p *Parser) parseOption() {
 	p.pushState(stateOptionFinish)
 	p.pushState(stateOptionAssign)
+	p.pushState(stateOptionName)
+}
+
+func (p *Parser) parseOptionName() {
+	p.popState()
+
+	switch p.curr() {
+	case lexer.TokenKindIdentifier:
+		p.addLeafNode(false)
+		p.next()
+	case lexer.TokenKindLeftParen:
+		p.addLeafNode(false)
+		p.next()
+		p.pushState(stateOptionNameParenFinish)
+		p.pushState(stateFullIdentifierRoot)
+
+		if p.curr() == lexer.TokenKindDot {
+			p.addLeafNode(false)
+			p.next()
+		}
+	default:
+		//p.popState()
+		p.addLeafNode(true)
+		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftParen)
+		//		p.skipPastLikelyEnd(p.currTok)
+		//return
+	}
+
+	if optionNameRest := p.topState(); optionNameRest.st == stateOptionNameRest {
+		// we are coming back from a dot
+		p.popState()
+		optionNameState := p.topState()
+		optionNameState.subtreeStart++
+		p.addNode(optionNameRest.tokIdx, optionNameState)
+
+		if optionNameRest.hasError {
+			return
+		}
+	}
+
+	if p.curr() == lexer.TokenKindDot {
+		p.pushState(stateOptionNameRest)
+	}
+}
+
+func (p *Parser) parseOptionNameRest() {
+	tok := p.currTok
+	p.next()
+	p.pushStateWithIdx(stateOptionName, tok)
+}
+
+func (p *Parser) parseOptionNameParenFinish() {
+	state := p.popState()
+	tokIdx := p.currTok
+
+	state.hasError = p.curr() != lexer.TokenKindRightParen
+
+	if !state.hasError {
+		p.next()
+	} else {
+		p.expectedCurr(lexer.TokenKindRightParen)
+		tokIdx = p.skipPastLikelyEnd(tokIdx)
+		state.subtreeStart--
+	}
+
+	p.addNode(tokIdx, state)
+
+	if optionNameRest := p.topState(); optionNameRest.st == stateOptionNameRest {
+		// we are coming back from a dot
+		p.popState()
+		optionNameState := p.topState()
+		optionNameState.subtreeStart++
+		p.addNode(optionNameRest.tokIdx, optionNameState)
+
+		if optionNameRest.hasError {
+			return
+		}
+	}
+
+	if p.curr() == lexer.TokenKindDot {
+		p.pushState(stateOptionNameRest)
+	}
 }
 
 func (p *Parser) parseOptionAssign() {
-	p.popState()
-
-	// TODO option names can be more complex
-	hasError := p.curr() != lexer.TokenKindIdentifier
-	p.addLeafNode(hasError)
+	state := p.popState()
+	tok := p.currTok
+	hasError := p.curr() != lexer.TokenKindEqual
 
 	if !hasError {
 		p.next()
 	} else {
-		p.expectedCurr(lexer.TokenKindIdentifier)
-		p.skipPastLikelyEnd(p.currTok)
-		return
-	}
-
-	hasError = p.curr() != lexer.TokenKindEqual
-	p.addLeafNode(hasError)
-
-	if !hasError {
-		p.next()
-	} else {
+		p.addLeafNode(hasError)
 		p.expectedCurr(lexer.TokenKindEqual)
 		p.skipPastLikelyEnd(p.currTok)
 		return
@@ -48,10 +118,14 @@ func (p *Parser) parseOptionAssign() {
 	if !hasError {
 		p.next()
 	} else {
+		// TODO check for text message
+		// else error
 		p.expectedCurr(accepted...)
 		p.skipPastLikelyEnd(p.currTok)
-		// TODO check for text message
 	}
+
+	state.subtreeStart++
+	p.addNode(tok, state)
 }
 
 func (p *Parser) parseOptionFinish() {

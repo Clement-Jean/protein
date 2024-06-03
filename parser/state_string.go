@@ -9,11 +9,25 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[stateTopLevel-0]
+	_ = x[stateSyntaxAssign-1]
+	_ = x[stateSyntaxFinish-2]
+	_ = x[stateEditionAssign-3]
+	_ = x[stateEditionFinish-4]
+	_ = x[stateImportValue-5]
+	_ = x[stateImportFinish-6]
+	_ = x[statePackageFinish-7]
+	_ = x[stateOptionName-8]
+	_ = x[stateOptionNameRest-9]
+	_ = x[stateOptionNameParenFinish-10]
+	_ = x[stateOptionAssign-11]
+	_ = x[stateOptionFinish-12]
+	_ = x[stateFullIdentifierRoot-13]
+	_ = x[stateFullIdentifierRest-14]
 }
 
-const _state_name = "stateTopLevel"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionFinishstateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint8{0, 13}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 228, 251, 274}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {
