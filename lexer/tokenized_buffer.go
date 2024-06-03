@@ -9,7 +9,7 @@ type TokenInfo struct {
 }
 
 type LineInfo struct {
-	Start int // offset from the begining of the input text
+	Start uint32 // offset from the begining of the input text
 	Len   uint32
 }
 

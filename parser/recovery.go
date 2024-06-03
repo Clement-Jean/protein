@@ -10,7 +10,7 @@ func (p *Parser) skipPastLikelyEnd(idx int) int {
 
 	rootTok := p.toks.TokenInfos[idx]
 	rootLine := p.toks.LineInfos[rootTok.LineIdx]
-	rootIndent := rootLine.Start + int(rootTok.Column)
+	rootIndent := rootLine.Start + rootTok.Column
 	keepSkipping := func(idx int) bool {
 		// while we are:
 		//   - on the same line
@@ -18,7 +18,7 @@ func (p *Parser) skipPastLikelyEnd(idx int) int {
 		// we can skip
 		tok := p.toks.TokenInfos[idx]
 		line := p.toks.LineInfos[tok.LineIdx]
-		return line == rootLine || line.Start+int(tok.Column) > rootIndent
+		return line == rootLine || line.Start+tok.Column > rootIndent
 	}
 
 	for {
