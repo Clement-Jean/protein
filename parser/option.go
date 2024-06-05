@@ -15,12 +15,14 @@ func (p *Parser) parseOption() {
 func (p *Parser) parseOptionName() {
 	p.popState()
 
+	hasError := p.curr() != lexer.TokenKindIdentifier &&
+		p.curr() != lexer.TokenKindLeftParen
+	p.addLeafNode(hasError)
+
 	switch p.curr() {
 	case lexer.TokenKindIdentifier:
-		p.addLeafNode(false)
 		p.next()
 	case lexer.TokenKindLeftParen:
-		p.addLeafNode(false)
 		p.next()
 		p.pushState(stateOptionNameParenFinish)
 		p.pushState(stateFullIdentifierRoot)
@@ -30,11 +32,7 @@ func (p *Parser) parseOptionName() {
 			p.next()
 		}
 	default:
-		//p.popState()
-		p.addLeafNode(true)
 		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftParen)
-		//		p.skipPastLikelyEnd(p.currTok)
-		//return
 	}
 
 	if optionNameRest := p.topState(); optionNameRest.st == stateOptionNameRest {
