@@ -31,7 +31,6 @@ func (p *Parser) parseFullIdentifierRoot() {
 }
 
 func (p *Parser) parseFullIdentifierRest() {
-	tok := p.currTok
+	p.pushState(stateFullIdentifierRoot)
 	p.next()
-	p.pushStateWithIdx(stateFullIdentifierRoot, tok)
 }

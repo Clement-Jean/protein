@@ -30,14 +30,6 @@ func (p *Parser) pushState(st state) {
 	})
 }
 
-func (p *Parser) pushStateWithIdx(st state, idx int) {
-	p.stack = append(p.stack, stateStackEntry{
-		st:           st,
-		tokIdx:       idx,
-		subtreeStart: int32(len(p.tree) - 1),
-	})
-}
-
 func (p *Parser) popState() stateStackEntry {
 	state := p.stack[len(p.stack)-1]
 	p.stack = p.stack[:len(p.stack)-1]

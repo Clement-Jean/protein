@@ -53,9 +53,8 @@ func (p *Parser) parseOptionName() {
 }
 
 func (p *Parser) parseOptionNameRest() {
-	tok := p.currTok
+	p.pushState(stateOptionName)
 	p.next()
-	p.pushStateWithIdx(stateOptionName, tok)
 }
 
 func (p *Parser) parseOptionNameParenFinish() {
