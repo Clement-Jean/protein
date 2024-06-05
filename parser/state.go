@@ -23,6 +23,7 @@ const (
 	stateTextFieldAssign
 	stateTextFieldName
 	stateTextMessageValue
+	stateTextMessageComma
 	stateTextMessageFinish
 
 	stateFullIdentifierRoot

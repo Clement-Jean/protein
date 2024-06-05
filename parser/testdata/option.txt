@@ -390,3 +390,61 @@ parseTree = [
   {kind: ;, subtreeSize: 10},
   {kind: EOF},
 ]
+
+================================================================================
+message values
+================================================================================
+
+option (deprecated) = { value: true, value2: "test" };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: (},
+      {kind: Identifier},
+    {kind: ), subtreeSize: 3},
+      {kind: {},
+          {kind: Identifier},
+          {kind: true},
+        {kind: :, subtreeSize: 3},
+          {kind: Identifier},
+          {kind: String},
+        {kind: :, subtreeSize: 3},
+      {kind: ,, subtreeSize: 7},
+    {kind: }, subtreeSize: 9},
+  {kind: ;, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+message values 2
+================================================================================
+
+option (deprecated) = { value: true, value2: "test", value3: 2.5 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: (},
+      {kind: Identifier},
+    {kind: ), subtreeSize: 3},
+      {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: String},
+          {kind: :, subtreeSize: 3},
+        {kind: ,, subtreeSize: 7},
+          {kind: Identifier},
+          {kind: Float},
+        {kind: :, subtreeSize: 3},
+      {kind: ,, subtreeSize: 11},
+    {kind: }, subtreeSize: 13},
+  {kind: ;, subtreeSize: 18},
+  {kind: EOF},
+]

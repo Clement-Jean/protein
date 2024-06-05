@@ -15,7 +15,21 @@ func (p *Parser) parseTextMessageValue() {
 	}
 }
 
+func (p *Parser) parseTextMessageComma() {
+	state := p.popState()
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
+}
+
 func (p *Parser) parseTextMessageFinish() {
+	if p.curr() == lexer.TokenKindComma {
+		p.pushState(stateTextMessageComma)
+		p.next()
+		p.pushState(stateTextMessageValue)
+		return
+	}
+
 	state := p.popState()
 	tokIdx := p.currTok
 

@@ -154,6 +154,8 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseTextFieldName()
 		case stateTextMessageValue:
 			p.parseTextMessageValue()
+		case stateTextMessageComma:
+			p.parseTextMessageComma()
 		case stateTextMessageFinish:
 			p.parseTextMessageFinish()
 

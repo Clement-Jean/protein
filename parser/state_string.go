@@ -25,14 +25,15 @@ func _() {
 	_ = x[stateTextFieldAssign-14]
 	_ = x[stateTextFieldName-15]
 	_ = x[stateTextMessageValue-16]
-	_ = x[stateTextMessageFinish-17]
-	_ = x[stateFullIdentifierRoot-18]
-	_ = x[stateFullIdentifierRest-19]
+	_ = x[stateTextMessageComma-17]
+	_ = x[stateTextMessageFinish-18]
+	_ = x[stateFullIdentifierRoot-19]
+	_ = x[stateFullIdentifierRest-20]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextMessageValuestateTextMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextMessageValuestateTextMessageCommastateTextMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 228, 247, 267, 285, 306, 328, 351, 374}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 228, 247, 267, 285, 306, 327, 349, 372, 395}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {
