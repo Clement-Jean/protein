@@ -16,10 +16,11 @@ func (p *Parser) parseOptionName() {
 	p.popState()
 
 	hasError := p.curr() != lexer.TokenKindIdentifier &&
-		p.curr() != lexer.TokenKindLeftParen
+		p.curr() != lexer.TokenKindLeftParen &&
+		!p.curr().IsIdentifier()
 	p.addLeafNode(hasError)
 
-	switch p.curr() {
+	switch curr := p.curr(); curr {
 	case lexer.TokenKindIdentifier:
 		p.next()
 	case lexer.TokenKindLeftParen:
@@ -32,6 +33,11 @@ func (p *Parser) parseOptionName() {
 			p.next()
 		}
 	default:
+		if curr.IsIdentifier() {
+			p.next()
+			break
+		}
+
 		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftParen)
 	}
 

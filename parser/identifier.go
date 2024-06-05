@@ -5,7 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseFullIdentifierRoot() {
 	p.popState()
 
-	hasError := p.curr() != lexer.TokenKindIdentifier
+	hasError := p.curr() != lexer.TokenKindIdentifier && !p.curr().IsIdentifier()
 	p.addLeafNode(hasError)
 
 	if !hasError {
