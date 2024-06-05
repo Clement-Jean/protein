@@ -17,6 +17,29 @@ parseTree = [
 ]
 
 ================================================================================
+full identifier
+================================================================================
+
+option my.custom.option = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+          {kind: Identifier},
+          {kind: Identifier},
+        {kind: ., subtreeSize: 3},
+        {kind: option},
+      {kind: ., subtreeSize: 5},
+      {kind: true},
+    {kind: =, subtreeSize: 7},
+  {kind: ;, subtreeSize: 9},
+  {kind: EOF},
+]
+
+
+================================================================================
 custom name
 ================================================================================
 
@@ -29,10 +52,10 @@ parseTree = [
     {kind: option},
           {kind: Identifier},
             {kind: (},
-            {kind: .},
+              {kind: .},
               {kind: Identifier},
               {kind: Identifier},
-            {kind: ., subtreeSize: 3},
+            {kind: ., subtreeSize: 4},
           {kind: ), subtreeSize: 6},
         {kind: ., subtreeSize: 8},
         {kind: Identifier},
@@ -56,10 +79,10 @@ parseTree = [
     {kind: option},
         {kind: Identifier},
           {kind: (},
-          {kind: .},
+            {kind: .},
             {kind: Identifier},
             {kind: Identifier},
-          {kind: ., subtreeSize: 3},
+          {kind: ., subtreeSize: 4},
         {kind: ), subtreeSize: 6},
       {kind: ., subtreeSize: 8},
       {kind: true},

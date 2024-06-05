@@ -12,13 +12,14 @@ func (p *Parser) parseFullIdentifierRoot() {
 		p.next()
 	} else {
 		p.expectedCurr(lexer.TokenKindIdentifier)
-		//		p.skipPastLikelyEnd(p.currTok)
 	}
 
 	if state := p.topState(); state.st == stateFullIdentifierRest {
 		// we are coming back from a dot
 		p.popState()
-		p.addNode(state.tokIdx, state)
+		top := p.topState()
+		top.subtreeStart++
+		p.addNode(state.tokIdx, top)
 
 		if state.hasError {
 			return
