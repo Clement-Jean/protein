@@ -116,15 +116,21 @@ func (p *Parser) parseOptionAssign() {
 		lexer.TokenKindStr,
 	}
 	hasError = !slices.Contains(accepted, p.curr())
-	p.addLeafNode(hasError)
 
 	if !hasError {
+		p.addLeafNode(false)
 		p.next()
 	} else {
-		// TODO check for text message
-		// else error
-		p.expectedCurr(accepted...)
-		p.skipPastLikelyEnd(p.currTok)
+		if p.curr() == lexer.TokenKindLeftBrace || p.curr() == lexer.TokenKindLeftAngle {
+			p.addLeafNode(false)
+			p.next()
+			p.parseTextMessage()
+			return
+		} else {
+			p.addLeafNode(true)
+			p.expectedCurr(accepted...)
+			p.skipPastLikelyEnd(p.currTok)
+		}
 	}
 
 	state.subtreeStart++

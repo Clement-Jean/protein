@@ -112,6 +112,33 @@ parseTree = [
 ]
 
 ================================================================================
+custom name 4
+================================================================================
+
+option (my.custom.option) = { test: true };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: (},
+          {kind: Identifier},
+          {kind: Identifier},
+        {kind: ., subtreeSize: 3},
+        {kind: option},
+      {kind: ., subtreeSize: 5},
+    {kind: ), subtreeSize: 7},
+      {kind: {},
+        {kind: Identifier},
+        {kind: true},
+      {kind: :, subtreeSize: 3},
+    {kind: }, subtreeSize: 5},
+  {kind: ;, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
 expected identifier
 ================================================================================
 
@@ -338,5 +365,28 @@ parseTree = [
       {kind: String},
     {kind: =, subtreeSize: 3},
   {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+
+================================================================================
+message value
+================================================================================
+
+option (deprecated) = { value: true };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: (},
+      {kind: Identifier},
+    {kind: ), subtreeSize: 3},
+      {kind: {},
+        {kind: Identifier},
+        {kind: true},
+      {kind: :, subtreeSize: 3},
+    {kind: }, subtreeSize: 5},
+  {kind: ;, subtreeSize: 10},
   {kind: EOF},
 ]

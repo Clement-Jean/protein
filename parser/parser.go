@@ -55,6 +55,13 @@ func (p *Parser) curr() lexer.TokenKind {
 	return p.toks.TokenInfos[p.currTok].Kind
 }
 
+func (p *Parser) peek() lexer.TokenKind {
+	if p.currTok+1 >= len(p.toks.TokenInfos) {
+		return lexer.TokenKindEOF
+	}
+	return p.toks.TokenInfos[p.currTok+1].Kind
+}
+
 func (p *Parser) addLeafNode(hasError bool) {
 	p.tree = append(p.tree, Node{
 		TokIdx:      p.currTok,
@@ -139,6 +146,16 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseOptionAssign()
 		case stateOptionFinish:
 			p.parseOptionFinish()
+		case stateTextFieldValue:
+			p.parseTextFieldValue()
+		case stateTextFieldAssign:
+			p.parseTextFieldAssign()
+		case stateTextFieldName:
+			p.parseTextFieldName()
+		case stateTextMessageValue:
+			p.parseTextMessageValue()
+		case stateTextMessageFinish:
+			p.parseTextMessageFinish()
 
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()

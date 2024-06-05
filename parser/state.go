@@ -19,6 +19,11 @@ const (
 	stateOptionNameParenFinish
 	stateOptionAssign
 	stateOptionFinish
+	stateTextFieldValue
+	stateTextFieldAssign
+	stateTextFieldName
+	stateTextMessageValue
+	stateTextMessageFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
