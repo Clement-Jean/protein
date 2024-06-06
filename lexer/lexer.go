@@ -119,16 +119,17 @@ func (l *Lexer) makeLines() {
 	for i = range nbLines {
 		rest := l.src.From(start)
 		idx := uint32(bytes.IndexByte(rest, '\n'))
-		newlineIdx := start + idx
-		info := &l.toks.LineInfos[i]
-		info.Start = start
-		info.Len = newlineIdx - start
-		start = newlineIdx + 1
+		l.toks.LineInfos[i] = LineInfo{
+			Start: start,
+			Len:   idx,
+		}
+		start += idx + 1
 	}
 
-	info := &l.toks.LineInfos[i]
-	info.Start = start
-	info.Len = l.src.Len() - start
+	l.toks.LineInfos[i] = LineInfo{
+		Start: start,
+		Len:   l.src.Len() - start,
+	}
 }
 
 func (l *Lexer) start() {
