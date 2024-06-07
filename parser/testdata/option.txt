@@ -394,6 +394,51 @@ parseTree = [
 ]
 
 ================================================================================
+message value empty
+================================================================================
+
+option (deprecated) = { };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+      {kind: }, subtreeSize: 2},
+    {kind: =, subtreeSize: 6},
+  {kind: ;, subtreeSize: 8},
+  {kind: EOF},
+]
+
+================================================================================
+message value angle
+================================================================================
+
+option (deprecated) = < value: true >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: <},
+          {kind: Identifier},
+          {kind: true},
+        {kind: :, subtreeSize: 3},
+      {kind: >, subtreeSize: 5},
+    {kind: =, subtreeSize: 9},
+  {kind: ;, subtreeSize: 11},
+  {kind: EOF},
+]
+
+================================================================================
 message values
 ================================================================================
 
@@ -452,3 +497,164 @@ parseTree = [
   {kind: ;, subtreeSize: 19},
   {kind: EOF},
 ]
+
+================================================================================
+nested message values
+================================================================================
+
+option test = { another_test: { deprecated: true } };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+          {kind: Identifier},
+            {kind: {},
+              {kind: Identifier},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+          {kind: }, subtreeSize: 5},
+        {kind: :, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: ;, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
+nested message values angle
+================================================================================
+
+option test = < another_test: < deprecated: true > >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: <},
+          {kind: Identifier},
+            {kind: <},
+              {kind: Identifier},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+          {kind: >, subtreeSize: 5},
+        {kind: :, subtreeSize: 7},
+      {kind: >, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: ;, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
+nested message values optional colon
+================================================================================
+
+option test = { another_test { deprecated: true } };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+          {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: }, subtreeSize: 5},
+      {kind: }, subtreeSize: 8},
+    {kind: =, subtreeSize: 10},
+  {kind: ;, subtreeSize: 12},
+  {kind: EOF},
+]
+
+================================================================================
+message value extension name
+================================================================================
+
+option test = { [com.foo.ext.scalar]: 10 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: [},
+                  {kind: Identifier},
+                  {kind: Identifier},
+                {kind: ., subtreeSize: 3},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 5},
+              {kind: Identifier},
+            {kind: ., subtreeSize: 7},
+          {kind: ], subtreeSize: 9},
+          {kind: Integer},
+        {kind: :, subtreeSize: 11},
+      {kind: }, subtreeSize: 13},
+    {kind: =, subtreeSize: 15},
+  {kind: ;, subtreeSize: 17},
+  {kind: EOF},
+]
+
+================================================================================
+message value domain name
+================================================================================
+
+option test = { [type.googleapis.com/com.foo.any]: 10 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: [},
+                  {kind: Identifier},
+                  {kind: Identifier},
+                {kind: ., subtreeSize: 3},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 5},
+                  {kind: Identifier},
+                  {kind: Identifier},
+                {kind: ., subtreeSize: 3},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 5},
+            {kind: /, subtreeSize: 11},
+          {kind: ], subtreeSize: 13},
+          {kind: Integer},
+        {kind: :, subtreeSize: 15},
+      {kind: }, subtreeSize: 17},
+    {kind: =, subtreeSize: 19},
+  {kind: ;, subtreeSize: 21},
+  {kind: EOF},
+]
+
+================================================================================
+message value expected left brace
+================================================================================
+
+option test = {  >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+      {kind: >, hasError: true, subtreeSize: 2},
+    {kind: =, subtreeSize: 4},
+  {kind: ;, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [}], got >]

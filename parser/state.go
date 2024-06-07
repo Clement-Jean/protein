@@ -23,9 +23,14 @@ const (
 	stateTextFieldValue
 	stateTextFieldAssign
 	stateTextFieldName
+	stateTextFieldExtensionName
+	stateTextFieldExtensionNameSlash
+	stateTextFieldExtensionNameFinish
+	stateTextFieldColon
 	stateTextMessageValue
 	stateTextMessageComma
-	stateTextMessageFinish
+	stateTextMessageFinishRightBrace
+	stateTextMessageFinishRightAngle
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest

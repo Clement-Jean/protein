@@ -28,16 +28,18 @@ func _() {
 	_ = x[stateTextFieldExtensionName-17]
 	_ = x[stateTextFieldExtensionNameSlash-18]
 	_ = x[stateTextFieldExtensionNameFinish-19]
-	_ = x[stateTextMessageValue-20]
-	_ = x[stateTextMessageComma-21]
-	_ = x[stateTextMessageFinish-22]
-	_ = x[stateFullIdentifierRoot-23]
-	_ = x[stateFullIdentifierRest-24]
+	_ = x[stateTextFieldColon-20]
+	_ = x[stateTextMessageValue-21]
+	_ = x[stateTextMessageComma-22]
+	_ = x[stateTextMessageFinishRightBrace-23]
+	_ = x[stateTextMessageFinishRightAngle-24]
+	_ = x[stateFullIdentifierRoot-25]
+	_ = x[stateFullIdentifierRest-26]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageCommastateTextMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 414, 435, 457, 480, 503}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 486, 518, 541, 564}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

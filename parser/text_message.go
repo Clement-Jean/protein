@@ -3,7 +3,12 @@ package parser
 import "github.com/Clement-Jean/protein/lexer"
 
 func (p *Parser) parseTextMessage() {
-	p.pushState(stateTextMessageFinish)
+	if p.curr() == lexer.TokenKindLeftBrace {
+		p.pushState(stateTextMessageFinishRightBrace)
+	} else {
+		p.pushState(stateTextMessageFinishRightAngle)
+	}
+
 	p.pushState(stateTextMessageValue)
 }
 
@@ -34,14 +39,19 @@ func (p *Parser) parseTextMessageFinish() {
 
 	state := p.popState()
 	tokIdx := p.currTok
+	expected := lexer.TokenKindRightBrace
+	if state.st == stateTextMessageFinishRightAngle {
+		expected = lexer.TokenKindRightAngle
+	}
 
 	state.hasError = curr != expected
 
 	if !state.hasError {
 		p.next()
 	} else {
-		p.expectedCurr(lexer.TokenKindRightBrace, lexer.TokenKindRightAngle)
+		p.expectedCurr(expected)
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
+		p.next()
 	}
 
 	p.addNode(tokIdx, state)

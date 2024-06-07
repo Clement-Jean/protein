@@ -17,21 +17,52 @@ func (p *Parser) parseTextFieldName() {
 	switch curr {
 	case lexer.TokenKindIdentifier:
 		p.next()
-	case lexer.TokenKindLeftAngle:
-		// TODO pushState(stateTextFieldExtensionNameFinish)
-		//      pushState(stateTextFieldExtensionName)
-		//      next()
+	case lexer.TokenKindLeftSquare:
+		p.next()
+		p.pushState(stateTextFieldExtensionNameFinish)
+		p.pushState(stateTextFieldExtensionName)
 	default:
+		if curr.IsIdentifier() {
+			p.next()
+			break
+		}
 		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftSquare)
 	}
 }
 
 func (p *Parser) parseTextFieldExtensionName() {
-	panic("not implemented")
+	p.popState()
+	p.pushState(stateFullIdentifierRoot)
+}
+
+func (p *Parser) parseTextFieldExtensionNameSlash() {
+	state := p.popState()
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
 }
 
 func (p *Parser) parseTextFieldExtensionNameFinish() {
-	panic("not implemented")
+	if p.curr() == lexer.TokenKindSlash {
+		p.pushState(stateTextFieldExtensionNameSlash)
+		p.next()
+		p.pushState(stateFullIdentifierRoot)
+		return
+	}
+
+	state := p.popState()
+	tokIdx := p.currTok
+
+	state.hasError = p.curr() != lexer.TokenKindRightSquare
+
+	if !state.hasError {
+		p.next()
+	} else {
+		p.expectedCurr(lexer.TokenKindRightSquare)
+		tokIdx = p.skipPastLikelyEnd(tokIdx)
+	}
+
+	p.addNode(tokIdx, state)
 }
 
 func (p *Parser) parseTextFieldAssign() {
@@ -43,11 +74,30 @@ func (p *Parser) parseTextFieldAssign() {
 			// TODO error
 			panic("not implemented")
 		}
-		p.pushState(stateTextFieldValue)
-		p.next()
+
+		p.addLeafNode(false)
+		p.parseTextMessage()
+		p.next() // skip { or <
 	} else {
-		// here ':' is optional, however we insert it anyway as node
+		peek := p.peek()
+		if peek != lexer.TokenKindLeftBrace && peek != lexer.TokenKindLeftAngle {
+			p.pushState(stateTextFieldValue)
+			p.next() // skip :
+		} else {
+			p.pushState(stateTextFieldColon)
+			p.next() // skip :
+			p.addLeafNode(false)
+			p.parseTextMessage()
+			p.next() // skip { or <
+		}
 	}
+}
+
+func (p *Parser) parseTextFieldColon() {
+	state := p.popState()
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
 }
 
 func (p *Parser) parseTextFieldValue() {
@@ -66,10 +116,6 @@ func (p *Parser) parseTextFieldValue() {
 	case lexer.TokenKindTrue, lexer.TokenKindFalse:
 		p.addLeafNode(false)
 		p.next()
-	case lexer.TokenKindLeftBrace, lexer.TokenKindLeftAngle:
-		p.addLeafNode(false)
-		p.next()
-		p.parseTextMessage()
 	default:
 		if curr.IsIdentifier() {
 			p.addLeafNode(false)
@@ -80,5 +126,7 @@ func (p *Parser) parseTextFieldValue() {
 		panic("not implemented")
 	}
 
-	p.addNode(state.tokIdx, state)
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
 }
