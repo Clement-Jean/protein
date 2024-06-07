@@ -640,7 +640,7 @@ parseTree = [
 ]
 
 ================================================================================
-message value expected left brace
+message value expected right brace
 ================================================================================
 
 option test = {  >;
@@ -658,3 +658,29 @@ parseTree = [
   {kind: EOF},
 ]
 errs = [expected [}], got >]
+
+================================================================================
+inner message value expected right brace
+================================================================================
+
+option test = { test: { true: true >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+          {kind: Identifier},
+            {kind: {},
+              {kind: true},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+          {kind: >, hasError: true, subtreeSize: 5},
+        {kind: :, subtreeSize: 7},
+      {kind: ;, hasError: true, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: EOF, hasError: true, subtreeSize: 13},
+]
+errs = [expected [}], got > expected [}], got ; expected [;], got EOF]

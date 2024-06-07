@@ -11,7 +11,9 @@ func (p *Parser) parseTextFieldName() {
 	p.popState()
 
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindIdentifier && curr != lexer.TokenKindLeftSquare
+	hasError := curr != lexer.TokenKindIdentifier &&
+		curr != lexer.TokenKindLeftSquare &&
+		!curr.IsIdentifier()
 	p.addLeafNode(hasError)
 
 	switch curr {
