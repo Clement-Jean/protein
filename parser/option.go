@@ -96,12 +96,19 @@ func (p *Parser) parseOptionNameParenFinish() {
 	}
 }
 
-func (p *Parser) parseOptionAssign() {
+func (p *Parser) parseOptionEqual() {
 	state := p.popState()
-	tok := p.currTok
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
+}
+
+func (p *Parser) parseOptionAssign() {
+	p.popState()
 	hasError := p.curr() != lexer.TokenKindEqual
 
 	if !hasError {
+		p.pushState(stateOptionEqual)
 		p.next()
 	} else {
 		p.addLeafNode(hasError)
@@ -132,9 +139,6 @@ func (p *Parser) parseOptionAssign() {
 			p.skipPastLikelyEnd(p.currTok)
 		}
 	}
-
-	state.subtreeStart++
-	p.addNode(tok, state)
 }
 
 func (p *Parser) parseOptionFinish() {

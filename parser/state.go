@@ -18,6 +18,7 @@ const (
 	stateOptionNameRest
 	stateOptionNameParenFinish
 	stateOptionAssign
+	stateOptionEqual
 	stateOptionFinish
 	stateTextFieldValue
 	stateTextFieldAssign

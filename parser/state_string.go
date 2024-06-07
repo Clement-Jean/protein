@@ -20,20 +20,24 @@ func _() {
 	_ = x[stateOptionNameRest-9]
 	_ = x[stateOptionNameParenFinish-10]
 	_ = x[stateOptionAssign-11]
-	_ = x[stateOptionFinish-12]
-	_ = x[stateTextFieldValue-13]
-	_ = x[stateTextFieldAssign-14]
-	_ = x[stateTextFieldName-15]
-	_ = x[stateTextMessageValue-16]
-	_ = x[stateTextMessageComma-17]
-	_ = x[stateTextMessageFinish-18]
-	_ = x[stateFullIdentifierRoot-19]
-	_ = x[stateFullIdentifierRest-20]
+	_ = x[stateOptionEqual-12]
+	_ = x[stateOptionFinish-13]
+	_ = x[stateTextFieldValue-14]
+	_ = x[stateTextFieldAssign-15]
+	_ = x[stateTextFieldName-16]
+	_ = x[stateTextFieldExtensionName-17]
+	_ = x[stateTextFieldExtensionNameSlash-18]
+	_ = x[stateTextFieldExtensionNameFinish-19]
+	_ = x[stateTextMessageValue-20]
+	_ = x[stateTextMessageComma-21]
+	_ = x[stateTextMessageFinish-22]
+	_ = x[stateFullIdentifierRoot-23]
+	_ = x[stateFullIdentifierRest-24]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextMessageValuestateTextMessageCommastateTextMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageCommastateTextMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 228, 247, 267, 285, 306, 327, 349, 372, 395}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 414, 435, 457, 480, 503}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

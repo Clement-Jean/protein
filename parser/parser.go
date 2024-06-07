@@ -144,6 +144,8 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseOptionNameParenFinish()
 		case stateOptionAssign:
 			p.parseOptionAssign()
+		case stateOptionEqual:
+			p.parseOptionEqual()
 		case stateOptionFinish:
 			p.parseOptionFinish()
 		case stateTextFieldValue:
