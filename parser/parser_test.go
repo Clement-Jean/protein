@@ -122,3 +122,19 @@ func runParseTestCase(t *testing.T, tests []ParseTestCase) {
 		})
 	}
 }
+
+var testFiles = []string{
+	"comment.txt",
+	"syntax.txt",
+	"edition.txt",
+	"package.txt",
+	"import.txt",
+	"option.txt",
+}
+
+func TestParser(t *testing.T) {
+	for _, file := range testFiles {
+		subTests := parseTestContent(t, file)
+		runParseTestCase(t, subTests)
+	}
+}
