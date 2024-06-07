@@ -21,12 +21,17 @@ func (p *Parser) skipPastLikelyEnd(idx int) int {
 		return line == rootLine || line.Start+tok.Column > rootIndent
 	}
 
+	curr := p.curr()
 	for {
-		if p.curr() == lexer.TokenKindSemicolon {
+		if curr == lexer.TokenKindRightBrace || curr == lexer.TokenKindRightAngle {
 			return p.currTok
 		}
 
-		p.next()
+		if curr == lexer.TokenKindSemicolon {
+			return p.currTok
+		}
+
+		curr = p.next()
 		if p.currTok >= len(p.toks.TokenInfos)-1 || !keepSkipping(p.currTok) {
 			break
 		}
