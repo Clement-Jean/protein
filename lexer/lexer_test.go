@@ -441,7 +441,7 @@ func FuzzLexer(f *testing.F) {
 	f.Fuzz(func(t *testing.T, s string) {
 		l, err := lexer.NewFromReader(strings.NewReader(s))
 		if err != nil {
-			f.Fatal(err)
+			t.Fatal(err)
 		}
 
 		toks, _ = l.Lex()
