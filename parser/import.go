@@ -10,12 +10,13 @@ func (p *Parser) parseImport() {
 func (p *Parser) parseImportValue() {
 	p.popState()
 
-	if p.curr() == lexer.TokenKindPublic || p.curr() == lexer.TokenKindWeak {
+	curr := p.curr()
+	if curr == lexer.TokenKindPublic || curr == lexer.TokenKindWeak {
 		p.addLeafNode(false)
-		p.next()
+		curr = p.next()
 	}
 
-	hasError := p.curr() != lexer.TokenKindStr
+	hasError := curr != lexer.TokenKindStr
 	p.addLeafNode(hasError)
 
 	if !hasError {

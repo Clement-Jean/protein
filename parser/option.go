@@ -15,20 +15,21 @@ func (p *Parser) parseOption() {
 func (p *Parser) parseOptionName() {
 	p.popState()
 
-	hasError := p.curr() != lexer.TokenKindIdentifier &&
-		p.curr() != lexer.TokenKindLeftParen &&
-		!p.curr().IsIdentifier()
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindIdentifier &&
+		curr != lexer.TokenKindLeftParen &&
+		!curr.IsIdentifier()
 	p.addLeafNode(hasError)
 
-	switch curr := p.curr(); curr {
+	switch curr {
 	case lexer.TokenKindIdentifier:
 		p.next()
 	case lexer.TokenKindLeftParen:
-		p.next()
+		curr = p.next()
 		p.pushState(stateOptionNameParenFinish)
 		p.pushState(stateFullIdentifierRoot)
 
-		if p.curr() == lexer.TokenKindDot {
+		if curr == lexer.TokenKindDot {
 			p.addLeafNode(false)
 			p.next()
 		}
@@ -105,11 +106,12 @@ func (p *Parser) parseOptionEqual() {
 
 func (p *Parser) parseOptionAssign() {
 	p.popState()
-	hasError := p.curr() != lexer.TokenKindEqual
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindEqual
 
 	if !hasError {
 		p.pushState(stateOptionEqual)
-		p.next()
+		curr = p.next()
 	} else {
 		p.addLeafNode(hasError)
 		p.expectedCurr(lexer.TokenKindEqual)
@@ -122,16 +124,16 @@ func (p *Parser) parseOptionAssign() {
 		lexer.TokenKindInt, lexer.TokenKindFloat,
 		lexer.TokenKindStr,
 	}
-	hasError = !slices.Contains(accepted, p.curr())
+	hasError = !slices.Contains(accepted, curr)
 
 	if !hasError {
 		p.addLeafNode(false)
 		p.next()
 	} else {
-		if p.curr() == lexer.TokenKindLeftBrace || p.curr() == lexer.TokenKindLeftAngle {
+		if curr == lexer.TokenKindLeftBrace || curr == lexer.TokenKindLeftAngle {
 			p.addLeafNode(false)
-			p.next()
 			p.parseTextMessage()
+			p.next()
 			return
 		} else {
 			p.addLeafNode(true)

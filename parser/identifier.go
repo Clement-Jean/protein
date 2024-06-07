@@ -5,11 +5,12 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseFullIdentifierRoot() {
 	p.popState()
 
-	hasError := p.curr() != lexer.TokenKindIdentifier && !p.curr().IsIdentifier()
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindIdentifier && !curr.IsIdentifier()
 	p.addLeafNode(hasError)
 
 	if !hasError {
-		p.next()
+		curr = p.next()
 	} else {
 		p.expectedCurr(lexer.TokenKindIdentifier)
 	}
@@ -26,7 +27,7 @@ func (p *Parser) parseFullIdentifierRoot() {
 		}
 	}
 
-	if p.curr() == lexer.TokenKindDot {
+	if curr == lexer.TokenKindDot {
 		p.pushState(stateFullIdentifierRest)
 	}
 }

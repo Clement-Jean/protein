@@ -10,7 +10,8 @@ func (p *Parser) parseTextMessage() {
 func (p *Parser) parseTextMessageValue() {
 	p.popState()
 
-	if p.curr() != lexer.TokenKindRightBrace && p.curr() != lexer.TokenKindRightAngle {
+	curr := p.curr()
+	if curr != lexer.TokenKindRightBrace && curr != lexer.TokenKindRightAngle {
 		p.parseTextField()
 	}
 }
@@ -23,7 +24,8 @@ func (p *Parser) parseTextMessageComma() {
 }
 
 func (p *Parser) parseTextMessageFinish() {
-	if p.curr() == lexer.TokenKindComma {
+	curr := p.curr()
+	if curr == lexer.TokenKindComma {
 		p.pushState(stateTextMessageComma)
 		p.next()
 		p.pushState(stateTextMessageValue)
@@ -33,8 +35,7 @@ func (p *Parser) parseTextMessageFinish() {
 	state := p.popState()
 	tokIdx := p.currTok
 
-	state.hasError = p.curr() != lexer.TokenKindRightBrace &&
-		p.curr() != lexer.TokenKindRightAngle
+	state.hasError = curr != expected
 
 	if !state.hasError {
 		p.next()

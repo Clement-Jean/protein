@@ -10,10 +10,11 @@ func (p *Parser) parseTextField() {
 func (p *Parser) parseTextFieldName() {
 	p.popState()
 
-	hasError := p.curr() != lexer.TokenKindIdentifier && p.curr() != lexer.TokenKindLeftAngle
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindIdentifier && curr != lexer.TokenKindLeftSquare
 	p.addLeafNode(hasError)
 
-	switch p.curr() {
+	switch curr {
 	case lexer.TokenKindIdentifier:
 		p.next()
 	case lexer.TokenKindLeftAngle:
@@ -36,8 +37,9 @@ func (p *Parser) parseTextFieldExtensionNameFinish() {
 func (p *Parser) parseTextFieldAssign() {
 	p.popState()
 
-	if p.peek() != lexer.TokenKindLeftBrace && p.peek() != lexer.TokenKindLeftAngle {
-		if p.curr() != lexer.TokenKindColon {
+	curr := p.curr()
+	if curr != lexer.TokenKindColon {
+		if curr != lexer.TokenKindLeftBrace && curr != lexer.TokenKindLeftAngle {
 			// TODO error
 			panic("not implemented")
 		}

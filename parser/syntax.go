@@ -10,18 +10,19 @@ func (p *Parser) parseSyntax() {
 func (p *Parser) parseSyntaxAssign() {
 	p.popState()
 
-	hasError := p.curr() != lexer.TokenKindEqual
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindEqual
 	p.addLeafNode(hasError)
 
 	if !hasError {
-		p.next()
+		curr = p.next()
 	} else {
 		p.expectedCurr(lexer.TokenKindEqual)
 		p.skipPastLikelyEnd(p.currTok)
 		return
 	}
 
-	hasError = p.curr() != lexer.TokenKindStr
+	hasError = curr != lexer.TokenKindStr
 	p.addLeafNode(hasError)
 
 	if !hasError {

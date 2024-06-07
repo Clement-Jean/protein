@@ -87,13 +87,14 @@ func (p *Parser) expectedCurr(kind ...lexer.TokenKind) {
 }
 
 func (p *Parser) parseTopLevel() {
-	if p.curr() == lexer.TokenKindEOF {
+	curr := p.curr()
+
+	if curr == lexer.TokenKindEOF {
 		p.popState()
 		p.addLeafNode(false)
 		return
 	}
 
-	curr := p.curr()
 	p.addLeafNode(false)
 	p.next()
 
