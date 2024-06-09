@@ -16,12 +16,12 @@ const (
 	TokenKindSemicolon   // ;
 	TokenKindDot         // .
 	TokenKindLeftBrace   // {
-	TokenKindRightBrace  // }
 	TokenKindLeftSquare  // [
-	TokenKindRightSquare // ]
 	TokenKindLeftParen   // (
-	TokenKindRightParen  // )
 	TokenKindLeftAngle   // <
+	TokenKindRightBrace  // }
+	TokenKindRightSquare // ]
+	TokenKindRightParen  // )
 	TokenKindRightAngle  // >
 	TokenKindSlash       // /
 
@@ -146,5 +146,13 @@ var kinds = [...]TokenKind{
 }
 
 func (k TokenKind) IsIdentifier() bool {
-	return k > 127
+	return k >= TokenKindIdentifier
+}
+
+func (k TokenKind) IsOpeningSymbol() bool {
+	return k >= TokenKindLeftBrace && k <= TokenKindLeftAngle
+}
+
+func (k TokenKind) IsClosingSymbol() bool {
+	return k >= TokenKindRightBrace && k <= TokenKindRightAngle
 }

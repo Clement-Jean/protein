@@ -19,12 +19,12 @@ func _() {
 	_ = x[TokenKindSemicolon-8]
 	_ = x[TokenKindDot-9]
 	_ = x[TokenKindLeftBrace-10]
-	_ = x[TokenKindRightBrace-11]
-	_ = x[TokenKindLeftSquare-12]
-	_ = x[TokenKindRightSquare-13]
-	_ = x[TokenKindLeftParen-14]
-	_ = x[TokenKindRightParen-15]
-	_ = x[TokenKindLeftAngle-16]
+	_ = x[TokenKindLeftSquare-11]
+	_ = x[TokenKindLeftParen-12]
+	_ = x[TokenKindLeftAngle-13]
+	_ = x[TokenKindRightBrace-14]
+	_ = x[TokenKindRightSquare-15]
+	_ = x[TokenKindRightParen-16]
 	_ = x[TokenKindRightAngle-17]
 	_ = x[TokenKindSlash-18]
 	_ = x[TokenKindInt-19]
@@ -69,7 +69,7 @@ func _() {
 }
 
 const (
-	_TokenKind_name_0 = "EOFBOFErrorComment_=,:;.{}[]()<>/IntegerFloatString"
+	_TokenKind_name_0 = "EOFBOFErrorComment_=,:;.{[(<}])>/IntegerFloatString"
 	_TokenKind_name_1 = "Identifiersyntaxeditionpackageimportpublicweakoptionreservedmaxenummessagemaponeofextensionsservicerpcreturnsextendtruefalsefloatdoubleint32int64uint32uint64sint32sint64fixed32fixed64sfixed32sfixed64boolstringbytes"
 )
 
