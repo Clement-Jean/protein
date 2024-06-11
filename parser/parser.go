@@ -16,9 +16,8 @@ type Parser struct {
 
 func New(toks *lexer.TokenizedBuffer) *Parser {
 	return &Parser{
-		toks:  toks,
-		tree:  make([]Node, 0, len(toks.TokenInfos)),
-		stack: make([]stateStackEntry, 0, 31),
+		toks: toks,
+		tree: make([]Node, 0, len(toks.TokenInfos)),
 	}
 }
 
