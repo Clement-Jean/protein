@@ -119,12 +119,7 @@ func (p *Parser) parseOptionAssign() {
 		return
 	}
 
-	accepted := []lexer.TokenKind{
-		lexer.TokenKindTrue, lexer.TokenKindFalse,
-		lexer.TokenKindInt, lexer.TokenKindFloat,
-		lexer.TokenKindStr,
-	}
-	hasError = !slices.Contains(accepted, curr)
+	hasError = !slices.Contains(constantTypes, curr)
 
 	if !hasError {
 		p.addLeafNode(false)
@@ -137,7 +132,7 @@ func (p *Parser) parseOptionAssign() {
 			return
 		} else {
 			p.addLeafNode(true)
-			p.expectedCurr(accepted...)
+			p.expectedCurr(constantTypes...)
 			p.skipPastLikelyEnd(p.currTok)
 		}
 	}

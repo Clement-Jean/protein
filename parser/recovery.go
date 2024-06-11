@@ -1,6 +1,33 @@
 package parser
 
-import "github.com/Clement-Jean/protein/lexer"
+import (
+	"slices"
+
+	"github.com/Clement-Jean/protein/lexer"
+)
+
+func (p *Parser) skipTo(end ...lexer.TokenKind) {
+	curr := p.curr()
+	for curr != lexer.TokenKindEOF && !slices.Contains(end, curr) {
+		if p.skipSubscope(curr) {
+			curr = p.curr()
+			continue
+		}
+
+		curr = p.next()
+	}
+}
+
+func (p *Parser) skipSubscope(curr lexer.TokenKind) bool {
+	if !curr.IsOpeningSymbol() {
+		return false
+	}
+	for curr != lexer.TokenKindEOF && !curr.IsClosingSymbol() {
+		curr = p.next()
+	}
+	p.next()
+	return true
+}
 
 func (p *Parser) skipPastLikelyEnd(idx int) int {
 	if p.currTok >= len(p.toks.TokenInfos)-1 {
@@ -29,6 +56,11 @@ func (p *Parser) skipPastLikelyEnd(idx int) int {
 
 		if curr == lexer.TokenKindSemicolon {
 			return p.currTok
+		}
+
+		if p.skipSubscope(curr) {
+			curr = p.curr()
+			continue
 		}
 
 		curr = p.next()

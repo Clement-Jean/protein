@@ -1,6 +1,10 @@
 package parser
 
-import "github.com/Clement-Jean/protein/lexer"
+import (
+	"slices"
+
+	"github.com/Clement-Jean/protein/lexer"
+)
 
 func (p *Parser) parseTextField() {
 	p.pushState(stateTextFieldAssign)
@@ -28,7 +32,9 @@ func (p *Parser) parseTextFieldName() {
 			p.next()
 			break
 		}
+		p.popState() // skip the whole field
 		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftSquare)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
 	}
 }
 
@@ -60,8 +66,10 @@ func (p *Parser) parseTextFieldExtensionNameFinish() {
 	if !state.hasError {
 		p.next()
 	} else {
+		p.popState() // skip the whole field
 		p.expectedCurr(lexer.TokenKindRightSquare)
-		tokIdx = p.skipPastLikelyEnd(tokIdx)
+		tokIdx = p.currTok
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
 	}
 
 	p.addNode(tokIdx, state)
@@ -73,8 +81,10 @@ func (p *Parser) parseTextFieldAssign() {
 	curr := p.curr()
 	if curr != lexer.TokenKindColon {
 		if curr != lexer.TokenKindLeftBrace && curr != lexer.TokenKindLeftAngle {
-			// TODO error
-			panic("not implemented")
+			p.addLeafNode(true)
+			p.expectedCurr(lexer.TokenKindLeftBrace, lexer.TokenKindLeftAngle)
+			p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
+			return
 		}
 
 		p.addLeafNode(false)
@@ -105,27 +115,19 @@ func (p *Parser) parseTextFieldColon() {
 func (p *Parser) parseTextFieldValue() {
 	state := p.popState()
 
-	switch curr := p.curr(); curr {
-	case lexer.TokenKindInt:
+	curr := p.curr()
+	isConstant := slices.Contains(constantTypes, curr)
+
+	if isConstant {
 		p.addLeafNode(false)
 		p.next()
-	case lexer.TokenKindFloat:
+	} else if curr.IsIdentifier() {
 		p.addLeafNode(false)
 		p.next()
-	case lexer.TokenKindStr:
-		p.addLeafNode(false)
-		p.next()
-	case lexer.TokenKindTrue, lexer.TokenKindFalse:
-		p.addLeafNode(false)
-		p.next()
-	default:
-		if curr.IsIdentifier() {
-			p.addLeafNode(false)
-			p.next()
-			break
-		}
-		// TODO error
-		panic("not implemented")
+	} else {
+		p.addLeafNode(true)
+		p.expectedCurr(constantTypes...)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
 	}
 
 	top := p.topState()
