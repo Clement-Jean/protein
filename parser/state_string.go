@@ -33,13 +33,16 @@ func _() {
 	_ = x[stateTextMessageComma-22]
 	_ = x[stateTextMessageFinishRightBrace-23]
 	_ = x[stateTextMessageFinishRightAngle-24]
-	_ = x[stateFullIdentifierRoot-25]
-	_ = x[stateFullIdentifierRest-26]
+	_ = x[stateMessageName-25]
+	_ = x[stateMessageBlock-26]
+	_ = x[stateMessageFinish-27]
+	_ = x[stateFullIdentifierRoot-28]
+	_ = x[stateFullIdentifierRest-29]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 486, 518, 541, 564}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 486, 518, 534, 551, 569, 592, 615}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

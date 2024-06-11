@@ -31,6 +31,9 @@ const (
 	stateTextMessageComma
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
+	stateMessageName
+	stateMessageBlock
+	stateMessageFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
