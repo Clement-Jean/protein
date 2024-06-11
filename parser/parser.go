@@ -174,6 +174,8 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseMessageName()
 		case stateMessageBlock:
 			p.parseMessageBlock()
+		case stateMessageValue:
+			p.parseMessageValue()
 		case stateMessageFinish:
 			p.parseMessageFinish()
 

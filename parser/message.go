@@ -16,7 +16,7 @@ func (p *Parser) parseMessageName() {
 	p.addLeafNode(hasError)
 
 	if !hasError {
-		curr = p.next()
+		p.next()
 	} else {
 		p.expectedCurr(lexer.TokenKindEqual)
 		p.skipPastLikelyEnd(p.currTok)
@@ -26,23 +26,27 @@ func (p *Parser) parseMessageName() {
 func (p *Parser) parseMessageBlock() {
 	p.popState()
 
-	curr := p.curr()
-	hasError := curr != lexer.TokenKindLeftBrace
+	hasError := p.curr() != lexer.TokenKindLeftBrace
 	p.addLeafNode(hasError)
 
 	if !hasError {
-		curr = p.next()
+		p.next()
 	} else {
 		p.expectedCurr(lexer.TokenKindLeftBrace)
 		p.skipPastLikelyEnd(p.currTok)
 	}
 
-	switch curr {
+	p.pushState(stateMessageValue)
+}
+
+func (p *Parser) parseMessageValue() {
+	switch p.curr() {
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
 		p.next()
 		p.parseOption()
 	case lexer.TokenKindRightBrace:
+		p.popState()
 	default:
 		panic("not implemented")
 	}

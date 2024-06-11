@@ -33,6 +33,7 @@ const (
 	stateTextMessageFinishRightAngle
 	stateMessageName
 	stateMessageBlock
+	stateMessageValue
 	stateMessageFinish
 
 	stateFullIdentifierRoot

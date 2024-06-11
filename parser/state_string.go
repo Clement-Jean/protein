@@ -35,14 +35,15 @@ func _() {
 	_ = x[stateTextMessageFinishRightAngle-24]
 	_ = x[stateMessageName-25]
 	_ = x[stateMessageBlock-26]
-	_ = x[stateMessageFinish-27]
-	_ = x[stateFullIdentifierRoot-28]
-	_ = x[stateFullIdentifierRest-29]
+	_ = x[stateMessageValue-27]
+	_ = x[stateMessageFinish-28]
+	_ = x[stateFullIdentifierRoot-29]
+	_ = x[stateFullIdentifierRest-30]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 486, 518, 534, 551, 569, 592, 615}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 486, 518, 534, 551, 568, 586, 609, 632}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {
