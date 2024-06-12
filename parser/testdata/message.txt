@@ -80,3 +80,52 @@ parseTree = [
   {kind: }, subtreeSize: 14},
   {kind: EOF},
 ]
+
+================================================================================
+field
+================================================================================
+
+message Test { uint32 id = 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+
+================================================================================
+fields
+================================================================================
+
+message Test { uint32 id = 1; float height = 2; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+      {kind: float},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]

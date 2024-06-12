@@ -34,6 +34,7 @@ const (
 	stateTextMessageFinishRightAngle
 	stateMessageName
 	stateMessageBlock
+	stateMessageField
 	stateMessageValue
 	stateMessageFinish
 
