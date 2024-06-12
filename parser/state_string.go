@@ -31,19 +31,20 @@ func _() {
 	_ = x[stateTextFieldColon-20]
 	_ = x[stateTextMessageValue-21]
 	_ = x[stateTextMessageComma-22]
-	_ = x[stateTextMessageFinishRightBrace-23]
-	_ = x[stateTextMessageFinishRightAngle-24]
-	_ = x[stateMessageName-25]
-	_ = x[stateMessageBlock-26]
-	_ = x[stateMessageValue-27]
-	_ = x[stateMessageFinish-28]
-	_ = x[stateFullIdentifierRoot-29]
-	_ = x[stateFullIdentifierRest-30]
+	_ = x[stateTextMessageInsert-23]
+	_ = x[stateTextMessageFinishRightBrace-24]
+	_ = x[stateTextMessageFinishRightAngle-25]
+	_ = x[stateMessageName-26]
+	_ = x[stateMessageBlock-27]
+	_ = x[stateMessageValue-28]
+	_ = x[stateMessageFinish-29]
+	_ = x[stateFullIdentifierRoot-30]
+	_ = x[stateFullIdentifierRest-31]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 486, 518, 534, 551, 568, 586, 609, 632}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 476, 508, 540, 556, 573, 590, 608, 631, 654}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

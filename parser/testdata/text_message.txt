@@ -72,6 +72,34 @@ parseTree = [
 ]
 
 ================================================================================
+multiple fields semicolon
+================================================================================
+
+option (deprecated) = { value: true; value2: "test" };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: String},
+          {kind: :, subtreeSize: 3},
+        {kind: ;, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 13},
+  {kind: ;, subtreeSize: 15},
+  {kind: EOF},
+]
+
+================================================================================
 multiple fields 2
 ================================================================================
 
@@ -245,6 +273,68 @@ parseTree = [
 ]
 
 ================================================================================
+optional comma or semicolon
+================================================================================
+
+option test = {
+   a: { test: true }
+   b: true
+};
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: Identifier},
+              {kind: {},
+                {kind: Identifier},
+                {kind: true},
+              {kind: :, subtreeSize: 3},
+            {kind: }, subtreeSize: 5},
+          {kind: :, subtreeSize: 7},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: <INSERT>, subtreeSize: 11},
+      {kind: }, subtreeSize: 13},
+    {kind: =, subtreeSize: 15},
+  {kind: ;, subtreeSize: 17},
+  {kind: EOF},
+]
+
+================================================================================
+optional comma or semicolon 2
+================================================================================
+
+option test = {
+   a: true
+   b: true
+};
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: <INSERT>, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: ;, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
 expected right brace
 ================================================================================
 
@@ -268,27 +358,25 @@ errs = [expected [}], got >]
 inner expected right brace
 ================================================================================
 
-option test = { test: { true: true >;
+option test = { test: { true: true >
 
 --------------------------------------------------------------------------------
 
 parseTree = [
   {kind: BOF},
-    {kind: option},
+  {kind: option},
+  {kind: Identifier},
+    {kind: {},
       {kind: Identifier},
         {kind: {},
-          {kind: Identifier},
-            {kind: {},
-              {kind: true},
-              {kind: true},
-            {kind: :, subtreeSize: 3},
-          {kind: >, hasError: true, subtreeSize: 5},
-        {kind: :, subtreeSize: 7},
-      {kind: ;, hasError: true, subtreeSize: 9},
-    {kind: =, subtreeSize: 11},
-  {kind: EOF, hasError: true, subtreeSize: 13},
+          {kind: true},
+          {kind: true},
+        {kind: :, subtreeSize: 3},
+      {kind: >, hasError: true, subtreeSize: 5},
+    {kind: :, subtreeSize: 7},
+  {kind: EOF, hasError: true, subtreeSize: 9},
 ]
-errs = [expected [}], got > expected [}], got ; expected [;], got EOF]
+errs = [expected [}], got > expected [}], got EOF]
 
 ================================================================================
 expected right square
@@ -395,7 +483,7 @@ errs = [expected [{ <], got Integer]
 expected constant
 ================================================================================
 
-option test = { test: ; };
+option test = { test: ) };
 
 --------------------------------------------------------------------------------
 
@@ -405,11 +493,11 @@ parseTree = [
       {kind: Identifier},
         {kind: {},
           {kind: Identifier},
-          {kind: ;, hasError: true},
+          {kind: ), hasError: true},
         {kind: :, subtreeSize: 3},
       {kind: }, subtreeSize: 5},
     {kind: =, subtreeSize: 7},
   {kind: ;, subtreeSize: 9},
   {kind: EOF},
 ]
-errs = [expected [true false Integer Float String], got ;]
+errs = [expected [true false Integer Float String], got )]

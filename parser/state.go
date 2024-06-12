@@ -29,6 +29,7 @@ const (
 	stateTextFieldColon
 	stateTextMessageValue
 	stateTextMessageComma
+	stateTextMessageInsert
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
 	stateMessageName

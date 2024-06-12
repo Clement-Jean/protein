@@ -8,7 +8,6 @@ func (p *Parser) parseTextMessage() {
 	} else {
 		p.pushState(stateTextMessageFinishRightAngle)
 	}
-
 	p.pushState(stateTextMessageValue)
 }
 
@@ -16,7 +15,13 @@ func (p *Parser) parseTextMessageValue() {
 	p.popState()
 
 	curr := p.curr()
+	if curr == lexer.TokenKindComment {
+		curr = p.next()
+	}
+
 	if curr != lexer.TokenKindRightBrace && curr != lexer.TokenKindRightAngle {
+		p.parseTextField()
+	} else if curr == lexer.TokenKindIdentifier || curr.IsIdentifier() {
 		p.parseTextField()
 	}
 }
@@ -28,11 +33,25 @@ func (p *Parser) parseTextMessageComma() {
 	p.addNode(state.tokIdx, top)
 }
 
+func (p *Parser) parseTextMessageInsert() {
+	p.popState()
+	top := p.topState()
+	top.subtreeStart++
+	p.tree = append(p.tree, Node{
+		TokIdx:      -1,
+		SubtreeSize: int32(len(p.tree)) - top.subtreeStart + 1,
+	})
+}
+
 func (p *Parser) parseTextMessageFinish() {
 	curr := p.curr()
-	if curr == lexer.TokenKindComma {
+	if curr == lexer.TokenKindComma || curr == lexer.TokenKindSemicolon {
 		p.pushState(stateTextMessageComma)
 		p.next()
+		p.pushState(stateTextMessageValue)
+		return
+	} else if curr == lexer.TokenKindIdentifier || curr.IsIdentifier() {
+		p.pushState(stateTextMessageInsert)
 		p.pushState(stateTextMessageValue)
 		return
 	}
@@ -44,7 +63,7 @@ func (p *Parser) parseTextMessageFinish() {
 		expected = lexer.TokenKindRightAngle
 	}
 
-	state.hasError = curr != expected
+	state.hasError = p.curr() != expected
 
 	if !state.hasError {
 		p.next()

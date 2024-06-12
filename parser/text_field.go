@@ -34,7 +34,7 @@ func (p *Parser) parseTextFieldName() {
 		}
 		p.popState() // skip the whole field
 		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftSquare)
-		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon, lexer.TokenKindRightBrace)
 	}
 }
 
@@ -69,7 +69,7 @@ func (p *Parser) parseTextFieldExtensionNameFinish() {
 		p.popState() // skip the whole field
 		p.expectedCurr(lexer.TokenKindRightSquare)
 		tokIdx = p.currTok
-		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon, lexer.TokenKindRightBrace)
 	}
 
 	p.addNode(tokIdx, state)
@@ -83,7 +83,7 @@ func (p *Parser) parseTextFieldAssign() {
 		if curr != lexer.TokenKindLeftBrace && curr != lexer.TokenKindLeftAngle {
 			p.addLeafNode(true)
 			p.expectedCurr(lexer.TokenKindLeftBrace, lexer.TokenKindLeftAngle)
-			p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
+			p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon, lexer.TokenKindRightBrace)
 			return
 		}
 
@@ -127,7 +127,7 @@ func (p *Parser) parseTextFieldValue() {
 	} else {
 		p.addLeafNode(true)
 		p.expectedCurr(constantTypes...)
-		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightBrace)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon, lexer.TokenKindRightBrace)
 	}
 
 	top := p.topState()

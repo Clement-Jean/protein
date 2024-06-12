@@ -77,7 +77,17 @@ func (p *Parser) addNode(tokIdx int, state stateStackEntry) {
 	})
 }
 
+func (p *Parser) stackDump() {
+	println("currTok:", p.currTok)
+	println("stack dump:")
+	for i := len(p.stack) - 1; i >= 0; i-- {
+		println("  ", i, p.stack[i].st.String())
+	}
+	println()
+}
+
 func (p *Parser) error(err error) {
+	//	p.stackDump()
 	p.errs = append(p.errs, err)
 }
 
@@ -168,6 +178,8 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseTextMessageValue()
 		case stateTextMessageComma:
 			p.parseTextMessageComma()
+		case stateTextMessageInsert:
+			p.parseTextMessageInsert()
 		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
 			p.parseTextMessageFinish()
 		case stateMessageName:
