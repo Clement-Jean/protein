@@ -39,10 +39,10 @@ func (p *Parser) parseMessageBlock() {
 	p.pushState(stateMessageValue)
 }
 
-func (p *Parser) parseMessageField() {
+func (p *Parser) parseMessageFieldAssign() {
 	state := p.popState()
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindIdentifier
+	hasError := curr != lexer.TokenKindIdentifier && !curr.IsIdentifier()
 	p.addLeafNode(hasError)
 
 	if !hasError {
@@ -50,7 +50,6 @@ func (p *Parser) parseMessageField() {
 	} else {
 		p.expectedCurr(lexer.TokenKindIdentifier)
 		p.skipPastLikelyEnd(p.currTok)
-		return
 	}
 
 	hasError = curr != lexer.TokenKindEqual
@@ -92,7 +91,7 @@ func (p *Parser) parseMessageField() {
 }
 
 func (p *Parser) parseMessageValue() {
-	switch p.curr() {
+	switch curr := p.curr(); curr {
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
 		p.next()
@@ -114,12 +113,20 @@ func (p *Parser) parseMessageValue() {
 		lexer.TokenKindTypeBytes:
 		p.addLeafNode(false)
 		p.next()
-		p.pushState(stateMessageField)
-	case lexer.TokenKindSemicolon:
+		p.pushState(stateMessageFieldAssign)
+	case lexer.TokenKindIdentifier:
+		p.pushState(stateMessageFieldAssign)
+		p.pushState(stateFullIdentifierRoot)
+	case lexer.TokenKindSemicolon, lexer.TokenKindComment:
 		p.next()
 	case lexer.TokenKindRightBrace:
 		p.popState()
 	default:
+		if curr.IsIdentifier() {
+			p.pushState(stateMessageFieldAssign)
+			p.pushState(stateFullIdentifierRoot)
+			break
+		}
 		panic("not implemented")
 	}
 }

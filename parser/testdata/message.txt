@@ -33,6 +33,23 @@ parseTree = [
 ]
 
 ================================================================================
+empty statement
+================================================================================
+
+message Test { ; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+  {kind: }, subtreeSize: 4},
+  {kind: EOF},
+]
+
+================================================================================
 option
 ================================================================================
 
@@ -127,5 +144,51 @@ parseTree = [
       {kind: =, subtreeSize: 3},
     {kind: ;, subtreeSize: 5},
   {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+fields various names
+================================================================================
+
+message test {
+  Bar msg = 1;
+  Foo.Bar inner_msg = 2;
+  true.Bar test = 3;
+  true uint32 = 4;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+            {kind: {},
+              {kind: Identifier},
+              {kind: Identifier},
+              {kind: Integer},
+            {kind: =, subtreeSize: 4},
+          {kind: ;, subtreeSize: 6},
+              {kind: Identifier},
+              {kind: Identifier},
+            {kind: ., subtreeSize: 3},
+            {kind: Identifier},
+            {kind: Integer},
+          {kind: =, subtreeSize: 6},
+        {kind: ;, subtreeSize: 8},
+            {kind: true},
+            {kind: Identifier},
+          {kind: ., subtreeSize: 3},
+          {kind: Identifier},
+          {kind: Integer},
+        {kind: =, subtreeSize: 6},
+      {kind: ;, subtreeSize: 8},
+        {kind: true},
+        {kind: uint32},
+        {kind: Integer},
+      {kind: =, subtreeSize: 4},
+    {kind: ;, subtreeSize: 6},
+  {kind: }, subtreeSize: 28},
   {kind: EOF},
 ]
