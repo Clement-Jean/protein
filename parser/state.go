@@ -24,22 +24,24 @@ const (
 	stateTextFieldAssign
 	stateTextFieldName
 	stateTextFieldExtensionName
-	stateTextFieldExtensionNameSlash
 	stateTextFieldExtensionNameFinish
-	stateTextFieldColon
 	stateTextMessageValue
-	stateTextMessageComma
 	stateTextMessageInsert
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
 	stateMessageName
 	stateMessageBlock
 	stateMessageFieldAssign
+	stateMessageFieldOption
+	stateMessageFieldOptionFinish
+	stateMessageFieldFinish
 	stateMessageValue
 	stateMessageFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
+
+	stateEnder
 )
 
 type stateStackEntry struct {

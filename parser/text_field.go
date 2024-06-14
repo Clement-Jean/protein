@@ -43,16 +43,9 @@ func (p *Parser) parseTextFieldExtensionName() {
 	p.pushState(stateFullIdentifierRoot)
 }
 
-func (p *Parser) parseTextFieldExtensionNameSlash() {
-	state := p.popState()
-	top := p.topState()
-	top.subtreeStart++
-	p.addNode(state.tokIdx, top)
-}
-
 func (p *Parser) parseTextFieldExtensionNameFinish() {
 	if p.curr() == lexer.TokenKindSlash {
-		p.pushState(stateTextFieldExtensionNameSlash)
+		p.pushState(stateEnder)
 		p.next()
 		p.pushState(stateFullIdentifierRoot)
 		return
@@ -96,7 +89,7 @@ func (p *Parser) parseTextFieldAssign() {
 			p.pushState(stateTextFieldValue)
 			p.next() // skip :
 		} else {
-			p.pushState(stateTextFieldColon)
+			p.pushState(stateEnder)
 			p.next() // skip :
 			p.addLeafNode(false)
 			p.parseTextMessage()
@@ -105,16 +98,8 @@ func (p *Parser) parseTextFieldAssign() {
 	}
 }
 
-func (p *Parser) parseTextFieldColon() {
-	state := p.popState()
-	top := p.topState()
-	top.subtreeStart++
-	p.addNode(state.tokIdx, top)
-}
-
 func (p *Parser) parseTextFieldValue() {
 	state := p.popState()
-
 	curr := p.curr()
 	isConstant := slices.Contains(constantTypes, curr)
 

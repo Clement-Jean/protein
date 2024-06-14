@@ -26,26 +26,27 @@ func _() {
 	_ = x[stateTextFieldAssign-15]
 	_ = x[stateTextFieldName-16]
 	_ = x[stateTextFieldExtensionName-17]
-	_ = x[stateTextFieldExtensionNameSlash-18]
-	_ = x[stateTextFieldExtensionNameFinish-19]
-	_ = x[stateTextFieldColon-20]
-	_ = x[stateTextMessageValue-21]
-	_ = x[stateTextMessageComma-22]
-	_ = x[stateTextMessageInsert-23]
-	_ = x[stateTextMessageFinishRightBrace-24]
-	_ = x[stateTextMessageFinishRightAngle-25]
-	_ = x[stateMessageName-26]
-	_ = x[stateMessageBlock-27]
-	_ = x[stateMessageFieldAssign-28]
+	_ = x[stateTextFieldExtensionNameFinish-18]
+	_ = x[stateTextMessageValue-19]
+	_ = x[stateTextMessageInsert-20]
+	_ = x[stateTextMessageFinishRightBrace-21]
+	_ = x[stateTextMessageFinishRightAngle-22]
+	_ = x[stateMessageName-23]
+	_ = x[stateMessageBlock-24]
+	_ = x[stateMessageFieldAssign-25]
+	_ = x[stateMessageFieldOption-26]
+	_ = x[stateMessageFieldOptionFinish-27]
+	_ = x[stateMessageFieldFinish-28]
 	_ = x[stateMessageValue-29]
 	_ = x[stateMessageFinish-30]
 	_ = x[stateFullIdentifierRoot-31]
 	_ = x[stateFullIdentifierRest-32]
+	_ = x[stateEnder-33]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameSlashstateTextFieldExtensionNameFinishstateTextFieldColonstateTextMessageValuestateTextMessageCommastateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFieldAssignstateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierRest"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierReststateEnder"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 360, 393, 412, 433, 454, 476, 508, 540, 556, 573, 596, 613, 631, 654, 677}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 404, 436, 468, 484, 501, 524, 547, 576, 599, 616, 634, 657, 680, 690}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

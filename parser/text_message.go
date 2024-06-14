@@ -26,13 +26,6 @@ func (p *Parser) parseTextMessageValue() {
 	}
 }
 
-func (p *Parser) parseTextMessageComma() {
-	state := p.popState()
-	top := p.topState()
-	top.subtreeStart++
-	p.addNode(state.tokIdx, top)
-}
-
 func (p *Parser) parseTextMessageInsert() {
 	p.popState()
 	top := p.topState()
@@ -46,7 +39,7 @@ func (p *Parser) parseTextMessageInsert() {
 func (p *Parser) parseTextMessageFinish() {
 	curr := p.curr()
 	if curr == lexer.TokenKindComma || curr == lexer.TokenKindSemicolon {
-		p.pushState(stateTextMessageComma)
+		p.pushState(stateEnder)
 		p.next()
 		p.pushState(stateTextMessageValue)
 		return

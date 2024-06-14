@@ -95,6 +95,13 @@ func (p *Parser) expectedCurr(kind ...lexer.TokenKind) {
 	p.error(fmt.Errorf("expected %v, got %s", kind, p.curr()))
 }
 
+func (p *Parser) parseEnderState() {
+	state := p.popState()
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
+}
+
 func (p *Parser) parseTopLevel() {
 	curr := p.curr()
 
@@ -156,28 +163,20 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseOptionNameParenFinish()
 		case stateOptionAssign:
 			p.parseOptionAssign()
-		case stateOptionEqual:
-			p.parseOptionEqual()
 		case stateOptionFinish:
 			p.parseOptionFinish()
 		case stateTextFieldValue:
 			p.parseTextFieldValue()
-		case stateTextFieldColon:
-			p.parseTextFieldColon()
 		case stateTextFieldAssign:
 			p.parseTextFieldAssign()
 		case stateTextFieldName:
 			p.parseTextFieldName()
 		case stateTextFieldExtensionName:
 			p.parseTextFieldExtensionName()
-		case stateTextFieldExtensionNameSlash:
-			p.parseTextFieldExtensionNameSlash()
 		case stateTextFieldExtensionNameFinish:
 			p.parseTextFieldExtensionNameFinish()
 		case stateTextMessageValue:
 			p.parseTextMessageValue()
-		case stateTextMessageComma:
-			p.parseTextMessageComma()
 		case stateTextMessageInsert:
 			p.parseTextMessageInsert()
 		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
@@ -197,6 +196,9 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseFullIdentifierRoot()
 		case stateFullIdentifierRest:
 			p.parseFullIdentifierRest()
+
+		case stateEnder:
+			p.parseEnderState()
 		}
 	}
 	return p.tree, p.errs
