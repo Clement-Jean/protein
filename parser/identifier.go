@@ -6,7 +6,7 @@ func (p *Parser) parseFullIdentifierRoot() {
 	p.popState()
 
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindIdentifier && !curr.IsIdentifier()
+	hasError := !curr.IsIdentifier()
 	p.addLeafNode(hasError)
 
 	if !hasError {

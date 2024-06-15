@@ -21,7 +21,7 @@ func (p *Parser) parseTextMessageValue() {
 
 	if curr != lexer.TokenKindRightBrace && curr != lexer.TokenKindRightAngle {
 		p.parseTextField()
-	} else if curr == lexer.TokenKindIdentifier || curr.IsIdentifier() {
+	} else if curr.IsIdentifier() {
 		p.parseTextField()
 	}
 }
@@ -43,7 +43,7 @@ func (p *Parser) parseTextMessageFinish() {
 		p.next()
 		p.pushState(stateTextMessageValue)
 		return
-	} else if curr == lexer.TokenKindIdentifier || curr.IsIdentifier() {
+	} else if curr.IsIdentifier() {
 		p.pushState(stateTextMessageInsert)
 		p.pushState(stateTextMessageValue)
 		return

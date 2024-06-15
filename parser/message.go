@@ -16,7 +16,7 @@ func (p *Parser) parseMessageName() {
 	p.popState()
 
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindIdentifier && !curr.IsIdentifier()
+	hasError := !curr.IsIdentifier()
 	p.addLeafNode(hasError)
 
 	if !hasError {
@@ -52,7 +52,7 @@ func (p *Parser) parseMessageFieldAssign() {
 	introducerLen := int32(len(p.tree)) - state.subtreeStart
 
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindIdentifier && !curr.IsIdentifier()
+	hasError := !curr.IsIdentifier()
 
 	if !hasError {
 		p.addLeafNode(hasError)
