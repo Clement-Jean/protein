@@ -37,16 +37,17 @@ func _() {
 	_ = x[stateMessageFieldOption-26]
 	_ = x[stateMessageFieldOptionFinish-27]
 	_ = x[stateMessageFieldFinish-28]
-	_ = x[stateMessageValue-29]
-	_ = x[stateMessageFinish-30]
-	_ = x[stateFullIdentifierRoot-31]
-	_ = x[stateFullIdentifierRest-32]
-	_ = x[stateEnder-33]
+	_ = x[stateMessageMapKeyValue-29]
+	_ = x[stateMessageValue-30]
+	_ = x[stateMessageFinish-31]
+	_ = x[stateFullIdentifierRoot-32]
+	_ = x[stateFullIdentifierRest-33]
+	_ = x[stateEnder-34]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierReststateEnder"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageMapKeyValuestateMessageValuestateMessageFinishstateFullIdentifierRootstateFullIdentifierReststateEnder"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 404, 436, 468, 484, 501, 524, 547, 576, 599, 616, 634, 657, 680, 690}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 404, 436, 468, 484, 501, 524, 547, 576, 599, 622, 639, 657, 680, 703, 713}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

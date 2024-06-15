@@ -204,16 +204,90 @@ func (p *Parser) parseMessageFieldFinish() {
 	p.addNode(tokIdx, state)
 }
 
+func (p *Parser) parseMessageMapKeyValue() {
+	state := p.popState()
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindLeftAngle
+	p.addLeafNode(hasError)
+
+	if !hasError {
+		curr = p.next()
+	} else {
+		p.expectedCurr(lexer.TokenKindLeftAngle)
+		p.skipPastLikelyEnd(p.currTok)
+		return
+	}
+
+	hasError = !slices.Contains(mapKeyTypes, curr)
+	p.addLeafNode(hasError)
+
+	if !hasError {
+		curr = p.next()
+	} else {
+		p.expectedCurr(mapKeyTypes...)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightAngle)
+		curr = p.curr()
+	}
+
+	hasError = curr != lexer.TokenKindComma
+	commaIdx := p.currTok
+
+	if !hasError {
+		curr = p.next()
+	} else {
+		p.addLeafNode(hasError)
+		p.expectedCurr(lexer.TokenKindComma)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightAngle)
+		curr = p.curr()
+		state.subtreeStart += 3
+		goto end_generic
+	}
+
+	hasError = !curr.IsIdentifier()
+	p.addLeafNode(hasError)
+
+	if !hasError {
+		curr = p.next()
+	} else {
+		p.expectedCurr(lexer.TokenKindIdentifier)
+		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightAngle)
+		curr = p.curr()
+	}
+
+	state.subtreeStart += 3
+	p.addNode(commaIdx, state)
+
+end_generic:
+	hasError = curr != lexer.TokenKindRightAngle
+
+	if !hasError {
+		state.subtreeStart--
+		p.addNode(p.currTok, state)
+		p.next()
+	} else {
+		p.addLeafNode(hasError)
+		p.expectedCurr(lexer.TokenKindRightAngle)
+		p.skipPastLikelyEnd(p.currTok)
+	}
+}
+
 func (p *Parser) parseMessageValue() {
 	switch curr := p.curr(); curr {
-	case lexer.TokenKindOption:
-		p.addLeafNode(false)
-		p.next()
-		p.parseOption()
 	case lexer.TokenKindSemicolon, lexer.TokenKindComment:
 		p.next()
 	case lexer.TokenKindRightBrace:
 		p.popState()
+	case lexer.TokenKindOption:
+		p.addLeafNode(false)
+		p.next()
+		p.parseOption()
+	case lexer.TokenKindMap:
+		p.pushState(stateMessageFieldFinish)
+		p.pushState(stateMessageFieldAssign)
+		p.pushState(stateMessageMapKeyValue)
+		p.addLeafNode(false)
+		p.next()
+
 	default:
 		hasDot := false
 		if curr == lexer.TokenKindDot {
@@ -245,6 +319,7 @@ func (p *Parser) parseMessageValue() {
 			lexer.TokenKindTypeBool,
 			lexer.TokenKindTypeString,
 			lexer.TokenKindTypeBytes,
+			lexer.TokenKindMap,
 			lexer.TokenKindIdentifier,
 			lexer.TokenKindRightBrace,
 		)

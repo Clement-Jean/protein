@@ -193,6 +193,8 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseMessageFieldOptionFinish()
 		case stateMessageFieldFinish:
 			p.parseMessageFieldFinish()
+		case stateMessageMapKeyValue:
+			p.parseMessageMapKeyValue()
 		case stateMessageValue:
 			p.parseMessageValue()
 		case stateMessageFinish:

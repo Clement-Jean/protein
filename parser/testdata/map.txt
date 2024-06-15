@@ -1,0 +1,144 @@
+================================================================================
+simple
+================================================================================
+
+message test {
+  map<string, uint32> occs = 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: map},
+        {kind: <},
+          {kind: string},
+          {kind: uint32},
+        {kind: ,, subtreeSize: 3},
+      {kind: >, subtreeSize: 5},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 10},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+expected key type
+================================================================================
+
+message test {
+  map<float, uint32> occs = 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: map},
+        {kind: <},
+          {kind: float, hasError: true},
+          {kind: uint32},
+        {kind: ,, subtreeSize: 3},
+      {kind: >, subtreeSize: 5},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 10},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+errs = [expected [int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string], got float]
+
+================================================================================
+expected comma
+================================================================================
+
+message Test {
+  map<string uint32> occs = 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: map},
+        {kind: <},
+        {kind: string},
+        {kind: uint32, hasError: true},
+      {kind: >, subtreeSize: 4},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 9},
+  {kind: }, subtreeSize: 13},
+  {kind: EOF},
+]
+errs = [expected [,], got uint32]
+
+================================================================================
+expected identifier
+================================================================================
+
+message Test {
+  map<string, 1> occs = 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: map},
+        {kind: <},
+          {kind: string},
+          {kind: Integer, hasError: true},
+        {kind: ,, subtreeSize: 3},
+      {kind: >, subtreeSize: 5},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 10},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got Integer]
+
+================================================================================
+expected right angle
+================================================================================
+
+message Test {
+  map<string, uint32 occs = 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: map},
+      {kind: <},
+        {kind: string},
+        {kind: uint32},
+      {kind: ,, subtreeSize: 3},
+      {kind: Identifier, hasError: true},
+    {kind: ;, hasError: true, subtreeSize: 7},
+  {kind: }, subtreeSize: 11},
+  {kind: EOF},
+]
+errs = [expected [>], got Identifier expected [Identifier], got ;]

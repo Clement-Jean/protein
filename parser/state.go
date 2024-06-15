@@ -35,6 +35,7 @@ const (
 	stateMessageFieldOption
 	stateMessageFieldOptionFinish
 	stateMessageFieldFinish
+	stateMessageMapKeyValue
 	stateMessageValue
 	stateMessageFinish
 
