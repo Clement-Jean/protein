@@ -45,6 +45,8 @@ const (
 	TokenKindEnum                                // enum
 	TokenKindMessage                             // message
 	TokenKindMap                                 // map
+	TokenKindRepeated                            // repeated
+	TokenKindOptional                            // optional
 	TokenKindOneOf                               // oneof
 	TokenKindExtensions                          // extensions
 	TokenKindService                             // service
@@ -83,6 +85,8 @@ var literals = []string{
 	"enum",
 	"message",
 	"map",
+	"repeated",
+	"optional",
 	"oneof",
 	"extensions",
 	"service",
@@ -120,6 +124,8 @@ var kinds = [...]TokenKind{
 	TokenKindEnum,
 	TokenKindMessage,
 	TokenKindMap,
+	TokenKindRepeated,
+	TokenKindOptional,
 	TokenKindOneOf,
 	TokenKindExtensions,
 	TokenKindService,

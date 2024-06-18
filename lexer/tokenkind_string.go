@@ -43,46 +43,48 @@ func _() {
 	_ = x[TokenKindEnum-138]
 	_ = x[TokenKindMessage-139]
 	_ = x[TokenKindMap-140]
-	_ = x[TokenKindOneOf-141]
-	_ = x[TokenKindExtensions-142]
-	_ = x[TokenKindService-143]
-	_ = x[TokenKindRPC-144]
-	_ = x[TokenKindReturns-145]
-	_ = x[TokenKindExtend-146]
-	_ = x[TokenKindTrue-147]
-	_ = x[TokenKindFalse-148]
-	_ = x[TokenKindTypeFloat-149]
-	_ = x[TokenKindTypeDouble-150]
-	_ = x[TokenKindTypeInt32-151]
-	_ = x[TokenKindTypeInt64-152]
-	_ = x[TokenKindTypeUint32-153]
-	_ = x[TokenKindTypeUint64-154]
-	_ = x[TokenKindTypeSint32-155]
-	_ = x[TokenKindTypeSint64-156]
-	_ = x[TokenKindTypeFixed32-157]
-	_ = x[TokenKindTypeFixed64-158]
-	_ = x[TokenKindTypeSfixed32-159]
-	_ = x[TokenKindTypeSfixed64-160]
-	_ = x[TokenKindTypeBool-161]
-	_ = x[TokenKindTypeString-162]
-	_ = x[TokenKindTypeBytes-163]
+	_ = x[TokenKindRepeated-141]
+	_ = x[TokenKindOptional-142]
+	_ = x[TokenKindOneOf-143]
+	_ = x[TokenKindExtensions-144]
+	_ = x[TokenKindService-145]
+	_ = x[TokenKindRPC-146]
+	_ = x[TokenKindReturns-147]
+	_ = x[TokenKindExtend-148]
+	_ = x[TokenKindTrue-149]
+	_ = x[TokenKindFalse-150]
+	_ = x[TokenKindTypeFloat-151]
+	_ = x[TokenKindTypeDouble-152]
+	_ = x[TokenKindTypeInt32-153]
+	_ = x[TokenKindTypeInt64-154]
+	_ = x[TokenKindTypeUint32-155]
+	_ = x[TokenKindTypeUint64-156]
+	_ = x[TokenKindTypeSint32-157]
+	_ = x[TokenKindTypeSint64-158]
+	_ = x[TokenKindTypeFixed32-159]
+	_ = x[TokenKindTypeFixed64-160]
+	_ = x[TokenKindTypeSfixed32-161]
+	_ = x[TokenKindTypeSfixed64-162]
+	_ = x[TokenKindTypeBool-163]
+	_ = x[TokenKindTypeString-164]
+	_ = x[TokenKindTypeBytes-165]
 }
 
 const (
 	_TokenKind_name_0 = "EOFBOFErrorComment_=,:;.{[(<}])>/IntegerFloatString"
-	_TokenKind_name_1 = "Identifiersyntaxeditionpackageimportpublicweakoptionreservedmaxenummessagemaponeofextensionsservicerpcreturnsextendtruefalsefloatdoubleint32int64uint32uint64sint32sint64fixed32fixed64sfixed32sfixed64boolstringbytes"
+	_TokenKind_name_1 = "Identifiersyntaxeditionpackageimportpublicweakoptionreservedmaxenummessagemaprepeatedoptionaloneofextensionsservicerpcreturnsextendtruefalsefloatdoubleint32int64uint32uint64sint32sint64fixed32fixed64sfixed32sfixed64boolstringbytes"
 )
 
 var (
 	_TokenKind_index_0 = [...]uint8{0, 3, 6, 11, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 40, 45, 51}
-	_TokenKind_index_1 = [...]uint8{0, 10, 16, 23, 30, 36, 42, 46, 52, 60, 63, 67, 74, 77, 82, 92, 99, 102, 109, 115, 119, 124, 129, 135, 140, 145, 151, 157, 163, 169, 176, 183, 191, 199, 203, 209, 214}
+	_TokenKind_index_1 = [...]uint8{0, 10, 16, 23, 30, 36, 42, 46, 52, 60, 63, 67, 74, 77, 85, 93, 98, 108, 115, 118, 125, 131, 135, 140, 145, 151, 156, 161, 167, 173, 179, 185, 192, 199, 207, 215, 219, 225, 230}
 )
 
 func (i TokenKind) String() string {
 	switch {
 	case i <= 21:
 		return _TokenKind_name_0[_TokenKind_index_0[i]:_TokenKind_index_0[i+1]]
-	case 128 <= i && i <= 163:
+	case 128 <= i && i <= 165:
 		i -= 128
 		return _TokenKind_name_1[_TokenKind_index_1[i]:_TokenKind_index_1[i+1]]
 	default:

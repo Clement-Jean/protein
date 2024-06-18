@@ -271,6 +271,28 @@ end_generic:
 	}
 }
 
+var messageScopeExpected = []lexer.TokenKind{
+	lexer.TokenKindTypeFloat,
+	lexer.TokenKindOption,
+	lexer.TokenKindTypeDouble,
+	lexer.TokenKindTypeInt32,
+	lexer.TokenKindTypeInt64,
+	lexer.TokenKindTypeUint32,
+	lexer.TokenKindTypeUint64,
+	lexer.TokenKindTypeSint32,
+	lexer.TokenKindTypeSint64,
+	lexer.TokenKindTypeFixed32,
+	lexer.TokenKindTypeFixed64,
+	lexer.TokenKindTypeSfixed32,
+	lexer.TokenKindTypeSfixed64,
+	lexer.TokenKindTypeBool,
+	lexer.TokenKindTypeString,
+	lexer.TokenKindTypeBytes,
+	lexer.TokenKindMap,
+	lexer.TokenKindIdentifier,
+	lexer.TokenKindRightBrace,
+}
+
 func (p *Parser) parseMessageValue() {
 	switch curr := p.curr(); curr {
 	case lexer.TokenKindSemicolon, lexer.TokenKindComment:
@@ -287,42 +309,61 @@ func (p *Parser) parseMessageValue() {
 		p.pushState(stateMessageMapKeyValue)
 		p.addLeafNode(false)
 		p.next()
-
 	default:
 		hasDot := false
+		hasModifier := false
+		modifierIdx := -1
+		if curr == lexer.TokenKindOptional || curr == lexer.TokenKindRepeated {
+			hasModifier = true
+			modifierIdx = p.currTok
+			curr = p.next()
+		}
+
 		if curr == lexer.TokenKindDot {
 			hasDot = true
 			curr = p.next()
 		}
+
 		if curr.IsIdentifier() {
 			p.pushState(stateMessageFieldFinish)
 			p.pushState(stateMessageFieldAssign)
 			p.pushState(stateFullIdentifierRoot)
+			if hasModifier {
+				p.addNode(modifierIdx, stateStackEntry{
+					tokIdx:       modifierIdx,
+					subtreeStart: int32(len(p.tree)),
+				})
+			}
 			if hasDot {
 				p.addLeafNode(false)
 			}
 			break
+		} else if hasModifier {
+			// we try to create a coherent parse tree
+			// even though we know there is an error
+
+			// add all the tokens between modifierIdx
+			// and currTok
+			for i := modifierIdx; i <= p.currTok; i++ {
+				p.addNode(i, stateStackEntry{
+					tokIdx:       i,
+					subtreeStart: int32(len(p.tree)),
+				})
+			}
+			nbElements := p.currTok - modifierIdx + 1
+			p.expectedCurr(messageScopeExpected...)
+			p.skipPastLikelyEnd(p.currTok)
+
+			// after skip, we can now add the token
+			// we skipped to
+			p.addNode(p.currTok, stateStackEntry{
+				tokIdx:       p.currTok,
+				subtreeStart: int32(len(p.tree) - nbElements),
+				hasError:     true,
+			})
+			break
 		}
-		p.expectedCurr(lexer.TokenKindTypeFloat,
-			lexer.TokenKindOption,
-			lexer.TokenKindTypeDouble,
-			lexer.TokenKindTypeInt32,
-			lexer.TokenKindTypeInt64,
-			lexer.TokenKindTypeUint32,
-			lexer.TokenKindTypeUint64,
-			lexer.TokenKindTypeSint32,
-			lexer.TokenKindTypeSint64,
-			lexer.TokenKindTypeFixed32,
-			lexer.TokenKindTypeFixed64,
-			lexer.TokenKindTypeSfixed32,
-			lexer.TokenKindTypeSfixed64,
-			lexer.TokenKindTypeBool,
-			lexer.TokenKindTypeString,
-			lexer.TokenKindTypeBytes,
-			lexer.TokenKindMap,
-			lexer.TokenKindIdentifier,
-			lexer.TokenKindRightBrace,
-		)
+		p.expectedCurr(messageScopeExpected...)
 		p.skipPastLikelyEnd(p.currTok)
 	}
 }

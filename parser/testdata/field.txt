@@ -142,6 +142,52 @@ parseTree = [
 ]
 
 ================================================================================
+repeated
+================================================================================
+
+message Test { repeated uint32 ids = 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: repeated},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 6},
+  {kind: }, subtreeSize: 10},
+  {kind: EOF},
+]
+
+================================================================================
+optional
+================================================================================
+
+message Test { optional uint32 id = 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: optional},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 6},
+  {kind: }, subtreeSize: 10},
+  {kind: EOF},
+]
+
+================================================================================
 expected identifier
 ================================================================================
 
@@ -230,6 +276,52 @@ parseTree = [
   {kind: EOF},
 ]
 errs = [expected [Identifier], got ;]
+
+================================================================================
+expected identifier 5
+================================================================================
+
+message Test {
+  repeated 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: repeated},
+      {kind: Integer},
+    {kind: ;, hasError: true, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier }], got Integer]
+
+================================================================================
+expected identifier 6
+================================================================================
+
+message Test {
+  optional 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: optional},
+      {kind: Integer},
+    {kind: ;, hasError: true, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier }], got Integer]
 
 ================================================================================
 expected equal
