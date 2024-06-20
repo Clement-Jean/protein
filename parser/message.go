@@ -303,6 +303,10 @@ func (p *Parser) parseMessageValue() {
 		p.addLeafNode(false)
 		p.next()
 		p.parseOption()
+	case lexer.TokenKindReserved:
+		p.addLeafNode(false)
+		p.next()
+		p.parseReserved()
 	case lexer.TokenKindMap:
 		p.pushState(stateMessageFieldFinish)
 		p.pushState(stateMessageFieldAssign)

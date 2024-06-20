@@ -199,6 +199,12 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseMessageValue()
 		case stateMessageFinish:
 			p.parseMessageFinish()
+		case stateReservedRange:
+			p.parseReservedRange()
+		case stateReservedName:
+			p.parseReservedName()
+		case stateReservedFinish:
+			p.parseReservedFinish()
 
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()
