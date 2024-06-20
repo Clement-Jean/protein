@@ -38,6 +38,9 @@ const (
 	stateMessageMapKeyValue
 	stateMessageValue
 	stateMessageFinish
+	stateReservedRange
+	stateReservedName
+	stateReservedFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest

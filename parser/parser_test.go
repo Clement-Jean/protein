@@ -134,6 +134,7 @@ var testFiles = []string{
 	"message.txt",
 	"field.txt",
 	"map.txt",
+	"reserved.txt",
 }
 
 func TestParser(t *testing.T) {

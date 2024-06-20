@@ -41,6 +41,7 @@ const (
 	TokenKindWeak                                // weak
 	TokenKindOption                              // option
 	TokenKindReserved                            // reserved
+	TokenKindTo                                  // to
 	TokenKindMax                                 // max
 	TokenKindEnum                                // enum
 	TokenKindMessage                             // message
@@ -81,6 +82,7 @@ var literals = []string{
 	"weak",
 	"option",
 	"reserved",
+	"to",
 	"max",
 	"enum",
 	"message",
@@ -120,6 +122,7 @@ var kinds = [...]TokenKind{
 	TokenKindWeak,
 	TokenKindOption,
 	TokenKindReserved,
+	TokenKindTo,
 	TokenKindMax,
 	TokenKindEnum,
 	TokenKindMessage,
