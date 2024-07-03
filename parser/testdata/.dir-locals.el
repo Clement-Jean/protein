@@ -1,1 +1,3 @@
-((nil . ((eval . (whitespace-mode)))))
+((nil . ((eval . (whitespace-mode))))
+
+ (text-mode . ((indent-tabs-mode . nil))))
