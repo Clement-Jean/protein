@@ -41,6 +41,10 @@ const (
 	stateReservedRange
 	stateReservedName
 	stateReservedFinish
+	stateEnumName
+	stateEnumBlock
+	stateEnumValue
+	stateEnumFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest

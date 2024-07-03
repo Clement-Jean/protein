@@ -43,14 +43,18 @@ func _() {
 	_ = x[stateReservedRange-32]
 	_ = x[stateReservedName-33]
 	_ = x[stateReservedFinish-34]
-	_ = x[stateFullIdentifierRoot-35]
-	_ = x[stateFullIdentifierRest-36]
-	_ = x[stateEnder-37]
+	_ = x[stateEnumName-35]
+	_ = x[stateEnumBlock-36]
+	_ = x[stateEnumValue-37]
+	_ = x[stateEnumFinish-38]
+	_ = x[stateFullIdentifierRoot-39]
+	_ = x[stateFullIdentifierRest-40]
+	_ = x[stateEnder-41]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageMapKeyValuestateMessageValuestateMessageFinishstateReservedRangestateReservedNamestateReservedFinishstateFullIdentifierRootstateFullIdentifierReststateEnder"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageNamestateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageMapKeyValuestateMessageValuestateMessageFinishstateReservedRangestateReservedNamestateReservedFinishstateEnumNamestateEnumBlockstateEnumValuestateEnumFinishstateFullIdentifierRootstateFullIdentifierReststateEnder"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 404, 436, 468, 484, 501, 524, 547, 576, 599, 622, 639, 657, 675, 692, 711, 734, 757, 767}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 404, 436, 468, 484, 501, 524, 547, 576, 599, 622, 639, 657, 675, 692, 711, 724, 738, 752, 767, 790, 813, 823}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {
