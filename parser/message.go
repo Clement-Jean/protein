@@ -62,6 +62,7 @@ var messageScopeExpected = []lexer.TokenKind{
 	lexer.TokenKindIdentifier,
 	lexer.TokenKindReserved,
 	lexer.TokenKindOneOf,
+	lexer.TokenKindMessage,
 	lexer.TokenKindRightBrace,
 }
 
@@ -89,6 +90,10 @@ func (p *Parser) parseMessageValue() {
 		p.pushState(stateMessageMapKeyValue)
 		p.addLeafNode(false)
 		p.next()
+	case lexer.TokenKindMessage:
+		p.addLeafNode(false)
+		p.next()
+		p.parseMessage()
 	default:
 		hasDot := false
 		hasModifier := false

@@ -298,7 +298,7 @@ parseTree = [
   {kind: }, subtreeSize: 7},
   {kind: EOF},
 ]
-errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier reserved oneof }], got Integer]
+errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier reserved oneof message }], got Integer]
 
 ================================================================================
 expected identifier 6
@@ -321,7 +321,7 @@ parseTree = [
   {kind: }, subtreeSize: 7},
   {kind: EOF},
 ]
-errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier reserved oneof }], got Integer]
+errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier reserved oneof message }], got Integer]
 
 ================================================================================
 expected equal
