@@ -22,10 +22,10 @@ func (p *Parser) skipSubscope(curr lexer.TokenKind) bool {
 	if !curr.IsOpeningSymbol() {
 		return false
 	}
-	for curr != lexer.TokenKindEOF && !curr.IsClosingSymbol() {
+	end := curr.MatchingClosingSymbol()
+	for curr != lexer.TokenKindEOF && curr != end {
 		curr = p.next()
 	}
-	p.next()
 	return true
 }
 

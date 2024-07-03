@@ -165,3 +165,9 @@ func (k TokenKind) IsOpeningSymbol() bool {
 func (k TokenKind) IsClosingSymbol() bool {
 	return k >= TokenKindRightBrace && k <= TokenKindRightAngle
 }
+
+func (k TokenKind) MatchingClosingSymbol() TokenKind {
+	mid := (TokenKindRightAngle-TokenKindLeftBrace)/2 + 1
+	pos := k - TokenKindLeftBrace
+	return TokenKindLeftBrace + mid + pos
+}
