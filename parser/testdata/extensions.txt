@@ -1,0 +1,23 @@
+================================================================================
+ranges
+================================================================================
+
+message Test { extensions 4, 20 to max; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: extensions},
+        {kind: Integer},
+          {kind: Integer},
+          {kind: max},
+        {kind: to, subtreeSize: 3},
+      {kind: ,, subtreeSize: 5},
+    {kind: ;, subtreeSize: 7},
+  {kind: }, subtreeSize: 11},
+  {kind: EOF},
+]

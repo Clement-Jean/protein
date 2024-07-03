@@ -135,6 +135,7 @@ var testFiles = []string{
 	"field.txt",
 	"map.txt",
 	"reserved.txt",
+	"extensions.txt",
 	"enum.txt",
 	"oneof.txt",
 }

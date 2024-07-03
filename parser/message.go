@@ -1,8 +1,6 @@
 package parser
 
-import (
-	"github.com/Clement-Jean/protein/lexer"
-)
+import "github.com/Clement-Jean/protein/lexer"
 
 func (p *Parser) parseMessage() {
 	p.pushState(stateMessageFinish)
@@ -61,6 +59,7 @@ var messageScopeExpected = []lexer.TokenKind{
 	lexer.TokenKindMap,
 	lexer.TokenKindIdentifier,
 	lexer.TokenKindReserved,
+	lexer.TokenKindExtensions,
 	lexer.TokenKindOneOf,
 	lexer.TokenKindMessage,
 	lexer.TokenKindRightBrace,
@@ -80,6 +79,10 @@ func (p *Parser) parseMessageValue() {
 		p.addLeafNode(false)
 		p.next()
 		p.parseReserved()
+	case lexer.TokenKindExtensions:
+		p.addLeafNode(false)
+		p.next()
+		p.parseExtensions()
 	case lexer.TokenKindOneOf:
 		p.addLeafNode(false)
 		p.next()
