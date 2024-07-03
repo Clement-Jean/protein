@@ -45,6 +45,10 @@ const (
 	stateEnumBlock
 	stateEnumValue
 	stateEnumFinish
+	stateOneofName
+	stateOneofBlock
+	stateOneofValue
+	stateOneofFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest

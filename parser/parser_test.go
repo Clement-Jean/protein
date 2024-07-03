@@ -136,6 +136,7 @@ var testFiles = []string{
 	"map.txt",
 	"reserved.txt",
 	"enum.txt",
+	"oneof.txt",
 }
 
 func TestParser(t *testing.T) {

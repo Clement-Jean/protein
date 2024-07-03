@@ -215,6 +215,14 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseEnumValue()
 		case stateEnumFinish:
 			p.parseEnumFinish()
+		case stateOneofName:
+			p.parseOneofName()
+		case stateOneofBlock:
+			p.parseOneofBlock()
+		case stateOneofValue:
+			p.parseOneofValue()
+		case stateOneofFinish:
+			p.parseOneofFinish()
 
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()
