@@ -298,7 +298,7 @@ func (p *Parser) parseMessageValue() {
 	switch curr := p.curr(); curr {
 	case lexer.TokenKindSemicolon, lexer.TokenKindComment:
 		p.next()
-	case lexer.TokenKindRightBrace:
+	case lexer.TokenKindEOF, lexer.TokenKindRightBrace:
 		p.popState()
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
