@@ -29,7 +29,7 @@ const (
 	stateTextMessageInsert
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
-	stateMessageName
+	//stateMessageName
 	stateMessageBlock
 	stateMessageFieldAssign
 	stateMessageFieldOption
@@ -41,15 +41,14 @@ const (
 	stateReservedRange
 	stateReservedName
 	stateReservedFinish
-	stateEnumName
 	stateEnumBlock
 	stateEnumValue
 	stateEnumFinish
-	stateOneofName
 	stateOneofBlock
 	stateOneofValue
 	stateOneofFinish
 
+	stateIdentifier
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
 

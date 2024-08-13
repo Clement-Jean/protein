@@ -5,23 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseOneof() {
 	p.pushState(stateOneofFinish)
 	p.pushState(stateOneofBlock)
-	p.pushState(stateOneofName)
-}
-
-func (p *Parser) parseOneofName() {
-	p.popState()
-
-	curr := p.curr()
-	hasError := !curr.IsIdentifier()
-	p.addLeafNode(hasError)
-
-	if !hasError {
-		p.next()
-	} else {
-		p.expectedCurr(lexer.TokenKindIdentifier)
-		p.skipPastLikelyEnd(p.currTok)
-		p.popState()
-	}
+	p.pushState(stateIdentifier)
 }
 
 func (p *Parser) parseOneofBlock() {

@@ -183,8 +183,6 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseTextMessageInsert()
 		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
 			p.parseTextMessageFinish()
-		case stateMessageName:
-			p.parseMessageName()
 		case stateMessageBlock:
 			p.parseMessageBlock()
 		case stateMessageFieldAssign:
@@ -207,23 +205,20 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseReservedName()
 		case stateReservedFinish:
 			p.parseReservedFinish()
-		case stateEnumName:
-			p.parseEnumName()
 		case stateEnumBlock:
 			p.parseEnumBlock()
 		case stateEnumValue:
 			p.parseEnumValue()
 		case stateEnumFinish:
 			p.parseEnumFinish()
-		case stateOneofName:
-			p.parseOneofName()
 		case stateOneofBlock:
 			p.parseOneofBlock()
 		case stateOneofValue:
 			p.parseOneofValue()
 		case stateOneofFinish:
 			p.parseOneofFinish()
-
+		case stateIdentifier:
+			p.parseIdentifier()
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()
 		case stateFullIdentifierRest:

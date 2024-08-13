@@ -5,22 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseMessage() {
 	p.pushState(stateMessageFinish)
 	p.pushState(stateMessageBlock)
-	p.pushState(stateMessageName)
-}
-
-func (p *Parser) parseMessageName() {
-	p.popState()
-
-	curr := p.curr()
-	hasError := !curr.IsIdentifier()
-	p.addLeafNode(hasError)
-
-	if !hasError {
-		p.next()
-	} else {
-		p.expectedCurr(lexer.TokenKindIdentifier)
-		p.skipPastLikelyEnd(p.currTok)
-	}
+	p.pushState(stateIdentifier)
 }
 
 func (p *Parser) parseMessageBlock() {
