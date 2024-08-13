@@ -47,6 +47,9 @@ const (
 	stateOneofBlock
 	stateOneofValue
 	stateOneofFinish
+	stateServiceBlock
+	stateServiceValue
+	stateServiceFinish
 
 	stateIdentifier
 	stateFullIdentifierRoot

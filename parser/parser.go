@@ -131,6 +131,8 @@ func (p *Parser) parseTopLevel() {
 		p.parseMessage()
 	case lexer.TokenKindEnum:
 		p.parseEnum()
+	case lexer.TokenKindService:
+		p.parseService()
 	}
 }
 
@@ -217,6 +219,13 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseOneofValue()
 		case stateOneofFinish:
 			p.parseOneofFinish()
+		case stateServiceBlock:
+			p.parseServiceBlock()
+		case stateServiceValue:
+			p.parseServiceValue()
+		case stateServiceFinish:
+			p.parseServiceFinish()
+
 		case stateIdentifier:
 			p.parseIdentifier()
 		case stateFullIdentifierRoot:
