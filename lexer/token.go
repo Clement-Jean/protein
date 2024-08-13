@@ -53,6 +53,7 @@ const (
 	TokenKindService                             // service
 	TokenKindRPC                                 // rpc
 	TokenKindReturns                             // returns
+	TokenKindStream                              // stream
 	TokenKindExtend                              // extend
 	TokenKindTrue                                // true
 	TokenKindFalse                               // false
@@ -94,6 +95,7 @@ var literals = []string{
 	"service",
 	"rpc",
 	"returns",
+	"stream",
 	"extend",
 	"true",
 	"false",
@@ -134,6 +136,7 @@ var kinds = [...]TokenKind{
 	TokenKindService,
 	TokenKindRPC,
 	TokenKindReturns,
+	TokenKindStream,
 	TokenKindExtend,
 	TokenKindTrue,
 	TokenKindFalse,
