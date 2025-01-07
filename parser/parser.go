@@ -99,6 +99,13 @@ func (p *Parser) expectedCurr(kind ...lexer.TokenKind) {
 	p.error(fmt.Errorf("expected %v, got %s", kind, p.curr()))
 }
 
+func (p *Parser) parseEnderState() {
+	state := p.popState()
+	top := p.topState()
+	top.subtreeStart++
+	p.addNode(state.tokIdx, top)
+}
+
 func (p *Parser) parseTopLevel() {
 	curr := p.curr()
 
@@ -122,6 +129,8 @@ func (p *Parser) parseTopLevel() {
 		p.parseImport()
 	case lexer.TokenKindPackage:
 		p.parsePackage()
+	case lexer.TokenKindOption:
+		p.parseOption()
 	}
 }
 
@@ -148,11 +157,24 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseImportFinish()
 		case statePackageFinish:
 			p.parsePackageFinish()
+		case stateOptionName:
+			p.parseOptionName()
+		case stateOptionNameRest:
+			p.parseOptionNameRest()
+		case stateOptionNameParenFinish:
+			p.parseOptionNameParenFinish()
+		case stateOptionAssign:
+			p.parseOptionAssign()
+		case stateOptionFinish:
+			p.parseOptionFinish()
 
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()
 		case stateFullIdentifierRest:
 			p.parseFullIdentifierRest()
+
+		case stateEnder:
+			p.parseEnderState()
 		}
 	}
 	return p.tree, p.errs

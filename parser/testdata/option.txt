@@ -1,0 +1,366 @@
+================================================================================
+weird name
+================================================================================
+
+option option = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: option},
+      {kind: true},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+
+================================================================================
+full identifier
+================================================================================
+
+option my.custom.option = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+          {kind: Identifier},
+          {kind: Identifier},
+        {kind: ., subtreeSize: 3},
+        {kind: option},
+      {kind: ., subtreeSize: 5},
+      {kind: true},
+    {kind: =, subtreeSize: 7},
+  {kind: ;, subtreeSize: 9},
+  {kind: EOF},
+]
+
+
+================================================================================
+custom name
+================================================================================
+
+option maybe.(.deprecated.yes).no = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+          {kind: Identifier},
+            {kind: (},
+              {kind: .},
+              {kind: Identifier},
+              {kind: Identifier},
+            {kind: ., subtreeSize: 4},
+          {kind: ), subtreeSize: 6},
+        {kind: ., subtreeSize: 8},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 10},
+      {kind: true},
+    {kind: =, subtreeSize: 12},
+  {kind: ;, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+custom name 2
+================================================================================
+
+option maybe.(.deprecated.yes) = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: Identifier},
+          {kind: (},
+            {kind: .},
+            {kind: Identifier},
+            {kind: Identifier},
+          {kind: ., subtreeSize: 4},
+        {kind: ), subtreeSize: 6},
+      {kind: ., subtreeSize: 8},
+      {kind: true},
+    {kind: =, subtreeSize: 10},
+  {kind: ;, subtreeSize: 12},
+  {kind: EOF},
+]
+
+================================================================================
+custom name 3
+================================================================================
+
+option (deprecated) = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+      {kind: true},
+    {kind: =, subtreeSize: 5},
+  {kind: ;, subtreeSize: 7},
+  {kind: EOF},
+]
+
+================================================================================
+custom name 4
+================================================================================
+
+option (my.custom.option) = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+            {kind: Identifier},
+            {kind: Identifier},
+          {kind: ., subtreeSize: 3},
+          {kind: option},
+        {kind: ., subtreeSize: 5},
+      {kind: ), subtreeSize: 7},
+      {kind: true},
+    {kind: =, subtreeSize: 9},
+  {kind: ;, subtreeSize: 11},
+  {kind: EOF},
+]
+
+================================================================================
+expected identifier
+================================================================================
+
+option = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: =, hasError: true},
+      {kind: true},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+errs = [expected [Identifier (], got =]
+
+================================================================================
+expected identifier 2
+================================================================================
+
+option n. = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: Identifier},
+        {kind: =, hasError: true},
+      {kind: ., subtreeSize: 3},
+      {kind: true},
+    {kind: =, subtreeSize: 5},
+  {kind: ;, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [Identifier (], got =]
+
+================================================================================
+expected identifier 3
+================================================================================
+
+option (n.) = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+          {kind: Identifier},
+          {kind: ), hasError: true},
+        {kind: ., subtreeSize: 3},
+      {kind: ), subtreeSize: 5},
+      {kind: true},
+    {kind: =, subtreeSize: 7},
+  {kind: ;, subtreeSize: 9},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got )]
+
+================================================================================
+expected identifier 4
+================================================================================
+
+option (n). = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+          {kind: (},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 3},
+        {kind: =, hasError: true},
+      {kind: ., subtreeSize: 5},
+      {kind: true},
+    {kind: =, subtreeSize: 7},
+  {kind: ;, subtreeSize: 9},
+  {kind: EOF},
+]
+errs = [expected [Identifier (], got =]
+
+================================================================================
+expected equal
+================================================================================
+
+option n true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+    {kind: Identifier},
+    {kind: true, hasError: true},
+  {kind: ;, subtreeSize: 4},
+  {kind: EOF},
+]
+errs = [expected [=], got true]
+
+================================================================================
+expected value
+================================================================================
+
+option n = ;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+      {kind: ;, hasError: true},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+errs = [expected [true false Integer Float String], got ;]
+
+================================================================================
+expected semicolon
+================================================================================
+
+option n = true
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+      {kind: true},
+    {kind: =, subtreeSize: 3},
+  {kind: EOF, hasError: true, subtreeSize: 5},
+]
+errs = [expected [;], got EOF]
+
+================================================================================
+expected right paren
+================================================================================
+
+option (deprecated
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+    {kind: (},
+    {kind: Identifier},
+  {kind: EOF, hasError: true, subtreeSize: 4},
+]
+errs = [expected [)], got EOF]
+
+================================================================================
+bool
+================================================================================
+
+option deprecated = true;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+      {kind: true},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+
+================================================================================
+int
+================================================================================
+
+option age = 42;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+      {kind: Integer},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+
+================================================================================
+float
+================================================================================
+
+option age = 42.5;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+      {kind: Float},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]
+
+================================================================================
+string
+================================================================================
+
+option go_package = "github.com/Clement-Jean/protein";
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+      {kind: String},
+    {kind: =, subtreeSize: 3},
+  {kind: ;, subtreeSize: 5},
+  {kind: EOF},
+]

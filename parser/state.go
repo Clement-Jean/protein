@@ -14,9 +14,17 @@ const (
 	stateImportValue
 	stateImportFinish
 	statePackageFinish
+	stateOptionName
+	stateOptionNameRest
+	stateOptionNameParenFinish
+	stateOptionAssign
+	stateOptionEqual
+	stateOptionFinish
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
+
+	stateEnder
 )
 
 type stateStackEntry struct {

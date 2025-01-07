@@ -128,6 +128,7 @@ var testFiles = []string{
 	"edition.txt",
 	"import.txt",
 	"package.txt",
+	"option.txt",
 }
 
 func TestParser(t *testing.T) {
