@@ -61,19 +61,19 @@ func NewFromReader(r io.Reader) (*Buffer, error) {
 	return &Buffer{data: data}, nil
 }
 
-func (b *Buffer) Len() int {
-	return len(b.data)
+func (b *Buffer) Len() uint32 {
+	return uint32(len(b.data))
 }
 
-func (b *Buffer) At(i int) byte {
+func (b *Buffer) At(i uint32) byte {
 	return b.data[i]
 }
 
-func (b *Buffer) From(start int) []byte {
+func (b *Buffer) From(start uint32) []byte {
 	return b.data[start:]
 }
 
-func (b *Buffer) Range(start, end int) []byte {
+func (b *Buffer) Range(start, end uint32) []byte {
 	return b.data[start:end]
 }
 

@@ -14,13 +14,13 @@ type Lexer struct {
 	toks        *TokenizedBuffer
 	errs        []error
 	currLineIdx LineIdx
-	srcPos      int // the idx at which the file content really starts
-	tokPos      int // the begining of a token
-	readPos     int // the idx we are reading at in src
+	srcPos      uint32 // the idx at which the file content really starts
+	tokPos      uint32 // the begining of a token
+	readPos     uint32 // the idx we are reading at in src
 }
 
 func newLexer(src *source.Buffer) (*Lexer, error) {
-	srcPos := 0
+	var srcPos uint32 = 0
 	if bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
 		// skip UTF8 BOM
 		srcPos = 3
@@ -89,14 +89,14 @@ func (l *Lexer) acceptWhile(fn func(byte) bool) {
 	}
 }
 
-func (l *Lexer) computeColumn(position int) uint32 {
+func (l *Lexer) computeColumn(position uint32) uint32 {
 	if int(l.currLineIdx) >= len(l.toks.LineInfos) {
 		return math.MaxUint32
 	}
-	return uint32(l.srcPos + position - l.toks.LineInfos[l.currLineIdx].Start)
+	return l.srcPos + position - l.toks.LineInfos[l.currLineIdx].Start
 }
 
-func (l *Lexer) emit(kind TokenKind, position int) stateFn {
+func (l *Lexer) emit(kind TokenKind, position uint32) stateFn {
 	l.toks.TokenInfos = append(l.toks.TokenInfos, TokenInfo{
 		Kind:    kind,
 		LineIdx: l.currLineIdx,
@@ -118,17 +118,17 @@ func (l *Lexer) makeLines() {
 	start := l.srcPos
 	for i = range nbLines {
 		rest := l.src.From(start)
-		idx := bytes.IndexByte(rest, '\n')
+		idx := uint32(bytes.IndexByte(rest, '\n'))
 		newlineIdx := start + idx
 		info := &l.toks.LineInfos[i]
 		info.Start = start
-		info.Len = uint32(newlineIdx - start)
+		info.Len = newlineIdx - start
 		start = newlineIdx + 1
 	}
 
 	info := &l.toks.LineInfos[i]
 	info.Start = start
-	info.Len = uint32(l.src.Len() - start)
+	info.Len = l.src.Len() - start
 }
 
 func (l *Lexer) start() {

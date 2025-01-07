@@ -39,7 +39,7 @@ func (l *Lexer) lexLineComment() (state stateFn) {
 	return state
 }
 
-func (l *Lexer) goToEndOfLineComment() (len int) {
+func (l *Lexer) goToEndOfLineComment() (len uint32) {
 	start := l.readPos
 	ch := l.next()
 	for ch != 0 && ch != '\n' {
@@ -65,7 +65,7 @@ func (l *Lexer) lexMultilineComment() (state stateFn) {
 	return state
 }
 
-func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
+func (l *Lexer) goToEndOfMultilineComment() (len uint32, ok bool) {
 	start := l.readPos
 	for ch := l.next(); ch != 0; ch = l.next() {
 		if ch == '*' {
