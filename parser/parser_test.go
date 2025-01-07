@@ -125,6 +125,7 @@ func runParseTestCase(t *testing.T, tests []ParseTestCase) {
 
 var testFiles = []string{
 	"syntax.txt",
+	"edition.txt",
 }
 
 func TestParser(t *testing.T) {

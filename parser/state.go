@@ -9,6 +9,8 @@ const (
 	stateTopLevel state = iota
 	stateSyntaxAssign
 	stateSyntaxFinish
+	stateEditionAssign
+	stateEditionFinish
 )
 
 type stateStackEntry struct {
