@@ -3,6 +3,7 @@ package lexer
 import (
 	"errors"
 	"fmt"
+	"slices"
 )
 
 type stateFn func() stateFn
@@ -79,7 +80,14 @@ func (l *Lexer) goToEndOfMultilineComment() (len int, ok bool) {
 func (l *Lexer) lexIdentifier() (state stateFn) {
 	start := l.readPos
 	l.acceptWhile(isIdentifier)
-	state = l.emit(TokenKindIdentifier, l.tokPos)
+
+	kind := TokenKindIdentifier
+	literal := string(l.src.Range(start, l.readPos))
+	if idx, found := slices.BinarySearch(literals, literal); found {
+		kind = kinds[idx]
+	}
+
+	state = l.emit(kind, l.tokPos)
 	l.tokPos += l.readPos - start
 	return state
 }

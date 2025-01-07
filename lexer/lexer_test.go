@@ -67,32 +67,41 @@ expected line infos: %+v
 	}
 }
 
-func symbolsTestCase() TestCase {
-	const start = uint8(lexer.TokenKindUnderscore)
-	const end = uint8(lexer.TokenKindSlash) + 1
-	const symbols = "_=,:;.{}[]()<>/"
+func rangeTestCase(name string, start, end lexer.TokenKind) TestCase {
+	var b strings.Builder
 
-	expectedTokenInfos := make([]lexer.TokenInfo, len(symbols)+2)
+	realStart := uint8(start)
+	realEnd := uint8(end) + 1
+	diff := realEnd - realStart
+
+	expectedTokenInfos := make([]lexer.TokenInfo, diff+2)
 	expectedTokenInfos[0].Kind = lexer.TokenKindBOF
-	for i := uint8(0); i < uint8(len(symbols)); i++ {
+	offset := 0
+	for i := uint8(0); i < diff; i++ {
 		info := &expectedTokenInfos[i+1]
-		info.Kind = lexer.TokenKind(start + i)
-		info.Column = uint32(i)
+		info.Kind = lexer.TokenKind(realStart + i)
+		info.Column = uint32(offset)
+
+		b.WriteString(info.Kind.String())
+		b.WriteString(" ")
+
+		offset += len(info.Kind.String()) + 1
 	}
-	info := &expectedTokenInfos[len(symbols)+1]
+	info := &expectedTokenInfos[diff+1]
 	info.Kind = lexer.TokenKindEOF
-	info.Column = uint32(len(symbols))
+	info.Column = uint32(offset)
 
 	return TestCase{
-		name:       "symbols",
-		input:      symbols,
+		name:       name,
+		input:      b.String(),
 		tokenInfos: expectedTokenInfos,
-		lineInfos:  []lexer.LineInfo{{Len: uint32(len(symbols))}},
+		lineInfos:  []lexer.LineInfo{{Len: uint32(offset)}},
 	}
 }
 
 var tests = []TestCase{
-	symbolsTestCase(),
+	rangeTestCase("symbols", lexer.TokenKindUnderscore, lexer.TokenKindSlash),
+	rangeTestCase("keywords", lexer.TokenKindTypeBool, lexer.TokenKindWeak),
 	{
 		name:  "invalid",
 		input: "&",
