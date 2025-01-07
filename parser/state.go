@@ -13,6 +13,10 @@ const (
 	stateEditionFinish
 	stateImportValue
 	stateImportFinish
+	statePackageFinish
+
+	stateFullIdentifierRoot
+	stateFullIdentifierRest
 )
 
 type stateStackEntry struct {
