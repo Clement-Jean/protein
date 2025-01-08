@@ -136,6 +136,7 @@ var testFiles = []string{
 	"oneof.txt",
 	"reserved.txt",
 	"extensions.txt",
+	"enum.txt",
 	//TODO "a_bit_of_everything.txt",
 }
 

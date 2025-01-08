@@ -60,6 +60,11 @@ const (
 	stateOneofValue
 	stateOneofFinish
 
+	// ENUMS
+	stateEnumBlock
+	stateEnumValue
+	stateEnumFinish
+
 	// IDENTIFIERS
 	stateIdentifier
 	stateFullIdentifierRoot
