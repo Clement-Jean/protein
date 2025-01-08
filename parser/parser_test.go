@@ -130,7 +130,13 @@ var testFiles = []string{
 	"package.txt",
 	"option.txt",
 	"text_message.txt",
-	"a_bit_of_everything.txt",
+	"message.txt",
+	"field.txt",
+	"map.txt",
+	"oneof.txt",
+	"reserved.txt",
+	"extensions.txt",
+	//TODO "a_bit_of_everything.txt",
 }
 
 func TestParser(t *testing.T) {

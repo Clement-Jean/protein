@@ -2,6 +2,22 @@ package parser
 
 import "github.com/Clement-Jean/protein/lexer"
 
+func (p *Parser) parseIdentifier() {
+	p.popState()
+
+	curr := p.curr()
+	hasError := !curr.IsIdentifier()
+	p.addLeafNode(hasError)
+
+	if !hasError {
+		p.next()
+	} else {
+		p.expectedCurr(lexer.TokenKindIdentifier)
+		p.skipPastLikelyEnd(p.currTok)
+		p.popState()
+	}
+}
+
 func (p *Parser) parseFullIdentifierRoot() {
 	p.popState()
 

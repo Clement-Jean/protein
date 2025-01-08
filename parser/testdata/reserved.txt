@@ -1,0 +1,154 @@
+================================================================================
+scalar
+================================================================================
+
+message Test { reserved 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+      {kind: Integer},
+    {kind: ;, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+
+================================================================================
+range
+================================================================================
+
+message Test { reserved 1 to 5; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+        {kind: Integer},
+        {kind: Integer},
+      {kind: to, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+
+================================================================================
+max
+================================================================================
+
+message Test { reserved 1 to max; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+        {kind: Integer},
+        {kind: max},
+      {kind: to, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+
+================================================================================
+scalar and ranges
+================================================================================
+
+message Test { reserved 1, 2 to 5, 5 to max; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+          {kind: Integer},
+            {kind: Integer},
+            {kind: Integer},
+          {kind: to, subtreeSize: 3},
+        {kind: ,, subtreeSize: 5},
+          {kind: Integer},
+          {kind: max},
+        {kind: to, subtreeSize: 3},
+      {kind: ,, subtreeSize: 9},
+    {kind: ;, subtreeSize: 11},
+  {kind: }, subtreeSize: 15},
+  {kind: EOF},
+]
+
+================================================================================
+expected range or name
+================================================================================
+
+message Test { reserved; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+    {kind: ;, hasError: true, subtreeSize: 2},
+  {kind: }, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [Integer String], got ;]
+
+================================================================================
+expected range
+================================================================================
+
+message Test { reserved 1, "test"; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+      {kind: Integer},
+      {kind: String, hasError: true},
+    {kind: ;, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+errs = [expected [Integer max], got String]
+
+================================================================================
+expected semicolon
+================================================================================
+
+message Test { reserved 1 }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: reserved},
+      {kind: Integer},
+    {kind: }, hasError: true, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [;], got }]

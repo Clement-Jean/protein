@@ -1,0 +1,160 @@
+================================================================================
+weird name
+================================================================================
+
+message Test { oneof oneof {} }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: oneof},
+      {kind: oneof},
+      {kind: {},
+    {kind: }, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+
+================================================================================
+name
+================================================================================
+
+message Test { oneof Test {} }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: oneof},
+      {kind: Identifier},
+      {kind: {},
+    {kind: }, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+
+================================================================================
+empty statement
+================================================================================
+
+message Test { oneof Test { ; } }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: oneof},
+      {kind: Identifier},
+      {kind: {},
+    {kind: }, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+
+================================================================================
+option
+================================================================================
+
+message Test { oneof Test { option deprecated = true; } }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: oneof},
+      {kind: Identifier},
+      {kind: {},
+        {kind: option},
+          {kind: Identifier},
+          {kind: true},
+        {kind: =, subtreeSize: 3},
+      {kind: ;, subtreeSize: 5},
+    {kind: }, subtreeSize: 9},
+  {kind: }, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
+options
+================================================================================
+
+message Test { oneof Test { option deprecated = true; option test = true; } }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: oneof},
+      {kind: Identifier},
+      {kind: {},
+        {kind: option},
+          {kind: Identifier},
+          {kind: true},
+        {kind: =, subtreeSize: 3},
+      {kind: ;, subtreeSize: 5},
+        {kind: option},
+          {kind: Identifier},
+          {kind: true},
+        {kind: =, subtreeSize: 3},
+      {kind: ;, subtreeSize: 5},
+    {kind: }, subtreeSize: 14},
+  {kind: }, subtreeSize: 18},
+  {kind: EOF},
+]
+
+================================================================================
+expected identifier
+================================================================================
+
+message Test { oneof {} }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: oneof},
+      {kind: {, hasError: true},
+    {kind: }, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got {]
+
+================================================================================
+expected right brace
+================================================================================
+
+message Test { oneof Test {
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+  {kind: message},
+  {kind: Identifier},
+  {kind: {},
+    {kind: oneof},
+    {kind: Identifier},
+    {kind: {},
+  {kind: EOF, hasError: true, subtreeSize: 4},
+]
+errs = [expected [}], got EOF]

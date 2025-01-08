@@ -30,6 +30,24 @@ const (
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
 
+	stateMessageBlock
+	stateMessageFieldAssign
+	stateMessageFieldOption
+	stateMessageFieldOptionFinish
+	stateMessageFieldFinish
+	stateMessageMapKeyValue
+	stateMessageValue
+	stateMessageFinish
+
+	stateReservedRange
+	stateReservedName
+	stateReservedFinish
+
+	stateOneofBlock
+	stateOneofValue
+	stateOneofFinish
+
+	stateIdentifier
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
 

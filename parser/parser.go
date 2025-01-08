@@ -131,6 +131,8 @@ func (p *Parser) parseTopLevel() {
 		p.parsePackage()
 	case lexer.TokenKindOption:
 		p.parseOption()
+	case lexer.TokenKindMessage:
+		p.parseMessage()
 	}
 }
 
@@ -184,6 +186,40 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
 			p.parseTextMessageFinish()
 
+		case stateMessageBlock:
+			p.parseMessageBlock()
+		case stateMessageFieldAssign:
+			p.parseMessageFieldAssign()
+		case stateMessageFieldOption:
+			p.parseMessageFieldOption()
+		case stateMessageFieldOptionFinish:
+			p.parseMessageFieldOptionFinish()
+		case stateMessageFieldFinish:
+			p.parseMessageFieldFinish()
+		case stateMessageMapKeyValue:
+			p.parseMessageMapKeyValue()
+		case stateMessageValue:
+			p.parseMessageValue()
+		case stateMessageFinish:
+			p.parseMessageFinish()
+
+		case stateReservedRange:
+			p.parseReservedRange()
+		case stateReservedName:
+			p.parseReservedName()
+		case stateReservedFinish:
+			p.parseReservedFinish()
+
+		case stateOneofBlock:
+			p.parseOneofBlock()
+		case stateOneofValue:
+			p.parseOneofValue()
+		case stateOneofFinish:
+			p.parseOneofFinish()
+
+
+		case stateIdentifier:
+			p.parseIdentifier()
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()
 		case stateFullIdentifierRest:

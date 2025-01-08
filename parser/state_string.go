@@ -31,14 +31,32 @@ func _() {
 	_ = x[stateTextMessageInsertSemicolon-20]
 	_ = x[stateTextMessageFinishRightBrace-21]
 	_ = x[stateTextMessageFinishRightAngle-22]
-	_ = x[stateFullIdentifierRoot-23]
-	_ = x[stateFullIdentifierRest-24]
-	_ = x[stateEnder-25]
+	_ = x[stateMessageBlock-23]
+	_ = x[stateMessageFieldAssign-24]
+	_ = x[stateMessageFieldOption-25]
+	_ = x[stateMessageFieldOptionFinish-26]
+	_ = x[stateMessageFieldFinish-27]
+	_ = x[stateMessageMapKeyValue-28]
+	_ = x[stateMessageValue-29]
+	_ = x[stateMessageFinish-30]
+	_ = x[stateReservedRange-31]
+	_ = x[stateReservedName-32]
+	_ = x[stateReservedFinish-33]
+	_ = x[stateOneofBlock-34]
+	_ = x[stateOneofValue-35]
+	_ = x[stateOneofFinish-36]
+	_ = x[stateEnumBlock-37]
+	_ = x[stateEnumValue-38]
+	_ = x[stateEnumFinish-39]
+	_ = x[stateIdentifier-40]
+	_ = x[stateFullIdentifierRoot-41]
+	_ = x[stateFullIdentifierRest-42]
+	_ = x[stateEnder-43]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertSemicolonstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateFullIdentifierRootstateFullIdentifierReststateEnder"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertSemicolonstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageMapKeyValuestateMessageValuestateMessageFinishstateReservedRangestateReservedNamestateReservedFinishstateOneofBlockstateOneofValuestateOneofFinishstateEnumBlockstateEnumValuestateEnumFinishstateIdentifierstateFullIdentifierRootstateFullIdentifierReststateEnder"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 413, 445, 477, 500, 523, 533}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 413, 445, 477, 494, 517, 540, 569, 592, 615, 632, 650, 668, 685, 704, 719, 734, 750, 764, 778, 793, 808, 831, 854, 864}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

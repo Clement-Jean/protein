@@ -1,0 +1,445 @@
+================================================================================
+field
+================================================================================
+
+message Test { uint32 id = 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+
+================================================================================
+fields
+================================================================================
+
+message Test { uint32 id = 1; float height = 2; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+      {kind: float},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+fields various names
+================================================================================
+
+message test {
+  uint32 test = 1;
+  Bar msg = 2;
+  .Foo.Bar test = 3;
+  Foo.Bar inner_msg = 4;
+  true.Bar test = 5;
+  true uint32 = 6;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+      {kind: Identifier},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+        {kind: Identifier},
+        {kind: Identifier},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 4},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 8},
+        {kind: Identifier},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 3},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 7},
+        {kind: true},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 3},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 7},
+      {kind: true},
+        {kind: uint32},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 41},
+  {kind: EOF},
+]
+
+================================================================================
+field options
+================================================================================
+
+message test {
+  uint32 id = 1 [deprecated = true, test = 1];
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+        {kind: [},
+            {kind: Identifier},
+            {kind: true},
+          {kind: =, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: Integer},
+          {kind: =, subtreeSize: 3},
+        {kind: ,, subtreeSize: 7},
+      {kind: ], subtreeSize: 9},
+    {kind: ;, subtreeSize: 14},
+  {kind: }, subtreeSize: 18},
+  {kind: EOF},
+]
+
+================================================================================
+repeated
+================================================================================
+
+message Test { repeated uint32 ids = 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: repeated},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 6},
+  {kind: }, subtreeSize: 10},
+  {kind: EOF},
+]
+
+================================================================================
+optional
+================================================================================
+
+message Test { optional uint32 id = 1; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: optional},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 6},
+  {kind: }, subtreeSize: 10},
+  {kind: EOF},
+]
+
+================================================================================
+expected identifier
+================================================================================
+
+message Test {
+  int32;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: int32},
+    {kind: ;, hasError: true, subtreeSize: 2},
+  {kind: }, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got ;]
+
+================================================================================
+expected identifier 2
+================================================================================
+
+message Test {
+  test;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: Identifier},
+    {kind: ;, hasError: true, subtreeSize: 2},
+  {kind: }, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got ;]
+
+================================================================================
+expected identifier 3
+================================================================================
+
+message Test {
+  test.Foo;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+        {kind: Identifier},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 3},
+    {kind: ;, hasError: true, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got ;]
+
+================================================================================
+expected identifier 4
+================================================================================
+
+message Test {
+  true;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: true},
+    {kind: ;, hasError: true, subtreeSize: 2},
+  {kind: }, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got ;]
+
+================================================================================
+expected identifier 5
+================================================================================
+
+message Test {
+  repeated 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: repeated},
+      {kind: Integer},
+    {kind: ;, hasError: true, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier reserved extensions oneof message }], got Integer]
+
+================================================================================
+expected identifier 6
+================================================================================
+
+message Test {
+  optional 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: optional},
+      {kind: Integer},
+    {kind: ;, hasError: true, subtreeSize: 3},
+  {kind: }, subtreeSize: 7},
+  {kind: EOF},
+]
+errs = [expected [float option double int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64 bool string bytes map Identifier reserved extensions oneof message }], got Integer]
+
+================================================================================
+expected equal
+================================================================================
+
+message Test {
+  uint32 uint32 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+      {kind: uint32},
+      {kind: Integer, hasError: true},
+    {kind: ;, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+errs = [expected [=], got Integer]
+
+================================================================================
+expected integer
+================================================================================
+
+message Test {
+  uint32 uint32 = 1.5;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: uint32},
+        {kind: Float, hasError: true},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 5},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+errs = [expected [Integer], got Float]
+
+================================================================================
+expected semicolon
+================================================================================
+
+message Test {
+  uint32 uint32 = 1
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: uint32},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: }, hasError: true, subtreeSize: 5},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+errs = [expected [;], got }]
+
+================================================================================
+option expected equal
+================================================================================
+
+message Test {
+  int32 id = 1 [packed: true, deprecated = true];
+  int32 id = 1 [deprecated = true, packed: true];
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: int32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+        {kind: [},
+            {kind: Identifier},
+          {kind: :, hasError: true, subtreeSize: 2},
+            {kind: Identifier},
+            {kind: true},
+          {kind: =, subtreeSize: 3},
+        {kind: ,, subtreeSize: 6},
+      {kind: ], subtreeSize: 8},
+    {kind: ;, subtreeSize: 13},
+      {kind: int32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+        {kind: [},
+            {kind: Identifier},
+            {kind: true},
+          {kind: =, subtreeSize: 3},
+            {kind: Identifier},
+          {kind: :, hasError: true, subtreeSize: 2},
+        {kind: ,, subtreeSize: 6},
+      {kind: ], subtreeSize: 8},
+    {kind: ;, subtreeSize: 13},
+  {kind: }, subtreeSize: 30},
+  {kind: EOF},
+]
+errs = [expected [=], got : expected [=], got :]
