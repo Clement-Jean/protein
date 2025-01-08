@@ -58,7 +58,12 @@ func (pt *ParseTree) printNode(out io.Writer, idx, depth int, toks *lexer.Tokeni
 	indent := 2 * (depth + 1)
 
 	fmt.Fprintf(out, "%s{", strings.Repeat(" ", indent))
-	fmt.Fprintf(out, "kind: %s", toks.TokenInfos[node.TokIdx].Kind)
+
+	if node.TokIdx > uint32(len(toks.TokenInfos)) {
+		fmt.Fprint(out, "kind: <INSERT>")
+	} else {
+		fmt.Fprintf(out, "kind: %s", toks.TokenInfos[node.TokIdx].Kind)
+	}
 
 	if node.HasError {
 		fmt.Fprintf(out, ", hasError: %t", node.HasError)

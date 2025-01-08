@@ -117,7 +117,13 @@ func (p *Parser) parseOptionAssign() {
 		p.addLeafNode(false)
 		p.next()
 	} else {
-		// TODO if curr == lexer.TokenKindLeftBrace || curr == lexer.TokenKindLeftAngle {
+		if curr == lexer.TokenKindLeftBrace || curr == lexer.TokenKindLeftAngle {
+			p.addLeafNode(false)
+			p.parseTextMessage()
+			p.next()
+			return
+		}
+
 		p.addLeafNode(true)
 		p.expectedCurr(constantTypes...)
 		p.skipPastLikelyEnd(p.currTok)

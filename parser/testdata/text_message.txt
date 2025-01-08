@@ -1,0 +1,503 @@
+================================================================================
+empty
+================================================================================
+
+option (deprecated) = { };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+      {kind: }, subtreeSize: 2},
+    {kind: =, subtreeSize: 6},
+  {kind: ;, subtreeSize: 8},
+  {kind: EOF},
+]
+
+================================================================================
+angle
+================================================================================
+
+option (deprecated) = < value: true >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: <},
+          {kind: Identifier},
+          {kind: true},
+        {kind: :, subtreeSize: 3},
+      {kind: >, subtreeSize: 5},
+    {kind: =, subtreeSize: 9},
+  {kind: ;, subtreeSize: 11},
+  {kind: EOF},
+]
+
+================================================================================
+multiple fields
+================================================================================
+
+option (deprecated) = { value: true, value2: "test" };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: String},
+          {kind: :, subtreeSize: 3},
+        {kind: ,, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 13},
+  {kind: ;, subtreeSize: 15},
+  {kind: EOF},
+]
+
+================================================================================
+multiple fields semicolon
+================================================================================
+
+option (deprecated) = { value: true; value2: "test" };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: String},
+          {kind: :, subtreeSize: 3},
+        {kind: ;, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 13},
+  {kind: ;, subtreeSize: 15},
+  {kind: EOF},
+]
+
+================================================================================
+multiple fields 2
+================================================================================
+
+option (deprecated) = { value: true, value2: "test", value3: 2.5 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+              {kind: Identifier},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+              {kind: Identifier},
+              {kind: String},
+            {kind: :, subtreeSize: 3},
+          {kind: ,, subtreeSize: 7},
+            {kind: Identifier},
+            {kind: Float},
+          {kind: :, subtreeSize: 3},
+        {kind: ,, subtreeSize: 11},
+      {kind: }, subtreeSize: 13},
+    {kind: =, subtreeSize: 17},
+  {kind: ;, subtreeSize: 19},
+  {kind: EOF},
+]
+
+================================================================================
+nested
+================================================================================
+
+option test = { another_test: { deprecated: true } };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+          {kind: Identifier},
+            {kind: {},
+              {kind: Identifier},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+          {kind: }, subtreeSize: 5},
+        {kind: :, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: ;, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
+nested angle
+================================================================================
+
+option test = < another_test: < deprecated: true > >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: <},
+          {kind: Identifier},
+            {kind: <},
+              {kind: Identifier},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+          {kind: >, subtreeSize: 5},
+        {kind: :, subtreeSize: 7},
+      {kind: >, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: ;, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
+nested optional colon
+================================================================================
+
+option test = { another_test { deprecated: true } };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+          {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: }, subtreeSize: 5},
+      {kind: }, subtreeSize: 8},
+    {kind: =, subtreeSize: 10},
+  {kind: ;, subtreeSize: 12},
+  {kind: EOF},
+]
+
+================================================================================
+extension name
+================================================================================
+
+option test = { [com.foo.ext.scalar]: 10 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: [},
+                  {kind: Identifier},
+                  {kind: Identifier},
+                {kind: ., subtreeSize: 3},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 5},
+              {kind: Identifier},
+            {kind: ., subtreeSize: 7},
+          {kind: ], subtreeSize: 9},
+          {kind: Integer},
+        {kind: :, subtreeSize: 11},
+      {kind: }, subtreeSize: 13},
+    {kind: =, subtreeSize: 15},
+  {kind: ;, subtreeSize: 17},
+  {kind: EOF},
+]
+
+================================================================================
+domain name
+================================================================================
+
+option test = { [type.googleapis.com/com.foo.any]: 10 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: [},
+                  {kind: Identifier},
+                  {kind: Identifier},
+                {kind: ., subtreeSize: 3},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 5},
+                  {kind: Identifier},
+                  {kind: Identifier},
+                {kind: ., subtreeSize: 3},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 5},
+            {kind: /, subtreeSize: 11},
+          {kind: ], subtreeSize: 13},
+          {kind: Integer},
+        {kind: :, subtreeSize: 15},
+      {kind: }, subtreeSize: 17},
+    {kind: =, subtreeSize: 19},
+  {kind: ;, subtreeSize: 21},
+  {kind: EOF},
+]
+
+================================================================================
+optional comma or semicolon
+================================================================================
+
+option test = {
+   a: { test: true }
+   b: true
+};
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: Identifier},
+              {kind: {},
+                {kind: Identifier},
+                {kind: true},
+              {kind: :, subtreeSize: 3},
+            {kind: }, subtreeSize: 5},
+          {kind: :, subtreeSize: 7},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: <INSERT>, subtreeSize: 11},
+      {kind: }, subtreeSize: 13},
+    {kind: =, subtreeSize: 15},
+  {kind: ;, subtreeSize: 17},
+  {kind: EOF},
+]
+
+================================================================================
+optional comma or semicolon 2
+================================================================================
+
+option test = {
+   a: true
+   b: true
+};
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: <INSERT>, subtreeSize: 7},
+      {kind: }, subtreeSize: 9},
+    {kind: =, subtreeSize: 11},
+  {kind: ;, subtreeSize: 13},
+  {kind: EOF},
+]
+
+================================================================================
+expected right brace
+================================================================================
+
+option test = {  >;
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+      {kind: >, hasError: true, subtreeSize: 2},
+    {kind: =, subtreeSize: 4},
+  {kind: ;, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [}], got >]
+
+================================================================================
+inner expected right brace
+================================================================================
+
+option test = { test: { true: true >
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+  {kind: option},
+  {kind: Identifier},
+    {kind: {},
+      {kind: Identifier},
+        {kind: {},
+          {kind: true},
+          {kind: true},
+        {kind: :, subtreeSize: 3},
+      {kind: >, hasError: true, subtreeSize: 5},
+    {kind: :, subtreeSize: 7},
+  {kind: EOF, hasError: true, subtreeSize: 9},
+]
+errs = [expected [}], got > expected [}], got EOF]
+
+================================================================================
+expected right square
+================================================================================
+
+option test = { [com.foo };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+          {kind: [},
+            {kind: Identifier},
+            {kind: Identifier},
+          {kind: ., subtreeSize: 3},
+        {kind: }, hasError: true, subtreeSize: 5},
+      {kind: }, subtreeSize: 7},
+    {kind: =, subtreeSize: 9},
+  {kind: ;, subtreeSize: 11},
+  {kind: EOF},
+]
+errs = [expected []], got }]
+
+================================================================================
+expected identifier
+================================================================================
+
+option test = { []: true };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: [},
+            {kind: ], hasError: true},
+          {kind: ], subtreeSize: 3},
+          {kind: true},
+        {kind: :, subtreeSize: 5},
+      {kind: }, subtreeSize: 7},
+    {kind: =, subtreeSize: 9},
+  {kind: ;, subtreeSize: 11},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got ]]
+
+================================================================================
+expected identifier 2
+================================================================================
+
+option test = { [com.foo/]: true };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+            {kind: [},
+                {kind: Identifier},
+                {kind: Identifier},
+              {kind: ., subtreeSize: 3},
+              {kind: ], hasError: true},
+            {kind: /, subtreeSize: 5},
+          {kind: ], subtreeSize: 7},
+          {kind: true},
+        {kind: :, subtreeSize: 9},
+      {kind: }, subtreeSize: 11},
+    {kind: =, subtreeSize: 13},
+  {kind: ;, subtreeSize: 15},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got ]]
+
+================================================================================
+expected message
+================================================================================
+
+option test = { test 1 };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+        {kind: Integer, hasError: true},
+      {kind: }, subtreeSize: 4},
+    {kind: =, subtreeSize: 6},
+  {kind: ;, subtreeSize: 8},
+  {kind: EOF},
+]
+errs = [expected [{ <], got Integer]
+
+================================================================================
+expected constant
+================================================================================
+
+option test = { test: ) };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+          {kind: Identifier},
+          {kind: ), hasError: true},
+        {kind: :, subtreeSize: 3},
+      {kind: }, subtreeSize: 5},
+    {kind: =, subtreeSize: 7},
+  {kind: ;, subtreeSize: 9},
+  {kind: EOF},
+]
+errs = [expected [true false Integer Float String], got )]

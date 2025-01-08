@@ -9,11 +9,36 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[stateTopLevel-0]
+	_ = x[stateSyntaxAssign-1]
+	_ = x[stateSyntaxFinish-2]
+	_ = x[stateEditionAssign-3]
+	_ = x[stateEditionFinish-4]
+	_ = x[stateImportValue-5]
+	_ = x[stateImportFinish-6]
+	_ = x[statePackageFinish-7]
+	_ = x[stateOptionName-8]
+	_ = x[stateOptionNameRest-9]
+	_ = x[stateOptionNameParenFinish-10]
+	_ = x[stateOptionAssign-11]
+	_ = x[stateOptionEqual-12]
+	_ = x[stateOptionFinish-13]
+	_ = x[stateTextFieldValue-14]
+	_ = x[stateTextFieldAssign-15]
+	_ = x[stateTextFieldName-16]
+	_ = x[stateTextFieldExtensionName-17]
+	_ = x[stateTextFieldExtensionNameFinish-18]
+	_ = x[stateTextMessageValue-19]
+	_ = x[stateTextMessageInsertSemicolon-20]
+	_ = x[stateTextMessageFinishRightBrace-21]
+	_ = x[stateTextMessageFinishRightAngle-22]
+	_ = x[stateFullIdentifierRoot-23]
+	_ = x[stateFullIdentifierRest-24]
+	_ = x[stateEnder-25]
 }
 
-const _state_name = "stateTopLevel"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertSemicolonstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateFullIdentifierRootstateFullIdentifierReststateEnder"
 
-var _state_index = [...]uint8{0, 13}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 413, 445, 477, 500, 523, 533}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

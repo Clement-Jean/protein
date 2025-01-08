@@ -167,6 +167,22 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseOptionAssign()
 		case stateOptionFinish:
 			p.parseOptionFinish()
+		case stateTextFieldValue:
+			p.parseTextFieldValue()
+		case stateTextFieldAssign:
+			p.parseTextFieldAssign()
+		case stateTextFieldName:
+			p.parseTextFieldName()
+		case stateTextFieldExtensionName:
+			p.parseTextFieldExtensionName()
+		case stateTextFieldExtensionNameFinish:
+			p.parseTextFieldExtensionNameFinish()
+		case stateTextMessageValue:
+			p.parseTextMessageValue()
+		case stateTextMessageInsertSemicolon:
+			p.parseTextMessageInsertSemicolon()
+		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
+			p.parseTextMessageFinish()
 
 		case stateFullIdentifierRoot:
 			p.parseFullIdentifierRoot()

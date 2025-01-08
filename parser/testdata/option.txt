@@ -364,3 +364,27 @@ parseTree = [
   {kind: ;, subtreeSize: 5},
   {kind: EOF},
 ]
+
+================================================================================
+message value
+================================================================================
+
+option (deprecated) = { value: true };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+        {kind: (},
+        {kind: Identifier},
+      {kind: ), subtreeSize: 3},
+        {kind: {},
+          {kind: Identifier},
+          {kind: true},
+        {kind: :, subtreeSize: 3},
+      {kind: }, subtreeSize: 5},
+    {kind: =, subtreeSize: 9},
+  {kind: ;, subtreeSize: 11},
+  {kind: EOF},
+]

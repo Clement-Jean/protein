@@ -20,6 +20,15 @@ const (
 	stateOptionAssign
 	stateOptionEqual
 	stateOptionFinish
+	stateTextFieldValue
+	stateTextFieldAssign
+	stateTextFieldName
+	stateTextFieldExtensionName
+	stateTextFieldExtensionNameFinish
+	stateTextMessageValue
+	stateTextMessageInsertSemicolon
+	stateTextMessageFinishRightBrace
+	stateTextMessageFinishRightAngle
 
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
