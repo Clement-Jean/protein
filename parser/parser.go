@@ -145,20 +145,30 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		switch p.topState().st {
 		case stateTopLevel:
 			p.parseTopLevel()
+
+		// SYNTAXES
 		case stateSyntaxAssign:
 			p.parseSyntaxAssign()
 		case stateSyntaxFinish:
 			p.parseSyntaxFinish()
+
+		// EDITIONS
 		case stateEditionAssign:
 			p.parseEditionAssign()
 		case stateEditionFinish:
 			p.parseEditionFinish()
+
+		// IMPORTS
 		case stateImportValue:
 			p.parseImportValue()
 		case stateImportFinish:
 			p.parseImportFinish()
+
+		// PACKAGES
 		case statePackageFinish:
 			p.parsePackageFinish()
+
+		// OPTIONS
 		case stateOptionName:
 			p.parseOptionName()
 		case stateOptionNameRest:
@@ -186,6 +196,7 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
 			p.parseTextMessageFinish()
 
+		// MESSAGES
 		case stateMessageBlock:
 			p.parseMessageBlock()
 		case stateMessageFieldAssign:
@@ -203,6 +214,7 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		case stateMessageFinish:
 			p.parseMessageFinish()
 
+		// RESERVEDS
 		case stateReservedRange:
 			p.parseReservedRange()
 		case stateReservedName:
@@ -210,6 +222,7 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		case stateReservedFinish:
 			p.parseReservedFinish()
 
+		// ONEOFS
 		case stateOneofBlock:
 			p.parseOneofBlock()
 		case stateOneofValue:
@@ -218,6 +231,7 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseOneofFinish()
 
 
+		// IDENTIFIERS
 		case stateIdentifier:
 			p.parseIdentifier()
 		case stateFullIdentifierRoot:
@@ -225,6 +239,7 @@ func (p *Parser) Parse() (ParseTree, []error) {
 		case stateFullIdentifierRest:
 			p.parseFullIdentifierRest()
 
+		// MISC
 		case stateEnder:
 			p.parseEnderState()
 		}

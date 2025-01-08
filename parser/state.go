@@ -7,13 +7,23 @@ type state uint8
 
 const (
 	stateTopLevel state = iota
+
+	// SYNTAXES
 	stateSyntaxAssign
 	stateSyntaxFinish
+
+	// EDITIONS
 	stateEditionAssign
 	stateEditionFinish
+
+	// IMPORTS
 	stateImportValue
 	stateImportFinish
+
+	// PACKAGES
 	statePackageFinish
+
+	// OPTIONS
 	stateOptionName
 	stateOptionNameRest
 	stateOptionNameParenFinish
@@ -30,6 +40,7 @@ const (
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
 
+	// MESSAGES
 	stateMessageBlock
 	stateMessageFieldAssign
 	stateMessageFieldOption
@@ -39,18 +50,22 @@ const (
 	stateMessageValue
 	stateMessageFinish
 
+	// RESERVEDS
 	stateReservedRange
 	stateReservedName
 	stateReservedFinish
 
+	// ONEOFS
 	stateOneofBlock
 	stateOneofValue
 	stateOneofFinish
 
+	// IDENTIFIERS
 	stateIdentifier
 	stateFullIdentifierRoot
 	stateFullIdentifierRest
 
+	// MISC
 	stateEnder
 )
 
