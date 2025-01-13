@@ -80,7 +80,7 @@ func rangeTestCase(name string, start, end lexer.TokenKind) TestCase {
 	for i := uint8(0); i < diff; i++ {
 		info := &expectedTokenInfos[i+1]
 		info.Kind = lexer.TokenKind(realStart + i)
-		info.Column = uint32(offset)
+		info.Offset = uint32(offset)
 
 		b.WriteString(info.Kind.String())
 		b.WriteString(" ")
@@ -89,13 +89,13 @@ func rangeTestCase(name string, start, end lexer.TokenKind) TestCase {
 	}
 	info := &expectedTokenInfos[diff+1]
 	info.Kind = lexer.TokenKindEOF
-	info.Column = uint32(offset)
+	info.Offset = uint32(offset)
 
 	return TestCase{
 		name:       name,
 		input:      b.String(),
 		tokenInfos: expectedTokenInfos,
-		lineInfos:  []lexer.LineInfo{{Len: uint32(offset)}},
+		lineInfos:  []lexer.LineInfo{{}},
 	}
 }
 
@@ -108,10 +108,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindError},
-			{Kind: lexer.TokenKindEOF, Column: 1},
+			{Kind: lexer.TokenKindEOF, Offset: 1},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 1},
+			{Start: 0},
 		},
 		errs: []error{errors.New("invalid char '&'")},
 	},
@@ -121,13 +121,13 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindError},
-			{Kind: lexer.TokenKindError, Column: 1},
-			{Kind: lexer.TokenKindError, Column: 2},
-			{Kind: lexer.TokenKindError, Column: 3},
-			{Kind: lexer.TokenKindEOF, Column: 4},
+			{Kind: lexer.TokenKindError, Offset: 1},
+			{Kind: lexer.TokenKindError, Offset: 2},
+			{Kind: lexer.TokenKindError, Offset: 3},
+			{Kind: lexer.TokenKindEOF, Offset: 4},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 4},
+			{Start: 0},
 		},
 		errs: []error{
 			fmt.Errorf("invalid char %q", "🙈"[0]),
@@ -140,11 +140,11 @@ var tests = []TestCase{
 		name:  "skip_utf8_bom",
 		input: string([]byte{0xEF, 0xBB, 0xBF}),
 		tokenInfos: []lexer.TokenInfo{
-			{Kind: lexer.TokenKindBOF, Column: 3},
-			{Kind: lexer.TokenKindEOF, Column: 3},
+			{Kind: lexer.TokenKindBOF, Offset: 3},
+			{Kind: lexer.TokenKindEOF, Offset: 3},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 3, Len: 0},
+			{Start: 3},
 		},
 	},
 	{
@@ -152,12 +152,12 @@ var tests = []TestCase{
 		input: "\t\n\v\f\n ",
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
-			{Kind: lexer.TokenKindEOF, LineIdx: 2, Column: 1},
+			{Kind: lexer.TokenKindEOF, Offset: 6},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 1},
-			{Start: 2, Len: 2},
-			{Start: 5, Len: 1},
+			{Start: 0},
+			{Start: 2},
+			{Start: 5},
 		},
 	},
 	{
@@ -165,12 +165,12 @@ var tests = []TestCase{
 		input: "\n\n",
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
-			{Kind: lexer.TokenKindEOF, LineIdx: 2},
+			{Kind: lexer.TokenKindEOF, Offset: 2},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 0},
-			{Start: 1, Len: 0},
-			{Start: 2, Len: 0},
+			{Start: 0},
+			{Start: 1},
+			{Start: 2},
 		},
 	},
 	{
@@ -179,10 +179,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindComment},
-			{Kind: lexer.TokenKindEOF, Column: 19},
+			{Kind: lexer.TokenKindEOF, Offset: 19},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 19},
+			{Start: 0},
 		},
 	},
 	{
@@ -191,11 +191,11 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindComment},
-			{Kind: lexer.TokenKindEOF, LineIdx: 1},
+			{Kind: lexer.TokenKindEOF, Offset: 20},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 19},
-			{Start: 20, Len: 0},
+			{Start: 0},
+			{Start: 20},
 		},
 	},
 	{
@@ -204,10 +204,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindComment},
-			{Kind: lexer.TokenKindEOF, Column: 21},
+			{Kind: lexer.TokenKindEOF, Offset: 21},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 21},
+			{Start: 0},
 		},
 	},
 	{
@@ -216,10 +216,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindComment},
-			{Kind: lexer.TokenKindEOF, Column: 23},
+			{Kind: lexer.TokenKindEOF, Offset: 23},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 23},
+			{Start: 0},
 		},
 	},
 	{
@@ -228,10 +228,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindError},
-			{Kind: lexer.TokenKindEOF, Column: 19},
+			{Kind: lexer.TokenKindEOF, Offset: 19},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 19},
+			{Start: 0},
 		},
 		errs: []error{errors.New("unclosed multiline comment")},
 	},
@@ -241,11 +241,11 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindIdentifier},
-			{Kind: lexer.TokenKindIdentifier, Column: 16},
-			{Kind: lexer.TokenKindEOF, Column: 30},
+			{Kind: lexer.TokenKindIdentifier, Offset: 16},
+			{Kind: lexer.TokenKindEOF, Offset: 30},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 30},
+			{Start: 0},
 		},
 	},
 	{
@@ -254,11 +254,11 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindStr},
-			{Kind: lexer.TokenKindStr, Column: 7},
-			{Kind: lexer.TokenKindEOF, Column: 13},
+			{Kind: lexer.TokenKindStr, Offset: 7},
+			{Kind: lexer.TokenKindEOF, Offset: 13},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 13},
+			{Start: 0},
 		},
 	},
 	{
@@ -267,10 +267,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindStr},
-			{Kind: lexer.TokenKindEOF, Column: 14},
+			{Kind: lexer.TokenKindEOF, Offset: 14},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 14},
+			{Start: 0},
 		},
 	},
 	{
@@ -279,10 +279,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindStr},
-			{Kind: lexer.TokenKindEOF, Column: 25},
+			{Kind: lexer.TokenKindEOF, Offset: 25},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 25},
+			{Start: 0},
 		},
 	},
 	{
@@ -291,10 +291,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindError},
-			{Kind: lexer.TokenKindEOF, Column: 5},
+			{Kind: lexer.TokenKindEOF, Offset: 5},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 5},
+			{Start: 0},
 		},
 		errs: []error{errors.New("unclosed string")},
 	},
@@ -304,12 +304,12 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindError},
-			{Kind: lexer.TokenKindError, LineIdx: 1},
-			{Kind: lexer.TokenKindEOF, LineIdx: 1, Column: 1},
+			{Kind: lexer.TokenKindError, Offset: 6},
+			{Kind: lexer.TokenKindEOF, Offset: 7},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 5},
-			{Start: 6, Len: 1},
+			{Start: 0},
+			{Start: 6},
 		},
 		errs: []error{
 			errors.New("unclosed string"),
@@ -322,10 +322,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindError},
-			{Kind: lexer.TokenKindEOF, Column: 6},
+			{Kind: lexer.TokenKindEOF, Offset: 6},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 6},
+			{Start: 0},
 		},
 		errs: []error{errors.New("unclosed string")},
 	},
@@ -335,13 +335,13 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindInt},
-			{Kind: lexer.TokenKindInt, Column: 2},
-			{Kind: lexer.TokenKindInt, Column: 4},
-			{Kind: lexer.TokenKindInt, Column: 7},
-			{Kind: lexer.TokenKindEOF, Column: 9},
+			{Kind: lexer.TokenKindInt, Offset: 2},
+			{Kind: lexer.TokenKindInt, Offset: 4},
+			{Kind: lexer.TokenKindInt, Offset: 7},
+			{Kind: lexer.TokenKindEOF, Offset: 9},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 9},
+			{Start: 0},
 		},
 	},
 	{
@@ -350,11 +350,11 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindInt},
-			{Kind: lexer.TokenKindInt, Column: 5},
-			{Kind: lexer.TokenKindEOF, Column: 9},
+			{Kind: lexer.TokenKindInt, Offset: 5},
+			{Kind: lexer.TokenKindEOF, Offset: 9},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 9},
+			{Start: 0},
 		},
 	},
 	{
@@ -363,10 +363,10 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindInt},
-			{Kind: lexer.TokenKindEOF, Column: 3},
+			{Kind: lexer.TokenKindEOF, Offset: 3},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 3},
+			{Start: 0},
 		},
 	},
 	{
@@ -375,18 +375,18 @@ var tests = []TestCase{
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
 			{Kind: lexer.TokenKindFloat},
-			{Kind: lexer.TokenKindFloat, Column: 5},
-			{Kind: lexer.TokenKindFloat, Column: 10},
-			{Kind: lexer.TokenKindFloat, Column: 14},
-			{Kind: lexer.TokenKindFloat, Column: 18},
-			{Kind: lexer.TokenKindFloat, Column: 21},
-			{Kind: lexer.TokenKindFloat, Column: 26},
-			{Kind: lexer.TokenKindFloat, Column: 32},
-			{Kind: lexer.TokenKindFloat, Column: 38},
-			{Kind: lexer.TokenKindEOF, Column: 41},
+			{Kind: lexer.TokenKindFloat, Offset: 5},
+			{Kind: lexer.TokenKindFloat, Offset: 10},
+			{Kind: lexer.TokenKindFloat, Offset: 14},
+			{Kind: lexer.TokenKindFloat, Offset: 18},
+			{Kind: lexer.TokenKindFloat, Offset: 21},
+			{Kind: lexer.TokenKindFloat, Offset: 26},
+			{Kind: lexer.TokenKindFloat, Offset: 32},
+			{Kind: lexer.TokenKindFloat, Offset: 38},
+			{Kind: lexer.TokenKindEOF, Offset: 41},
 		},
 		lineInfos: []lexer.LineInfo{
-			{Start: 0, Len: 41},
+			{Start: 0},
 		},
 	},
 }

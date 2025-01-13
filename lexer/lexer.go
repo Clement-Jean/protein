@@ -3,7 +3,6 @@ package lexer
 import (
 	"bytes"
 	"io"
-	"math"
 	"strings"
 
 	"github.com/Clement-Jean/protein/source"
@@ -19,7 +18,7 @@ type Lexer struct {
 	readPos     uint32 // the idx we are reading at in src
 }
 
-func newLexer(src *source.Buffer) (*Lexer, error) {
+func NewFromSource(src *source.Buffer) (*Lexer, error) {
 	var srcPos uint32 = 0
 	if bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
 		// skip UTF8 BOM
@@ -39,7 +38,7 @@ func NewFromFile(filename string) (*Lexer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newLexer(src)
+	return NewFromSource(src)
 }
 
 func NewFromReader(r io.Reader) (*Lexer, error) {
@@ -47,7 +46,7 @@ func NewFromReader(r io.Reader) (*Lexer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newLexer(src)
+	return NewFromSource(src)
 }
 
 func (l *Lexer) next() byte {
@@ -89,18 +88,10 @@ func (l *Lexer) acceptWhile(fn func(byte) bool) {
 	}
 }
 
-func (l *Lexer) computeColumn(position uint32) uint32 {
-	if int(l.currLineIdx) >= len(l.toks.LineInfos) {
-		return math.MaxUint32
-	}
-	return l.srcPos + position - l.toks.LineInfos[l.currLineIdx].Start
-}
-
 func (l *Lexer) emit(kind TokenKind, position uint32) stateFn {
 	l.toks.TokenInfos = append(l.toks.TokenInfos, TokenInfo{
-		Kind:    kind,
-		LineIdx: l.currLineIdx,
-		Column:  l.computeColumn(position),
+		Kind:   kind,
+		Offset: position,
 	})
 	return nil
 }
@@ -122,13 +113,11 @@ func (l *Lexer) makeLines() {
 		newlineIdx := start + idx
 		info := &l.toks.LineInfos[i]
 		info.Start = start
-		info.Len = newlineIdx - start
 		start = newlineIdx + 1
 	}
 
 	info := &l.toks.LineInfos[i]
 	info.Start = start
-	info.Len = l.src.Len() - start
 }
 
 func (l *Lexer) start() {
