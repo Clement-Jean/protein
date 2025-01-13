@@ -28,6 +28,13 @@ func (p *Parser) parseMessageFieldAssign() {
 		})
 		return
 	}
+
+	// the name of a field can be a keyword (e.g) message
+	// so we override the kind to be an identifier in order
+	// to make sure we don't treat this as something else
+	// than an identifier
+	p.toks.TokenInfos[p.currTok].Kind = lexer.TokenKindIdentifier
+
 	p.addLeafNode(hasError)
 	curr = p.next()
 
