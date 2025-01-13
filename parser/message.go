@@ -90,7 +90,7 @@ func (p *Parser) parseMessageValue() {
 		hasDot := false
 		hasModifier := false
 		var modifierIdx uint32
-		if curr == lexer.TokenKindOptional || curr == lexer.TokenKindRepeated {
+		if curr == lexer.TokenKindOptional || curr == lexer.TokenKindRepeated || curr == lexer.TokenKindRequired {
 			hasModifier = true
 			modifierIdx = p.currTok
 			curr = p.next()

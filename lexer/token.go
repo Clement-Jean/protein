@@ -60,6 +60,7 @@ const (
 	TokenKindPackage                             // package
 	TokenKindPublic                              // public
 	TokenKindRepeated                            // repeated
+	TokenKindRequired                            // required
 	TokenKindReserved                            // reserved
 	TokenKindReturns                             // returns
 	TokenKindRPC                                 // rpc
@@ -102,6 +103,7 @@ var literals = []string{
 	"package",
 	"public",
 	"repeated",
+	"required",
 	"reserved",
 	"returns",
 	"rpc",
@@ -143,6 +145,7 @@ var kinds = [...]TokenKind{
 	TokenKindPackage,
 	TokenKindPublic,
 	TokenKindRepeated,
+	TokenKindRequired,
 	TokenKindReserved,
 	TokenKindReturns,
 	TokenKindRPC,
