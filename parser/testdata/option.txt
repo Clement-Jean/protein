@@ -256,7 +256,7 @@ parseTree = [
   {kind: ;, subtreeSize: 5},
   {kind: EOF},
 ]
-errs = [expected [true false Integer Float String], got ;]
+errs = [expected [true false Integer Float String Identifier], got ;]
 
 ================================================================================
 expected semicolon

@@ -110,7 +110,7 @@ func runParseTestCase(t *testing.T, tests []ParseTestCase) {
 			pt, errs := p.Parse()
 
 			buf := new(bytes.Buffer)
-			pt.Print(buf, tb)
+			pt.Print(buf, nil, tb)
 			if len(errs) != 0 {
 				fmt.Fprintf(buf, "errs = %v", errs)
 			}
@@ -130,6 +130,7 @@ var testFiles = []string{
 	"package.txt",
 	"option.txt",
 	"text_message.txt",
+	"text_list.txt",
 	"message.txt",
 	"field.txt",
 	"map.txt",
@@ -137,6 +138,8 @@ var testFiles = []string{
 	"reserved.txt",
 	"extensions.txt",
 	"enum.txt",
+	"service.txt",
+	"rpc.txt",
 	//TODO "a_bit_of_everything.txt",
 }
 

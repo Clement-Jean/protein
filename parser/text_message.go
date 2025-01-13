@@ -7,9 +7,10 @@ import (
 )
 
 func (p *Parser) parseTextMessage() {
-	if p.curr() == lexer.TokenKindLeftBrace {
+	switch p.curr() {
+	case lexer.TokenKindLeftBrace:
 		p.pushState(stateTextMessageFinishRightBrace)
-	} else {
+	case lexer.TokenKindLeftAngle:
 		p.pushState(stateTextMessageFinishRightAngle)
 	}
 	p.pushState(stateTextMessageValue)
@@ -19,10 +20,11 @@ func (p *Parser) parseTextMessageValue() {
 	p.popState()
 
 	curr := p.curr()
-	if curr == lexer.TokenKindComment { // TODO: maybe while?
+	for curr == lexer.TokenKindComment {
 		curr = p.next()
 	}
 
+	// TODO: improve with early return
 	if curr != lexer.TokenKindRightBrace && curr != lexer.TokenKindRightAngle {
 		p.parseTextField()
 	} else if curr.IsIdentifier() {
@@ -42,6 +44,12 @@ func (p *Parser) parseTextMessageInsertSemicolon() {
 
 func (p *Parser) parseTextMessageFinish() {
 	curr := p.curr()
+
+	// TODO: this check should probably be in parseTextMessageValue
+	for curr == lexer.TokenKindComment {
+		curr = p.next()
+	}
+
 	if curr == lexer.TokenKindComma || curr == lexer.TokenKindSemicolon {
 		p.pushState(stateEnder)
 		p.next()

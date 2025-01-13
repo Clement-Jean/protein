@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Clement-Jean/protein/lexer"
+	"github.com/Clement-Jean/protein/source"
 )
 
 type Node struct {
@@ -53,16 +54,26 @@ func (pt *ParseTree) postorder() iter.Seq[int] {
 	}
 }
 
-func (pt *ParseTree) printNode(out io.Writer, idx, depth int, toks *lexer.TokenizedBuffer) bool {
+func (pt *ParseTree) printNode(out io.Writer, idx, depth int, toks *lexer.TokenizedBuffer, s *source.Buffer) bool {
 	node := (*pt)[idx]
 	indent := 2 * (depth + 1)
 
 	fmt.Fprintf(out, "%s{", strings.Repeat(" ", indent))
 
+	comment := ""
+
 	if node.TokIdx > uint32(len(toks.TokenInfos)) {
 		fmt.Fprint(out, "kind: <INSERT>")
 	} else {
-		fmt.Fprintf(out, "kind: %s", toks.TokenInfos[node.TokIdx].Kind)
+		kind := toks.TokenInfos[node.TokIdx].Kind
+
+		if s != nil && (kind == lexer.TokenKindIdentifier || kind == lexer.TokenKindStr) {
+			start := toks.TokenInfos[node.TokIdx].Offset
+			end := toks.TokenInfos[node.TokIdx+1].Offset
+			comment = fmt.Sprintf(" // %s", strings.TrimSpace(string(s.Range(start, end))))
+		}
+
+		fmt.Fprintf(out, "kind: %s", kind)
 	}
 
 	if node.HasError {
@@ -73,11 +84,11 @@ func (pt *ParseTree) printNode(out io.Writer, idx, depth int, toks *lexer.Tokeni
 		fmt.Fprintf(out, ", subtreeSize: %d", node.SubtreeSize)
 	}
 
-	fmt.Fprintf(out, "}")
+	fmt.Fprintf(out, "},%s\n", comment)
 	return false
 }
 
-func (pt *ParseTree) Print(out io.Writer, toks *lexer.TokenizedBuffer) {
+func (pt *ParseTree) Print(out io.Writer, s *source.Buffer, toks *lexer.TokenizedBuffer) {
 	fmt.Fprintf(out, "parseTree = [\n")
 
 	var stack []struct {
@@ -108,8 +119,7 @@ func (pt *ParseTree) Print(out io.Writer, toks *lexer.TokenizedBuffer) {
 	}
 
 	for node := range pt.postorder() {
-		pt.printNode(out, node, indents[node], toks)
-		fmt.Fprintf(out, ",\n")
+		pt.printNode(out, node, indents[node], toks, s)
 	}
 
 	fmt.Fprintf(out, "]\n")

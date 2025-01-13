@@ -39,11 +39,14 @@ const (
 	stateTextMessageInsertSemicolon
 	stateTextMessageFinishRightBrace
 	stateTextMessageFinishRightAngle
+	stateTextListValue
+	stateTextListFinish
 
 	// MESSAGES
 	stateMessageBlock
 	stateMessageFieldAssign
 	stateMessageFieldOption
+	stateMessageFieldOptionAssign
 	stateMessageFieldOptionFinish
 	stateMessageFieldFinish
 	stateMessageMapKeyValue
@@ -64,6 +67,18 @@ const (
 	stateEnumBlock
 	stateEnumValue
 	stateEnumFinish
+
+	// SERVICES
+	stateServiceBlock
+	stateServiceValue
+	stateServiceFinish
+
+	// RPCS
+	stateRPCDefinition
+	stateRPCReqRes
+	stateRPCReqResFinish
+	stateRPCValue
+	stateRPCFinish
 
 	// IDENTIFIERS
 	stateIdentifier

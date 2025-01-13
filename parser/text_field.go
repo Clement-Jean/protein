@@ -103,15 +103,20 @@ func (p *Parser) parseTextFieldValue() {
 	curr := p.curr()
 	isConstant := slices.Contains(constantTypes, curr)
 
-	if isConstant {
+	hasError := !isConstant && !curr.IsIdentifier()
+
+	if !hasError {
 		p.addLeafNode(false)
 		p.next()
-	} else if curr.IsIdentifier() {
+	} else if curr == lexer.TokenKindLeftSquare {
 		p.addLeafNode(false)
+		p.pushState(stateTextListFinish)
+		p.pushState(stateTextListValue)
 		p.next()
+		return
 	} else {
 		p.addLeafNode(true)
-		p.expectedCurr(constantTypes...)
+		p.expectedCurr(append(constantTypes, lexer.TokenKindLeftSquare)...)
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon, lexer.TokenKindRightBrace)
 	}
 

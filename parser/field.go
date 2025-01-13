@@ -69,33 +69,27 @@ func (p *Parser) parseMessageFieldAssign() {
 }
 
 func (p *Parser) parseMessageFieldOption() {
+	p.popState()
+
 	curr := p.curr()
-	switch curr {
-	case lexer.TokenKindRightSquare:
+	hasError := curr != lexer.TokenKindIdentifier && curr != lexer.TokenKindLeftParen
+
+	if !hasError {
 		p.pushState(stateMessageFieldOptionFinish)
-		return
-	case lexer.TokenKindComma:
-		p.pushState(stateEnder)
-		curr = p.next()
-	case lexer.TokenKindIdentifier:
-	default:
+		p.pushState(stateMessageFieldOptionAssign)
+		p.pushState(stateOptionName)
+	} else {
 		p.popState()
-		p.expectedCurr(lexer.TokenKindRightSquare, lexer.TokenKindComma)
+		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftParen)
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightSquare)
-		return
 	}
+}
 
-	hasError := curr != lexer.TokenKindIdentifier
-	p.addLeafNode(hasError)
+func (p *Parser) parseMessageFieldOptionAssign() {
+	p.popState()
 
-	if hasError {
-		p.expectedCurr(lexer.TokenKindIdentifier)
-		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightSquare)
-		return
-	}
-	curr = p.next()
-
-	hasError = curr != lexer.TokenKindEqual
+	curr := p.curr()
+	hasError := curr != lexer.TokenKindEqual
 
 	if !hasError {
 		p.pushState(stateEnder)
@@ -127,10 +121,20 @@ func (p *Parser) parseMessageFieldOption() {
 		p.addLeafNode(true)
 		p.expectedCurr(constantTypes...)
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightSquare)
+		return
 	}
 }
 
 func (p *Parser) parseMessageFieldOptionFinish() {
+	curr := p.curr()
+	if curr == lexer.TokenKindComma {
+		p.pushState(stateEnder)
+		p.next()
+		p.pushState(stateMessageFieldOptionAssign)
+		p.pushState(stateOptionName)
+		return
+	}
+
 	state := p.popState()
 	currTok := p.currTok
 
@@ -143,8 +147,7 @@ func (p *Parser) parseMessageFieldOptionFinish() {
 		currTok = p.skipPastLikelyEnd(p.currTok)
 	}
 
-	top := p.popState() // stop field option loop
-	p.addNode(currTok, top)
+	p.addNode(currTok, state)
 }
 
 func (p *Parser) parseMessageFieldFinish() {

@@ -135,6 +135,8 @@ func (p *Parser) parseTopLevel() {
 		p.parseMessage()
 	case lexer.TokenKindEnum:
 		p.parseEnum()
+	case lexer.TokenKindService:
+		p.parseService()
 	}
 }
 
@@ -197,6 +199,10 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseTextMessageInsertSemicolon()
 		case stateTextMessageFinishRightBrace, stateTextMessageFinishRightAngle:
 			p.parseTextMessageFinish()
+		case stateTextListValue:
+			p.parseTextListValue()
+		case stateTextListFinish:
+			p.parseTextListFinish()
 
 		// MESSAGES
 		case stateMessageBlock:
@@ -205,6 +211,8 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseMessageFieldAssign()
 		case stateMessageFieldOption:
 			p.parseMessageFieldOption()
+		case stateMessageFieldOptionAssign:
+			p.parseMessageFieldOptionAssign()
 		case stateMessageFieldOptionFinish:
 			p.parseMessageFieldOptionFinish()
 		case stateMessageFieldFinish:
@@ -239,6 +247,26 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseEnumValue()
 		case stateEnumFinish:
 			p.parseEnumFinish()
+
+		// SERVICES
+		case stateServiceBlock:
+			p.parseServiceBlock()
+		case stateServiceValue:
+			p.parseServiceValue()
+		case stateServiceFinish:
+			p.parseServiceFinish()
+
+		// RPCS
+		case stateRPCDefinition:
+			p.parseRPCDefinition()
+		case stateRPCReqRes:
+			p.parseRPCReqRes()
+		case stateRPCReqResFinish:
+			p.parseRPCReqResFinish()
+		case stateRPCValue:
+			p.parseRPCValue()
+		case stateRPCFinish:
+			p.parseRPCFinish()
 
 		// IDENTIFIERS
 		case stateIdentifier:

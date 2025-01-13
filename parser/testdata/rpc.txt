@@ -1,0 +1,89 @@
+================================================================================
+rpc
+================================================================================
+
+service Test { rpc Test (Test) returns (Test); }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: service},
+    {kind: Identifier},
+    {kind: {},
+      {kind: rpc},
+        {kind: Identifier},
+          {kind: (},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 3},
+          {kind: (},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 3},
+      {kind: returns, subtreeSize: 8},
+    {kind: ;, subtreeSize: 10},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+bidi rpc
+================================================================================
+
+service Test { rpc Test (stream Test) returns (stream Test); }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: service},
+    {kind: Identifier},
+    {kind: {},
+      {kind: rpc},
+        {kind: Identifier},
+          {kind: (},
+          {kind: stream},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 4},
+          {kind: (},
+          {kind: stream},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 4},
+      {kind: returns, subtreeSize: 10},
+    {kind: ;, subtreeSize: 12},
+  {kind: }, subtreeSize: 16},
+  {kind: EOF},
+]
+
+================================================================================
+rpc options
+================================================================================
+
+service Test { rpc Test (Test) returns (Test) { option test = true; } }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: service},
+    {kind: Identifier},
+    {kind: {},
+      {kind: rpc},
+        {kind: Identifier},
+          {kind: (},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 3},
+          {kind: (},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 3},
+      {kind: returns, subtreeSize: 8},
+        {kind: {},
+          {kind: option},
+            {kind: Identifier},
+            {kind: true},
+          {kind: =, subtreeSize: 3},
+        {kind: ;, subtreeSize: 5},
+      {kind: }, subtreeSize: 7},
+    {kind: <INSERT>, subtreeSize: 17},
+  {kind: }, subtreeSize: 21},
+  {kind: EOF},
+]

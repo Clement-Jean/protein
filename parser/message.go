@@ -82,6 +82,10 @@ func (p *Parser) parseMessageValue() {
 		p.addLeafNode(false)
 		p.next()
 		p.parseMessage()
+	case lexer.TokenKindEnum:
+		p.addLeafNode(false)
+		p.next()
+		p.parseEnum()
 	default:
 		hasDot := false
 		hasModifier := false

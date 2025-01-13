@@ -1,0 +1,104 @@
+================================================================================
+empty
+================================================================================
+
+option test = { test: [] };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+          {kind: [},
+        {kind: ], subtreeSize: 2},
+      {kind: }, subtreeSize: 5},
+    {kind: =, subtreeSize: 7},
+  {kind: ;, subtreeSize: 9},
+  {kind: EOF},
+]
+
+================================================================================
+message value
+================================================================================
+
+option test = { test: [{yup: true}] };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+          {kind: [},
+            {kind: {},
+              {kind: Identifier},
+              {kind: true},
+            {kind: :, subtreeSize: 3},
+          {kind: }, subtreeSize: 5},
+        {kind: ], subtreeSize: 7},
+      {kind: }, subtreeSize: 10},
+    {kind: =, subtreeSize: 12},
+  {kind: ;, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+field value
+================================================================================
+
+option test = { test: [yup: true] };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+          {kind: [},
+            {kind: Identifier},
+            {kind: true},
+          {kind: :, subtreeSize: 3},
+        {kind: ], subtreeSize: 5},
+      {kind: }, subtreeSize: 8},
+    {kind: =, subtreeSize: 10},
+  {kind: ;, subtreeSize: 12},
+  {kind: EOF},
+]
+
+================================================================================
+mix values
+================================================================================
+
+option test = { test: [{yup: true}, nope: false] };
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: option},
+      {kind: Identifier},
+        {kind: {},
+        {kind: Identifier},
+          {kind: [},
+              {kind: {},
+                {kind: Identifier},
+                {kind: true},
+              {kind: :, subtreeSize: 3},
+            {kind: }, subtreeSize: 5},
+              {kind: Identifier},
+              {kind: false},
+            {kind: :, subtreeSize: 3},
+          {kind: ,, subtreeSize: 9},
+        {kind: ], subtreeSize: 11},
+      {kind: }, subtreeSize: 14},
+    {kind: =, subtreeSize: 16},
+  {kind: ;, subtreeSize: 18},
+  {kind: EOF},
+]

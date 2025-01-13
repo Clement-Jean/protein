@@ -36,16 +36,17 @@ func (p *Parser) skipPastLikelyEnd(idx uint32) uint32 {
 	}
 
 	rootTok := p.toks.TokenInfos[idx]
-	rootLine := p.toks.LineInfos[rootTok.LineIdx]
-	rootIndent := rootLine.Start + rootTok.Column
+	rootLine := p.toks.FindLineIndex(rootTok.Offset)     // p.toks.LineInfos[rootTok.LineIdx]
+	rootIndent := p.toks.GetIndentColumnNumber(rootLine) // rootLine.Start + rootTok.Column
 	keepSkipping := func(idx uint32) bool {
 		// while we are:
 		//   - on the same line
 		//   - on a line with bigger indentation
 		// we can skip
 		tok := p.toks.TokenInfos[idx]
-		line := p.toks.LineInfos[tok.LineIdx]
-		return line == rootLine || line.Start+tok.Column > rootIndent
+		lineIdx := p.toks.FindLineIndex(tok.Offset) // p.toks.LineInfos[tok.LineIdx]
+		indent := p.toks.GetIndentColumnNumber(lineIdx)
+		return lineIdx == rootLine || indent > rootIndent
 	}
 
 	curr := p.curr()
