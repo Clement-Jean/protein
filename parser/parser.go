@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/Clement-Jean/protein/lexer"
 )
 
@@ -96,7 +94,11 @@ func (p *Parser) error(err error) {
 }
 
 func (p *Parser) expectedCurr(kind ...lexer.TokenKind) {
-	p.error(fmt.Errorf("expected %v, got %s", kind, p.curr()))
+	p.error(&ExpectedError{
+		Expected: kind,
+		Got:      p.curr(),
+		TokIdx:   p.currTok,
+	})
 }
 
 func (p *Parser) parseEnderState() {
