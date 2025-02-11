@@ -69,21 +69,21 @@ func (p *Parser) parseMessageValue() {
 		p.next()
 		p.parseExtensions()
 	case lexer.TokenKindOneOf:
-		p.addLeafNode(false)
+		p.addTypedLeafNode(NodeKindMessageOneOfDecl, false)
 		p.next()
 		p.parseOneof()
 	case lexer.TokenKindMap:
 		p.pushState(stateMessageFieldFinish)
 		p.pushState(stateMessageFieldAssign)
 		p.pushState(stateMessageMapKeyValue)
-		p.addLeafNode(false)
+		p.addTypedLeafNode(NodeKindMessageFieldDecl, false)
 		p.next()
 	case lexer.TokenKindMessage:
-		p.addLeafNode(false)
+		p.addTypedLeafNode(NodeKindMessageDecl, false)
 		p.next()
 		p.parseMessage()
 	case lexer.TokenKindEnum:
-		p.addLeafNode(false)
+		p.addTypedLeafNode(NodeKindEnumDecl, false)
 		p.next()
 		p.parseEnum()
 	default:
@@ -158,5 +158,5 @@ func (p *Parser) parseMessageFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addNode(tokIdx, state)
+	p.addTypedNode(tokIdx, NodeKindEnumClose, state)
 }

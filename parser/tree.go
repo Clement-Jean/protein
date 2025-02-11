@@ -11,9 +11,26 @@ import (
 	"github.com/Clement-Jean/protein/source"
 )
 
+type NodeKind uint16
+
+const (
+	NodeKindUndefined NodeKind = iota
+	NodeKindImportStmt
+	NodeKindPackageStmt
+	NodeKindMessageDecl
+	NodeKindMessageClose
+	NodeKindMessageFieldDecl
+	NodeKindMessageOneOfDecl
+	NodeKindEnumDecl
+	NodeKindEnumClose
+	NodeKindEnumValueDecl
+	NodeKindServiceDecl
+)
+
 type Node struct {
 	TokIdx      uint32
 	SubtreeSize uint32
+	Kind        NodeKind
 	HasError    bool
 }
 

@@ -41,13 +41,19 @@ func (l *Linker) Link() []error {
 		l.depId++
 	}
 
+	pkgs := make(map[string]string, len(l.units)) // file -> pkg
 	depGraph := make([][]int, len(l.units))
 
+	// unfortunately imports and packages can be placed
+	// anywhere. This means we need to resolve all of
+	// them first before being able to resolve types.
 	for i := 0; i < len(l.units); i++ {
 		for _, node := range l.units[i].Tree {
-			switch l.units[i].Toks.TokenInfos[node.TokIdx].Kind {
-			case lexer.TokenKindImport:
+			switch node.Kind {
+			case parser.NodeKindImportStmt:
 				l.handleImport(&depGraph, l.units[i], node.TokIdx)
+			case parser.NodeKindPackageStmt:
+				l.handlePackage(&pkgs, l.units[i], node.TokIdx)
 			}
 		}
 	}
@@ -60,10 +66,39 @@ func (l *Linker) Link() []error {
 		return []error{&ImportCycleError{Files: files}}
 	}
 
-	// TODO the parser will have to provide Kinds for
-	//      statements. This will help detecting when
-	//      we have a field, a message, etc... and this
-	//      will let us create symbol tables
+	var multiset []string
+
+	for i := 0; i < len(l.units); i++ {
+		pkg := pkgs[l.units[i].File]
+		s := []string{pkg}
+
+		for _, node := range l.units[i].Tree {
+			switch node.Kind {
+			case parser.NodeKindMessageClose, parser.NodeKindEnumClose:
+				if len(s) > 0 {
+					s = s[:len(s)-1]
+				}
+
+			case parser.NodeKindMessageDecl:
+				l.handleMessage(&multiset, &s, l.units[i], node.TokIdx)
+			case parser.NodeKindEnumDecl:
+				l.handleEnum(&multiset, &s, l.units[i], node.TokIdx)
+			case parser.NodeKindServiceDecl:
+				l.handleService(&multiset, s, l.units[i], node.TokIdx)
+			}
+		}
+	}
+
+	unique := multisetSort(multiset)
+
+	for i := 0; i < len(multiset); i++ {
+		print("('", multiset[i], "', ", unique[i], ") ")
+	}
+	println()
+
+	// TODO check already defined
+	// TODO check field types (if identifier)
+	// TODO check rpc input and output
 
 	return nil
 }

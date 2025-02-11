@@ -63,11 +63,29 @@ func (p *Parser) peek() lexer.TokenKind {
 	return p.toks.TokenInfos[p.currTok+1].Kind
 }
 
+func (p *Parser) addTypedLeafNode(kind NodeKind, hasError bool) {
+	p.tree = append(p.tree, Node{
+		TokIdx:      p.currTok,
+		SubtreeSize: 1,
+		Kind:        kind,
+		HasError:    hasError,
+	})
+}
+
 func (p *Parser) addLeafNode(hasError bool) {
 	p.tree = append(p.tree, Node{
 		TokIdx:      p.currTok,
 		SubtreeSize: 1,
 		HasError:    hasError,
+	})
+}
+
+func (p *Parser) addTypedNode(tokIdx uint32, kind NodeKind, state stateStackEntry) {
+	p.tree = append(p.tree, Node{
+		TokIdx:      tokIdx,
+		SubtreeSize: uint32(len(p.tree)) - state.subtreeStart + 1,
+		Kind:        kind,
+		HasError:    state.hasError,
 	})
 }
 
@@ -128,16 +146,21 @@ func (p *Parser) parseTopLevel() {
 	case lexer.TokenKindEdition:
 		p.parseEdition()
 	case lexer.TokenKindImport:
+		p.tree[len(p.tree)-1].Kind = NodeKindImportStmt
 		p.parseImport()
 	case lexer.TokenKindPackage:
+		p.tree[len(p.tree)-1].Kind = NodeKindPackageStmt
 		p.parsePackage()
 	case lexer.TokenKindOption:
 		p.parseOption()
 	case lexer.TokenKindMessage:
+		p.tree[len(p.tree)-1].Kind = NodeKindMessageDecl
 		p.parseMessage()
 	case lexer.TokenKindEnum:
+		p.tree[len(p.tree)-1].Kind = NodeKindEnumDecl
 		p.parseEnum()
 	case lexer.TokenKindService:
+		p.tree[len(p.tree)-1].Kind = NodeKindServiceDecl
 		p.parseService()
 	}
 }
