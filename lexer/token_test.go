@@ -6,9 +6,9 @@ import (
 )
 
 var tokenTests = []struct {
+	pred func(TokenKind) bool
 	name string
 	s    string
-	pred func(TokenKind) bool
 }{
 	{
 		name: "identifier",
