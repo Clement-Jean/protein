@@ -414,7 +414,7 @@ func BenchmarkLexer(b *testing.B) {
 		b.Run(s, func(b *testing.B) {
 			b.ReportAllocs()
 			b.ResetTimer()
-			for range b.N {
+			for b.Loop() {
 				toks, _ = l.Lex()
 			}
 		})
@@ -429,7 +429,7 @@ func FuzzLexer(f *testing.F) {
 	f.Fuzz(func(t *testing.T, s string) {
 		l, err := lexer.NewFromReader(strings.NewReader(s))
 		if err != nil {
-			f.Fatal(err)
+			t.Fatal(err)
 		}
 
 		toks, _ = l.Lex()
