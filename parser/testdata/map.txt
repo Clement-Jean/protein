@@ -28,6 +28,40 @@ parseTree = [
 ]
 
 ================================================================================
+wkt
+================================================================================
+
+message test {
+  map<string, google.protobuf.Empty> emptys = 1;
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: map},
+        {kind: <},
+          {kind: string},
+              {kind: Identifier},
+              {kind: Identifier},
+            {kind: ., subtreeSize: 3},
+            {kind: Identifier},
+          {kind: ., subtreeSize: 5},
+        {kind: ,, subtreeSize: 7},
+      {kind: >, subtreeSize: 9},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 14},
+  {kind: }, subtreeSize: 18},
+  {kind: EOF},
+]
+
+
+================================================================================
 expected key type
 ================================================================================
 

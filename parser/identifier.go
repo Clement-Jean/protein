@@ -3,11 +3,11 @@ package parser
 import "github.com/Clement-Jean/protein/lexer"
 
 func (p *Parser) parseIdentifier() {
-	p.popState()
+	st := p.popState()
 
 	curr := p.curr()
 	hasError := !curr.IsIdentifier()
-	p.addLeafNode(hasError)
+	p.addTypedLeafNode(st.kind, hasError)
 
 	if !hasError {
 		p.next()
@@ -19,11 +19,11 @@ func (p *Parser) parseIdentifier() {
 }
 
 func (p *Parser) parseFullIdentifierRoot() {
-	p.popState()
+	st := p.popState()
 
 	curr := p.curr()
 	hasError := !curr.IsIdentifier()
-	p.addLeafNode(hasError)
+	p.addTypedLeafNode(st.kind, hasError)
 
 	if !hasError {
 		curr = p.next()

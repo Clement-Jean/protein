@@ -21,10 +21,14 @@ var mapKeyTypes = []lexer.TokenKind{
 	lexer.TokenKindTypeString,
 }
 
-func (p *Parser) parseMessageMapKeyValue() {
-	state := p.popState()
-	curr := p.curr()
-	hasError := curr != lexer.TokenKindLeftAngle
+func (p *Parser) parseMessageMap() {
+	p.pushState(stateMessageMapFinish)
+	p.pushState(stateMessageMapStart)
+}
+
+func (p *Parser) parseMessageMapStart() {
+	p.popState()
+	hasError := p.curr() != lexer.TokenKindLeftAngle
 	p.addLeafNode(hasError)
 
 	if hasError {
@@ -32,9 +36,15 @@ func (p *Parser) parseMessageMapKeyValue() {
 		p.skipPastLikelyEnd(p.currTok)
 		return
 	}
-	curr = p.next()
+	p.next()
+	p.pushState(stateMessageMapKeyValue)
+}
 
-	hasError = !slices.Contains(mapKeyTypes, curr)
+func (p *Parser) parseMessageMapKeyValue() {
+	p.popState()
+	curr := p.curr()
+
+	hasError := !slices.Contains(mapKeyTypes, curr)
 	p.addLeafNode(hasError)
 
 	if !hasError {
@@ -46,42 +56,44 @@ func (p *Parser) parseMessageMapKeyValue() {
 	}
 
 	hasError = curr != lexer.TokenKindComma
-	commaIdx := p.currTok
 
 	if hasError {
 		p.addLeafNode(hasError)
 		p.expectedCurr(lexer.TokenKindComma)
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightAngle)
-		curr = p.curr()
-		state.subtreeStart += 3
-		goto end_generic
+		return
 	}
+	p.pushState(stateMessageMapComma)
 	curr = p.next()
 
 	hasError = !curr.IsIdentifier()
-	p.addLeafNode(hasError)
 
-	if !hasError {
-		curr = p.next()
-	} else {
+	if hasError {
+		p.addLeafNode(hasError)
 		p.expectedCurr(lexer.TokenKindIdentifier)
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightAngle)
-		curr = p.curr()
+		return
 	}
+	p.pushState(stateFullIdentifierRoot)
+}
 
-	state.subtreeStart += 3
-	p.addNode(commaIdx, state)
+func (p *Parser) parseMessageMapComma() {
+	state := p.popState()
+	p.addNode(state.tokIdx, state)
+}
 
-end_generic:
-	hasError = curr != lexer.TokenKindRightAngle
+func (p *Parser) parseMessageMapFinish() {
+	state := p.popState()
+	hasError := p.curr() != lexer.TokenKindRightAngle
 
-	if !hasError {
-		state.subtreeStart--
-		p.addNode(p.currTok, state)
-		p.next()
-	} else {
-		p.addLeafNode(hasError)
+	if hasError {
+		p.addLeafNode(true)
 		p.expectedCurr(lexer.TokenKindRightAngle)
 		p.skipPastLikelyEnd(p.currTok)
+		return
 	}
+
+	state.subtreeStart += 2 // map <
+	p.addNode(p.currTok, state)
+	p.next()
 }

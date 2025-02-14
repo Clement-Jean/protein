@@ -49,7 +49,10 @@ const (
 	stateMessageFieldOptionAssign
 	stateMessageFieldOptionFinish
 	stateMessageFieldFinish
+	stateMessageMapStart
 	stateMessageMapKeyValue
+	stateMessageMapComma
+	stateMessageMapFinish
 	stateMessageValue
 	stateMessageFinish
 
@@ -92,6 +95,7 @@ const (
 type stateStackEntry struct {
 	st           state
 	hasError     bool
+	kind         NodeKind
 	tokIdx       uint32
 	subtreeStart uint32
 }

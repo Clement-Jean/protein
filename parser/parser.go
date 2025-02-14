@@ -23,6 +23,15 @@ func New(toks *lexer.TokenizedBuffer) *Parser {
 	}
 }
 
+func (p *Parser) pushTypedState(kind NodeKind, st state) {
+	p.stack = append(p.stack, stateStackEntry{
+		st:           st,
+		kind:         kind,
+		tokIdx:       p.currTok,
+		subtreeStart: uint32(len(p.tree)) - 1,
+	})
+}
+
 func (p *Parser) pushState(st state) {
 	p.stack = append(p.stack, stateStackEntry{
 		st:           st,
@@ -242,8 +251,14 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseMessageFieldOptionFinish()
 		case stateMessageFieldFinish:
 			p.parseMessageFieldFinish()
+		case stateMessageMapStart:
+			p.parseMessageMapStart()
 		case stateMessageMapKeyValue:
 			p.parseMessageMapKeyValue()
+		case stateMessageMapComma:
+			p.parseMessageMapComma()
+		case stateMessageMapFinish:
+			p.parseMessageMapFinish()
 		case stateMessageValue:
 			p.parseMessageValue()
 		case stateMessageFinish:

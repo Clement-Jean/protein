@@ -75,7 +75,7 @@ func (p *Parser) parseMessageValue() {
 	case lexer.TokenKindMap:
 		p.pushState(stateMessageFieldFinish)
 		p.pushState(stateMessageFieldAssign)
-		p.pushState(stateMessageMapKeyValue)
+		p.parseMessageMap()
 		p.addTypedLeafNode(NodeKindMessageFieldDecl, false)
 		p.next()
 	case lexer.TokenKindMessage:
@@ -104,7 +104,7 @@ func (p *Parser) parseMessageValue() {
 		if curr.IsIdentifier() {
 			p.pushState(stateMessageFieldFinish)
 			p.pushState(stateMessageFieldAssign)
-			p.pushState(stateFullIdentifierRoot)
+			p.pushTypedState(NodeKindMessageFieldDecl, stateFullIdentifierRoot)
 			if hasModifier {
 				p.addNode(modifierIdx, stateStackEntry{
 					tokIdx:       modifierIdx,
