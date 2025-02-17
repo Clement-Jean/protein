@@ -66,6 +66,13 @@ func (p *Parser) parseMessageMapKeyValue() {
 	p.pushState(stateMessageMapComma)
 	curr = p.next()
 
+	var dotIdx uint32
+	hasDot := curr == lexer.TokenKindDot
+	if hasDot {
+		dotIdx = p.currTok
+		curr = p.next()
+	}
+
 	hasError = !curr.IsIdentifier()
 
 	if hasError {
@@ -74,7 +81,14 @@ func (p *Parser) parseMessageMapKeyValue() {
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindRightAngle)
 		return
 	}
-	p.pushState(stateFullIdentifierRoot)
+	if hasDot {
+		p.stack = append(p.stack, stateStackEntry{
+			tokIdx:       dotIdx,
+			st:           stateMessageMapComma, // using message comma state for the prefix dot in identifier...
+			subtreeStart: uint32(len(p.tree)),
+		})
+	}
+	p.pushTypedState(NodeKindMapValue, stateFullIdentifierRoot)
 }
 
 func (p *Parser) parseMessageMapComma() {

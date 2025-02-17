@@ -76,7 +76,7 @@ func (p *Parser) parseMessageValue() {
 		p.pushState(stateMessageFieldFinish)
 		p.pushState(stateMessageFieldAssign)
 		p.parseMessageMap()
-		p.addTypedLeafNode(NodeKindMessageFieldDecl, false)
+		p.addLeafNode(false)
 		p.next()
 	case lexer.TokenKindMessage:
 		p.addTypedLeafNode(NodeKindMessageDecl, false)
@@ -87,9 +87,13 @@ func (p *Parser) parseMessageValue() {
 		p.next()
 		p.parseEnum()
 	default:
+		var (
+			dotIdx      uint32
+			modifierIdx uint32
+		)
 		hasDot := false
 		hasModifier := false
-		var modifierIdx uint32
+
 		if curr == lexer.TokenKindOptional || curr == lexer.TokenKindRepeated || curr == lexer.TokenKindRequired {
 			hasModifier = true
 			modifierIdx = p.currTok
@@ -98,6 +102,7 @@ func (p *Parser) parseMessageValue() {
 
 		if curr == lexer.TokenKindDot {
 			hasDot = true
+			dotIdx = p.currTok
 			curr = p.next()
 		}
 
@@ -105,6 +110,7 @@ func (p *Parser) parseMessageValue() {
 			p.pushState(stateMessageFieldFinish)
 			p.pushState(stateMessageFieldAssign)
 			p.pushTypedState(NodeKindMessageFieldDecl, stateFullIdentifierRoot)
+
 			if hasModifier {
 				p.addNode(modifierIdx, stateStackEntry{
 					tokIdx:       modifierIdx,
@@ -112,7 +118,10 @@ func (p *Parser) parseMessageValue() {
 				})
 			}
 			if hasDot {
-				p.addLeafNode(false)
+				p.addNode(dotIdx, stateStackEntry{
+					tokIdx:       dotIdx,
+					subtreeStart: uint32(len(p.tree)),
+				})
 			}
 			break
 		} else if hasModifier {
@@ -158,5 +167,5 @@ func (p *Parser) parseMessageFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addTypedNode(tokIdx, NodeKindEnumClose, state)
+	p.addTypedNode(tokIdx, NodeKindMessageClose, state)
 }

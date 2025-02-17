@@ -77,7 +77,7 @@ parseTree = [
         {kind: Integer},
       {kind: =, subtreeSize: 3},
     {kind: ;, subtreeSize: 5},
-        {kind: Identifier},
+        {kind: .},
         {kind: Identifier},
         {kind: Identifier},
       {kind: ., subtreeSize: 4},
