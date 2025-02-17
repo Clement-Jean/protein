@@ -3,9 +3,10 @@ package linker
 import (
 	"fmt"
 	"strings"
+	"unique"
 )
 
-func (l *Linker) handleService(multiset *[]string, pkg []string, unit Unit, idx uint32) {
+func (l *Linker) handleService(multiset *typeMultiset, pkg []string, unit Unit, idx uint32) {
 	idx += 1
 
 	start := unit.Toks.TokenInfos[idx].Offset
@@ -13,5 +14,5 @@ func (l *Linker) handleService(multiset *[]string, pkg []string, unit Unit, idx 
 	name := strings.TrimSpace(string(unit.Buffer.Range(start, end)))
 
 	prefix := strings.Join(pkg, ".")
-	(*multiset) = append((*multiset), fmt.Sprintf("%s.%s", prefix, name))
+	(*multiset).names = append((*multiset).names, unique.Make(fmt.Sprintf("%s.%s", prefix, name)))
 }

@@ -11,21 +11,34 @@ import (
 	"github.com/Clement-Jean/protein/source"
 )
 
+//go:generate stringer -type=NodeKind -linecomment
 type NodeKind uint16
 
 const (
-	NodeKindUndefined NodeKind = iota
-	NodeKindImportStmt
-	NodeKindPackageStmt
-	NodeKindMessageDecl
-	NodeKindMessageClose
-	NodeKindMessageFieldDecl
-	NodeKindMessageOneOfDecl
-	NodeKindEnumDecl
-	NodeKindEnumClose
-	NodeKindEnumValueDecl
-	NodeKindServiceDecl
+	NodeKindUndefined        NodeKind = iota // Undefined
+	NodeKindImportStmt                       // ImportStmt
+	NodeKindPackageStmt                      // PackageStmt
+	NodeKindMessageClose                     // MessageClose
+	NodeKindMessageOneOfDecl                 // OneOfDecl
+
+	// type refs
+	NodeKindMessageFieldDecl // FieldDecl
+	NodeKindEnumValueDecl    // ValueDecl
+	NodeKindMapValue         // MapValue
+
+	// type defs
+	NodeKindMessageDecl // MessageDecl
+	NodeKindEnumDecl    // EnumDecl
+	NodeKindServiceDecl // ServiceDecl
 )
+
+func (k NodeKind) IsTypeDef() bool {
+	return k >= NodeKindMessageDecl
+}
+
+func (k NodeKind) IsTypeRef() bool {
+	return k >= NodeKindMessageFieldDecl && k < NodeKindMessageDecl
+}
 
 type Node struct {
 	TokIdx      uint32
@@ -87,7 +100,7 @@ func (pt *ParseTree) printNode(out io.Writer, idx, depth int, toks *lexer.Tokeni
 		if s != nil && (kind == lexer.TokenKindIdentifier || kind == lexer.TokenKindStr) {
 			start := toks.TokenInfos[node.TokIdx].Offset
 			end := toks.TokenInfos[node.TokIdx+1].Offset
-			comment = fmt.Sprintf(" // %s", strings.TrimSpace(string(s.Range(start, end))))
+			comment = fmt.Sprintf(" // %q", strings.TrimSpace(string(s.Range(start, end))))
 		}
 
 		fmt.Fprintf(out, "kind: %s", kind)

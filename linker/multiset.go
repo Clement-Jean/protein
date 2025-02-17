@@ -1,29 +1,42 @@
 package linker
 
-func partition(a []string, lo, hi, d int) (lt, gt, p int) {
+import (
+	"unique"
+
+	"github.com/Clement-Jean/protein/parser"
+)
+
+type typeMultiset struct {
+	names []unique.Handle[string]
+	kinds []parser.NodeKind
+}
+
+func partition(a typeMultiset, lo, hi, d int) (lt, gt, p int) {
 	var pivot int
 
-	if d >= len(a[lo]) {
+	if d >= len(a.names[lo].Value()) {
 		pivot = -1
 	} else {
-		pivot = int(a[lo][d])
+		pivot = int(a.names[lo].Value()[d])
 	}
 	i := lo + 1
 
 	for i <= hi {
 		var t int
-		if d >= len(a[i]) {
+		if d >= len(a.names[i].Value()) {
 			t = -1
 		} else {
-			t = int(a[i][d])
+			t = int(a.names[i].Value()[d])
 		}
 
 		if t < pivot {
-			a[lo], a[i] = a[i], a[lo]
+			a.names[lo], a.names[i] = a.names[i], a.names[lo]
+			a.kinds[lo], a.kinds[i] = a.kinds[i], a.kinds[lo]
 			lo++
 			i++
 		} else if t > pivot {
-			a[i], a[hi] = a[hi], a[i]
+			a.names[i], a.names[hi] = a.names[hi], a.names[i]
+			a.kinds[i], a.kinds[hi] = a.kinds[hi], a.kinds[i]
 			hi--
 		} else {
 			i++
@@ -33,11 +46,11 @@ func partition(a []string, lo, hi, d int) (lt, gt, p int) {
 	return lo, hi, pivot
 }
 
-func multisetSort(a []string) []bool {
-	unique := make([]bool, len(a))
+func multisetSort(a typeMultiset) {
+	n := len(a.names)
 	var q [][3]int
 
-	q = append(q, [3]int{0, len(a) - 1, 0})
+	q = append(q, [3]int{0, n - 1, 0})
 
 	for len(q) != 0 {
 		front := q[0]
@@ -53,14 +66,10 @@ func multisetSort(a []string) []bool {
 
 		lt, gt, pivot := partition(a, lo, hi, d)
 
-		unique[lt] = true
-
 		q = append(q, [3]int{lo, lt - 1, d})
 		if pivot >= 0 {
 			q = append(q, [3]int{lt, gt, d + 1})
 		}
 		q = append(q, [3]int{gt + 1, hi, d})
 	}
-
-	return unique
 }

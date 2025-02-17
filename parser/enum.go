@@ -69,5 +69,5 @@ func (p *Parser) parseEnumFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addTypedNode(tokIdx, NodeKindMessageClose, state)
+	p.addNode(tokIdx, state)
 }

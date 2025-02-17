@@ -1,6 +1,9 @@
 package linker
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -24,25 +27,47 @@ func (l *Linker) handleImport(depGraph *[][]int, unit Unit, idx uint32) {
 		l.depsIDs[file] = l.depId
 		l.depId++
 
-		s, err := source.NewFromFile(file)
-		if err != nil {
-			panic(err) // TODO better handling
+		var (
+			err  error                  = nil
+			errs []error                = nil
+			s    *source.Buffer         = nil
+			lex  *lexer.Lexer           = nil
+			tb   *lexer.TokenizedBuffer = nil
+			p    *parser.Parser         = nil
+			pt   parser.ParseTree       = nil
+		)
+
+		for i := 0; pt == nil && i < len(l.includePaths); i++ {
+			path := filepath.Join(l.includePaths[i], file)
+
+			if _, err = os.Stat(path); errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+
+			s, err = source.NewFromFile(path)
+			if err != nil {
+				panic(err) // TODO better handling
+			}
+
+			lex, err = lexer.NewFromSource(s)
+			if err != nil {
+				panic(err) // TODO better handling
+			}
+
+			tb, errs = lex.Lex()
+			if len(errs) != 0 {
+				panic(errs) // TODO better handling
+			}
+
+			p = parser.New(tb)
+			pt, errs = p.Parse()
+			if len(errs) != 0 {
+				panic(errs) // TODO better handling
+			}
 		}
 
-		lex, err := lexer.NewFromSource(s)
-		if err != nil {
-			panic(err) // TODO better handling
-		}
-
-		tb, errs := lex.Lex()
-		if len(errs) != 0 {
-			panic(errs) // TODO better handling
-		}
-
-		p := parser.New(tb)
-		pt, errs := p.Parse()
-		if len(errs) != 0 {
-			panic(errs) // TODO better handling
+		if pt == nil {
+			panic(file + " not found") // TODO better handling
 		}
 
 		l.units = append(l.units, Unit{
