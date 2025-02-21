@@ -259,7 +259,6 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 	}
 	println()
 
-	// TODO check rpc input and output
 	return errs
 }
 
@@ -278,7 +277,7 @@ func (tc *TypeChecker) Check() []error {
 	i := 0
 
 	for true {
-		// unfortunately imports can be placed anywhere.
+		// unfortunately imports and packages can be placed anywhere.
 		// This means we need to resolve all of them first
 		// before being able to resolve types.
 		for j := i; j < len(tc.units); j++ {
@@ -288,6 +287,13 @@ func (tc *TypeChecker) Check() []error {
 					if err := tc.handleImport(&depGraph, tc.units[j], node.TokIdx); err != nil {
 						errs = append(errs, err)
 					}
+				case parser.NodeKindPackageStmt:
+					if _, ok := tc.pkgs[tc.units[j]]; ok {
+						errs = append(errs, &PackageMultipleDefError{File: tc.units[j].File})
+						break
+					}
+
+					tc.handlePackage(tc.pkgs, tc.units[j], node.TokIdx)
 				}
 			}
 		}
@@ -307,23 +313,6 @@ func (tc *TypeChecker) Check() []error {
 
 		i = unitsLen // recheck only newly added
 		unitsLen = len(tc.units)
-	}
-
-	// unfortunately packages can be placed anywhere.
-	// This means we need to resolve all of them first
-	// before being able to resolve types.
-	for j, unit := range tc.units {
-		for _, node := range unit.Tree {
-			switch node.Kind {
-			case parser.NodeKindPackageStmt:
-				if _, ok := tc.pkgs[tc.units[j]]; ok {
-					errs = append(errs, &PackageMultipleDefError{File: tc.units[j].File})
-					break
-				}
-
-				tc.handlePackage(tc.pkgs, tc.units[j], node.TokIdx)
-			}
-		}
 	}
 
 	errs = append(errs, tc.checkImportCycles(depGraph)...)
