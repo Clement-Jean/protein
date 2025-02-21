@@ -109,19 +109,31 @@ func (p *Parser) parseMessageValue() {
 		if curr.IsIdentifier() {
 			p.pushState(stateMessageFieldFinish)
 			p.pushState(stateMessageFieldAssign)
-			p.pushTypedState(NodeKindMessageFieldDecl, stateFullIdentifierRoot)
 
 			if hasModifier {
+				p.pushState(stateFullIdentifierRoot)
 				p.addNode(modifierIdx, stateStackEntry{
 					tokIdx:       modifierIdx,
 					subtreeStart: uint32(len(p.tree)),
+					kind:         NodeKindMessageFieldDecl,
 				})
+			} else {
+				p.pushTypedState(NodeKindMessageFieldDecl, stateFullIdentifierRoot)
 			}
+
 			if hasDot {
-				p.addNode(dotIdx, stateStackEntry{
-					tokIdx:       dotIdx,
-					subtreeStart: uint32(len(p.tree)),
-				})
+				if hasModifier {
+					p.addNode(dotIdx, stateStackEntry{
+						tokIdx:       dotIdx,
+						subtreeStart: uint32(len(p.tree)),
+					})
+				} else {
+					p.addNode(dotIdx, stateStackEntry{
+						tokIdx:       dotIdx,
+						subtreeStart: uint32(len(p.tree)),
+						kind:         NodeKindMessageFieldDecl,
+					})
+				}
 			}
 			break
 		} else if hasModifier {
