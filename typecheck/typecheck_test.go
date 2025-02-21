@@ -19,10 +19,10 @@ type pair[K any, V any] struct {
 
 type testFile = pair[string, string]
 
-func createUnits(t *testing.T, contents []testFile) []typecheck.Unit {
+func createUnits(t *testing.T, contents []testFile) []*typecheck.Unit {
 	t.Helper()
 
-	var units []typecheck.Unit
+	var units []*typecheck.Unit
 
 	// sort for being able to use binary search
 	slices.SortFunc(contents, func(p, p2 testFile) int {
@@ -53,7 +53,7 @@ func createUnits(t *testing.T, contents []testFile) []typecheck.Unit {
 			t.Fatal(errs)
 		}
 
-		units = append(units, typecheck.Unit{
+		units = append(units, &typecheck.Unit{
 			File:   file,
 			Buffer: s,
 			Toks:   tb,

@@ -28,11 +28,11 @@ type TypeChecker struct {
 	depsIDs   map[*Unit]int
 	depsNames map[int]*Unit
 
-	units        []Unit
+	units        []*Unit
 	includePaths []string
 }
 
-func New(units []Unit, opts ...TypeCheckerOpt) *TypeChecker {
+func New(units []*Unit, opts ...TypeCheckerOpt) *TypeChecker {
 	tc := &TypeChecker{
 		units: units,
 
@@ -134,7 +134,7 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 	var multiset typeMultiset
 
 	for i := 0; i < len(tc.units); i++ {
-		pkg := tc.pkgs[&tc.units[i]]
+		pkg := tc.pkgs[tc.units[i]]
 		st := []string{pkg} // stack keeping track of type nesting
 
 		for _, node := range tc.units[i].Tree {
@@ -148,21 +148,23 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 				continue
 
 			case parser.NodeKindMessageDecl:
-				tc.handleMessage(&multiset, &st, &tc.units[i], node.TokIdx)
+				tc.handleMessage(&multiset, &st, tc.units[i], node.TokIdx)
 			case parser.NodeKindMessageFieldDecl:
-				tc.handleField(&multiset, st, &tc.units[i], node.TokIdx)
+				tc.handleField(&multiset, st, tc.units[i], node.TokIdx)
 			case parser.NodeKindMapValue:
-				tc.handleMapValue(&multiset, st, &tc.units[i], node.TokIdx)
+				tc.handleMapValue(&multiset, st, tc.units[i], node.TokIdx)
 			case parser.NodeKindEnumDecl:
-				tc.handleEnum(&multiset, st, &tc.units[i], node.TokIdx)
+				tc.handleEnum(&multiset, st, tc.units[i], node.TokIdx)
 			case parser.NodeKindServiceDecl:
-				tc.handleService(&multiset, st, &tc.units[i], node.TokIdx)
+				tc.handleService(&multiset, st, tc.units[i], node.TokIdx)
+			case parser.NodeKindRPCInputOutput:
+				tc.handleRPC(&multiset, st, tc.units[i], node.TokIdx)
 			default:
 				continue
 			}
 
 			if size != len(multiset.names) { // added element
-				multiset.units = append(multiset.units, &tc.units[i])
+				multiset.units = append(multiset.units, tc.units[i])
 				multiset.kinds = append(multiset.kinds, node.Kind)
 			}
 		}
@@ -181,7 +183,6 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 		name := multiset.names[i]
 		unit := multiset.units[i]
 
-		println(unit.File, name.Value())
 		if multiset.kinds[i].IsTypeDef() {
 			declIdx = i
 			decls++
@@ -268,7 +269,7 @@ func (tc *TypeChecker) Check() []error {
 	var errs []error
 
 	for j := 0; j < len(tc.units); j++ {
-		tc.registerDep(&tc.units[j])
+		tc.registerDep(tc.units[j])
 	}
 
 	tc.pkgs = make(map[*Unit]string, len(tc.units))
@@ -284,7 +285,7 @@ func (tc *TypeChecker) Check() []error {
 			for _, node := range tc.units[j].Tree {
 				switch node.Kind {
 				case parser.NodeKindImportStmt:
-					if err := tc.handleImport(&depGraph, &tc.units[j], node.TokIdx); err != nil {
+					if err := tc.handleImport(&depGraph, tc.units[j], node.TokIdx); err != nil {
 						errs = append(errs, err)
 					}
 				}
@@ -315,12 +316,12 @@ func (tc *TypeChecker) Check() []error {
 		for _, node := range unit.Tree {
 			switch node.Kind {
 			case parser.NodeKindPackageStmt:
-				if _, ok := tc.pkgs[&tc.units[j]]; ok {
+				if _, ok := tc.pkgs[tc.units[j]]; ok {
 					errs = append(errs, &PackageMultipleDefError{File: tc.units[j].File})
 					break
 				}
 
-				tc.handlePackage(tc.pkgs, &tc.units[j], node.TokIdx)
+				tc.handlePackage(tc.pkgs, tc.units[j], node.TokIdx)
 			}
 		}
 	}

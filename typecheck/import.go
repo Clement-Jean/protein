@@ -21,6 +21,7 @@ func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) e
 	file = strings.Trim(file, " \"'")
 
 	var to *Unit
+	from := tc.depsIDs[unit]
 
 	for i := 0; i < len(tc.units); i++ {
 		for j := 0; j < len(tc.includePaths); j++ {
@@ -35,7 +36,7 @@ func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) e
 			}
 
 			if tc.units[i].File == path {
-				to = &tc.units[i]
+				to = tc.units[i]
 				goto found
 			}
 		}
@@ -45,13 +46,12 @@ found:
 
 	if to == nil {
 		// add import to be parsed late (see: handleUnknownImports)
-		tc.units = append(tc.units, Unit{File: file})
-		to = &tc.units[len(tc.units)-1]
+		tc.units = append(tc.units, &Unit{File: file})
+		to = tc.units[len(tc.units)-1]
 		tc.registerDep(to)
 		*depGraph = append(*depGraph, make([]int, 0))
 	}
 
-	from := tc.depsIDs[unit]
 	(*depGraph)[from] = append((*depGraph)[from], tc.depsIDs[to])
 	return nil
 }
