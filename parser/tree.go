@@ -30,6 +30,7 @@ const (
 	NodeKindMessageFieldDecl // FieldDecl
 	NodeKindEnumValueDecl    // ValueDecl
 	NodeKindMapValue         // MapValue
+	NodeKindRPCInputOutput   // RPCInputOutput
 )
 
 func (k NodeKind) IsTypeDef() bool {

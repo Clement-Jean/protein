@@ -33,7 +33,7 @@ func (p *Parser) parseRPCReqRes() {
 	curr = p.next()
 
 	p.pushState(stateRPCReqResFinish)
-	p.pushState(stateFullIdentifierRoot)
+	p.pushTypedState(NodeKindRPCInputOutput, stateFullIdentifierRoot)
 
 	if curr == lexer.TokenKindStream {
 		p.addLeafNode(hasError)
