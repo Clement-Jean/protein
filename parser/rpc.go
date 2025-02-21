@@ -33,6 +33,12 @@ func (p *Parser) parseRPCReqRes() {
 	curr = p.next()
 
 	p.pushState(stateRPCReqResFinish)
+
+	if curr == lexer.TokenKindDot {
+		p.addLeafNode(false)
+		curr = p.next()
+	}
+
 	p.pushTypedState(NodeKindRPCInputOutput, stateFullIdentifierRoot)
 
 	if curr == lexer.TokenKindStream {

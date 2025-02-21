@@ -26,6 +26,35 @@ parseTree = [
 ]
 
 ================================================================================
+rpc fully qualified
+================================================================================
+
+service Test { rpc Test (.Test) returns (.Test); }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: service},
+    {kind: Identifier},
+    {kind: {},
+      {kind: rpc},
+        {kind: Identifier},
+          {kind: (},
+          {kind: .},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 4},
+          {kind: (},
+          {kind: .},
+          {kind: Identifier},
+        {kind: ), subtreeSize: 4},
+      {kind: returns, subtreeSize: 10},
+    {kind: ;, subtreeSize: 12},
+  {kind: }, subtreeSize: 16},
+  {kind: EOF},
+]
+
+================================================================================
 bidi rpc
 ================================================================================
 
