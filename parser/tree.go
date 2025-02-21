@@ -21,23 +21,23 @@ const (
 	NodeKindMessageClose                     // MessageClose
 	NodeKindMessageOneOfDecl                 // OneOfDecl
 
-	// type refs
-	NodeKindMessageFieldDecl // FieldDecl
-	NodeKindEnumValueDecl    // ValueDecl
-	NodeKindMapValue         // MapValue
-
 	// type defs
 	NodeKindMessageDecl // MessageDecl
 	NodeKindEnumDecl    // EnumDecl
 	NodeKindServiceDecl // ServiceDecl
+
+	// type refs
+	NodeKindMessageFieldDecl // FieldDecl
+	NodeKindEnumValueDecl    // ValueDecl
+	NodeKindMapValue         // MapValue
 )
 
 func (k NodeKind) IsTypeDef() bool {
-	return k >= NodeKindMessageDecl
+	return k >= NodeKindMessageDecl && k < NodeKindMessageFieldDecl
 }
 
 func (k NodeKind) IsTypeRef() bool {
-	return k >= NodeKindMessageFieldDecl && k < NodeKindMessageDecl
+	return k >= NodeKindMessageFieldDecl
 }
 
 type Node struct {
