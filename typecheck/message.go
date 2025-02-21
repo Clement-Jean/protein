@@ -1,4 +1,4 @@
-package linker
+package typecheck
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/Clement-Jean/protein/lexer"
 )
 
-func collectIdentifier(idx uint32, unit Unit, start lexer.TokenInfo) string {
+func collectIdentifier(idx uint32, unit *Unit, start lexer.TokenInfo) string {
 	var name strings.Builder
 
 	for start.Kind == lexer.TokenKindIdentifier || start.Kind == lexer.TokenKindDot {
@@ -29,7 +29,7 @@ func collectIdentifier(idx uint32, unit Unit, start lexer.TokenInfo) string {
 	return name.String()
 }
 
-func (l *Linker) handleMessage(multiset *typeMultiset, pkg *[]string, unit Unit, idx uint32) {
+func (tc *TypeChecker) handleMessage(multiset *typeMultiset, pkg *[]string, unit *Unit, idx uint32) {
 	idx += 1
 
 	start := unit.Toks.TokenInfos[idx].Offset
@@ -37,17 +37,14 @@ func (l *Linker) handleMessage(multiset *typeMultiset, pkg *[]string, unit Unit,
 	name := strings.TrimSpace(string(unit.Buffer.Range(start, end)))
 	prefix := strings.Join(*pkg, ".")
 
-	(*multiset).names = append((*multiset).names, unique.Make(fmt.Sprintf("%s.%s", prefix, name)))
+	multiset.offsets = append(multiset.offsets, start)
+	multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, name)))
 	(*pkg) = append((*pkg), name)
 }
 
-func (l *Linker) handleMapValue(multiset *typeMultiset, pkg []string, unit Unit, idx uint32) {
+func (tc *TypeChecker) handleMapValue(multiset *typeMultiset, pkg []string, unit *Unit, idx uint32) {
 	start := unit.Toks.TokenInfos[idx]
-
-	if start.Kind == lexer.TokenKindDot {
-		start = unit.Toks.TokenInfos[idx+1]
-	}
-
+	isPrecededByDot := idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot
 	id := collectIdentifier(idx, unit, start)
 
 	if len(id) == 0 { // non user-defined types (e.g. int32)
@@ -63,24 +60,26 @@ func (l *Linker) handleMapValue(multiset *typeMultiset, pkg []string, unit Unit,
 	// D -> the.curr.pkg.Parent.D
 	// .D -> D
 
-	isFullyQualified := (idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot) || strings.Contains(id, ".")
+	isFullyQualified := isPrecededByDot || strings.Contains(id, ".")
 
 	if !isFullyQualified {
 		prefix := strings.Join(pkg, ".")
-		(*multiset).names = append((*multiset).names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
+		multiset.offsets = append(multiset.offsets, start.Offset)
+		multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
 		return
 	}
 
-	(*multiset).names = append((*multiset).names, unique.Make(id))
+	if isPrecededByDot {
+		start = unit.Toks.TokenInfos[idx-1]
+	}
+
+	multiset.offsets = append(multiset.offsets, start.Offset)
+	multiset.names = append(multiset.names, unique.Make(id))
 }
 
-func (l *Linker) handleField(multiset *typeMultiset, pkg []string, unit Unit, idx uint32) {
-	switch unit.Toks.TokenInfos[idx].Kind {
-	case lexer.TokenKindOptional, lexer.TokenKindRequired, lexer.TokenKindRepeated:
-		idx += 1
-	}
-
+func (tc *TypeChecker) handleField(multiset *typeMultiset, pkg []string, unit *Unit, idx uint32) {
 	start := unit.Toks.TokenInfos[idx]
+	isPrecededByDot := idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot
 	id := collectIdentifier(idx, unit, start)
 
 	if len(id) == 0 { // non user-defined types (e.g. int32)
@@ -96,13 +95,19 @@ func (l *Linker) handleField(multiset *typeMultiset, pkg []string, unit Unit, id
 	// D -> the.curr.pkg.Parent.D
 	// .D -> D
 
-	isFullyQualified := (idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot) || strings.Contains(id, ".")
+	isFullyQualified := isPrecededByDot || strings.Contains(id, ".")
 
 	if !isFullyQualified {
 		prefix := strings.Join(pkg, ".")
-		(*multiset).names = append((*multiset).names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
+		multiset.offsets = append(multiset.offsets, start.Offset)
+		multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
 		return
 	}
 
-	(*multiset).names = append((*multiset).names, unique.Make(id))
+	if isPrecededByDot {
+		start = unit.Toks.TokenInfos[idx-1]
+	}
+
+	multiset.offsets = append(multiset.offsets, start.Offset)
+	multiset.names = append(multiset.names, unique.Make(id))
 }

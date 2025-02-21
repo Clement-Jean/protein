@@ -1,4 +1,4 @@
-package linker
+package typecheck
 
 import (
 	"strings"
@@ -6,7 +6,7 @@ import (
 	"github.com/Clement-Jean/protein/lexer"
 )
 
-func (l *Linker) handlePackage(pkgs *map[string]string, unit Unit, idx uint32) {
+func (tc *TypeChecker) handlePackage(pkgs map[*Unit]string, unit *Unit, idx uint32) {
 	idx += 1
 
 	var name strings.Builder
@@ -21,5 +21,5 @@ func (l *Linker) handlePackage(pkgs *map[string]string, unit Unit, idx uint32) {
 		start = unit.Toks.TokenInfos[idx]
 	}
 
-	(*pkgs)[unit.File] = name.String()
+	pkgs[unit] = name.String()
 }
