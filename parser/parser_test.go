@@ -140,7 +140,7 @@ var testFiles = []string{
 	"enum.txt",
 	"service.txt",
 	"rpc.txt",
-	//TODO "a_bit_of_everything.txt",
+	"a_bit_of_everything.txt",
 }
 
 func TestParser(t *testing.T) {
