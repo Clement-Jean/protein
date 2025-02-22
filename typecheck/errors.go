@@ -43,7 +43,9 @@ func (e *PackageMultipleDefError) Error() string {
 }
 
 type TypeNotDefinedError struct {
-	Name string
+	Name      string
+	File      string
+	Line, Col int
 }
 
 func (e *TypeNotDefinedError) Error() string {
@@ -51,7 +53,9 @@ func (e *TypeNotDefinedError) Error() string {
 }
 
 type TypeRedefinedError struct {
-	Name string
+	Name        string
+	Files       []string
+	Lines, Cols []int
 }
 
 func (e *TypeRedefinedError) Error() string {
@@ -59,7 +63,9 @@ func (e *TypeRedefinedError) Error() string {
 }
 
 type TypeUnusedWarning struct {
-	Name string
+	Name      string
+	File      string
+	Line, Col int
 }
 
 func (w *TypeUnusedWarning) Warning() string {

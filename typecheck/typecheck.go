@@ -211,31 +211,43 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 			}
 
 			line, col := tc.getLineColumn(multiset, i)
-			println("file", multiset.units[i].File, "col", col, "line", line+1, "name", name.Value())
 
-			// TODO: improve error message to show the line of the ref
-			errs = append(errs, &TypeNotDefinedError{Name: name.Value()})
+			errs = append(errs, &TypeNotDefinedError{
+				Name: name.Value(),
+				File: multiset.units[i].File,
+				Line: int(line + 1),
+				Col:  int(col),
+			})
 		} else {
 			infos[declIdx][0] += decls
 			infos[declIdx][1] += refs
 
 			if decls > 1 {
 				// backtracks to find the multiple defs
+				var (
+					files []string
+					lines []int
+					cols  []int
+				)
 				for j := i; j >= 0 && multiset.names[j] == name; j-- {
 					if !multiset.kinds[j].IsTypeDef() {
 						continue
 					}
 
-					//line, col := tc.getLineColumn(multiset, j)
-					//println("file", multiset.units[i].File, "col", col, "line", line+1, "name", name.Value())
+					line, col := tc.getLineColumn(multiset, j)
+					files = append(files, multiset.units[j].File)
+					lines = append(lines, int(line+1))
+					cols = append(cols, int(col))
 				}
 
-				// TODO: improve error message to show the 2+ declarations
-				errs = append(errs, &TypeRedefinedError{Name: name.Value()})
+				errs = append(errs, &TypeRedefinedError{
+					Name:  name.Value(),
+					Files: files,
+					Lines: lines,
+					Cols:  cols,
+				})
 			}
 		}
-
-		// println("type", name.Value(), "has", decls, "decls and", refs, "refs")
 	}
 
 	// TODO: skip the following loop if the error level is greater than WARNING
@@ -247,12 +259,15 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 	for i := 0; i < n; i++ {
 		if multiset.kinds[i].IsTypeDef() && infos[i][0] == 1 && infos[i][1] == 0 {
 			name := multiset.names[i].Value()
-			//line, col := tc.getLineColumn(multiset, i)
-			//println("file", multiset.units[i].File, "col", col, "line", line+1, "name", name)
+			line, col := tc.getLineColumn(multiset, i)
 
-			// TODO: improve error message to show the line of the ref
-			errs = append(errs, &TypeUnusedWarning{Name: name})
-			//continue
+			errs = append(errs, &TypeUnusedWarning{
+				Name: name,
+				File: multiset.units[i].File,
+				Line: int(line + 1),
+				Col:  int(col),
+			})
+			continue
 		}
 
 		print("(\"", multiset.names[i].Value(), "\", ", multiset.kinds[i].String(), "),")
