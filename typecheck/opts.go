@@ -34,3 +34,17 @@ func WithFileCheck(check FileExistsCheck) func(*TypeChecker) {
 		tc.fileCheck = check
 	}
 }
+
+type ErrorLevel = uint8
+
+const (
+	ErrorLevelUndefined ErrorLevel = iota
+	ErrorLevelWarning
+	ErrorLevelError
+)
+
+func WithErrorLevel(level ErrorLevel) func(*TypeChecker) {
+	return func(tc *TypeChecker) {
+		tc.errorLevel = level
+	}
+}

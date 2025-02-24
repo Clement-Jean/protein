@@ -30,6 +30,8 @@ type TypeChecker struct {
 
 	units        []*Unit
 	includePaths []string
+
+	errorLevel ErrorLevel
 }
 
 func New(units []*Unit, opts ...TypeCheckerOpt) *TypeChecker {
@@ -46,6 +48,8 @@ func New(units []*Unit, opts ...TypeCheckerOpt) *TypeChecker {
 			_, err := os.Stat(path)
 			return !errors.Is(err, os.ErrNotExist)
 		},
+
+		errorLevel: ErrorLevelUndefined,
 	}
 
 	for _, opt := range opts {
@@ -251,29 +255,33 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 		}
 	}
 
-	// TODO: skip the following loop if the error level is greater than WARNING
+	if tc.errorLevel <= ErrorLevelWarning {
+		// we can only check the uses of a type here because
+		// checkTypeUpperScopes could use a type later/earlier
+		// than when we check its definition, it could lead to
+		// incorrect warnings.
+		for i := 0; i < n; i++ {
+			decls := infos[i][0]
+			refs := infos[i][1]
 
-	// we can only check the uses of a type here because
-	// checkTypeUpperScopes could use a type later/earlier
-	// than when we check its definition, it could lead to
-	// incorrect warnings.
-	for i := 0; i < n; i++ {
-		if multiset.kinds[i].IsTypeDef() && infos[i][0] == 1 && infos[i][1] == 0 {
-			name := multiset.names[i].Value()
-			line, col := tc.getLineColumn(multiset, i)
+			if multiset.kinds[i].IsTypeDef() && decls == 1 && refs == 0 {
+				name := multiset.names[i].Value()
+				unit := multiset.units[i]
+				offset := multiset.offsets[i]
+				line, col := tc.getLineColumn(unit, offset)
+				errs = append(errs, &TypeUnusedWarning{
+					Name: name,
+					File: multiset.units[i].File,
+					Line: int(line + 1),
+					Col:  int(col + 1),
+				})
+				continue
+			}
 
-			errs = append(errs, &TypeUnusedWarning{
-				Name: name,
-				File: multiset.units[i].File,
-				Line: int(line + 1),
-				Col:  int(col),
-			})
-			continue
+			print("(\"", multiset.names[i].Value(), "\", ", multiset.kinds[i].String(), "),")
 		}
-
-		print("(\"", multiset.names[i].Value(), "\", ", multiset.kinds[i].String(), "),")
+		println()
 	}
-	println()
 
 	return errs
 }
@@ -282,6 +290,7 @@ func (tc *TypeChecker) Check() []error {
 	// TODO: embed WKT to avoid reparsing them
 
 	var errs []error
+	var fatalErrs []error
 
 	for j := 0; j < len(tc.units); j++ {
 		tc.registerDep(tc.units[j])
@@ -305,7 +314,7 @@ func (tc *TypeChecker) Check() []error {
 					}
 				case parser.NodeKindPackageStmt:
 					if _, ok := tc.pkgs[tc.units[j]]; ok {
-						errs = append(errs, &PackageMultipleDefError{File: tc.units[j].File})
+						fatalErrs = append(fatalErrs, &PackageMultipleDefError{File: tc.units[j].File})
 						break
 					}
 
@@ -314,27 +323,21 @@ func (tc *TypeChecker) Check() []error {
 			}
 		}
 
-		if len(errs) != 0 {
-			return errs
-		}
-
 		if len(tc.units) == unitsLen { // all imports handled
 			break
 		}
 
 		errs = append(errs, tc.handleUnknownImports(i)...)
-		if len(errs) != 0 {
-			return errs
-		}
-
 		i = unitsLen // recheck only newly added
 		unitsLen = len(tc.units)
 	}
 
-	errs = append(errs, tc.checkImportCycles(depGraph)...)
-	if len(errs) != 0 {
-		return errs
+	fatalErrs = append(fatalErrs, tc.checkImportCycles(depGraph)...)
+	if len(fatalErrs) != 0 {
+		return slices.Concat(fatalErrs, errs)
 	}
+
+	// TODO "a.b.c.D" seems to be defined in "test_d.proto", which is not imported by "test_a.proto".  To use it here, please add the necessary import.
 
 	errs = append(errs, tc.checkTypes(depGraph)...)
 	return errs
