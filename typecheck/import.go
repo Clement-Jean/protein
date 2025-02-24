@@ -10,9 +10,18 @@ import (
 )
 
 func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) error {
-	if unit.Toks.TokenInfos[idx+1].Kind == lexer.TokenKindIdentifier {
+	isPublic := false
+
+	switch unit.Toks.TokenInfos[idx+1].Kind {
+	case lexer.TokenKindPublic:
+		isPublic = true
 		idx += 1
+	case lexer.TokenKindWeak:
+		idx += 1
+	default:
+
 	}
+
 	idx += 1
 
 	start := unit.Toks.TokenInfos[idx].Offset
@@ -63,6 +72,18 @@ found:
 				ImportedFile:  tc.depsNames[toId].File,
 				Line:          int(line + 1),
 				Col:           int(col + 1),
+			}
+		}
+	}
+
+	if isPublic {
+		for i := 0; i < len(*depGraph); i++ {
+			if i == from {
+				continue
+			}
+
+			if slices.Contains((*depGraph)[i], from) {
+				(*depGraph)[i] = append((*depGraph)[i], toId)
 			}
 		}
 	}

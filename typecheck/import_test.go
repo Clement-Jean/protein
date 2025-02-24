@@ -95,6 +95,30 @@ func TestImports(t *testing.T) {
 			},
 			errors: []error{&typecheck.ImportFileNotFoundError{File: "b.proto", IncludePaths: includePaths}},
 		},
+		{
+			name: "public import",
+			contents: []testFile{
+				{"a.proto", "import 'b.proto';"},
+				{"b.proto", "import 'c.proto'; message B { a.b.c.d.D d = 1; }"},
+				{"c.proto", "import public 'd.proto';"},
+				{"d.proto", "package a.b.c.d; message D {}"},
+			},
+			errors: []error{&typecheck.TypeUnusedWarning{Name: ".B"}},
+		},
+		{
+			name: "public import not accessible error",
+			contents: []testFile{
+				{"a.proto", "import 'b.proto'; message A { a.b.c.d.D d = 1; }"},
+				{"b.proto", "import 'c.proto';"},
+				{"c.proto", "import public 'd.proto';"},
+				{"d.proto", "package a.b.c.d; message D {}"},
+			},
+			errors: []error{
+				&typecheck.TypeNotDefinedError{Name: "a.b.c.d.D"},
+				&typecheck.TypeUnusedWarning{Name: ".A"},
+				&typecheck.TypeUnusedWarning{Name: "a.b.c.d.D"},
+			},
+		},
 	}
 
 	for _, test := range tests {

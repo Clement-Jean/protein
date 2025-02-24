@@ -197,6 +197,16 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 
 				if accessible {
 					refs++
+				} else {
+					unit := multiset.units[i]
+					offset := multiset.offsets[i]
+					line, col := tc.getLineColumn(unit, offset)
+					errs = append(errs, &TypeNotDefinedError{
+						Name: name.Value(),
+						File: multiset.units[i].File,
+						Line: int(line + 1),
+						Col:  int(col + 1),
+					})
 				}
 			} else if multiset.kinds[i].IsTypeDef() {
 				decls++
