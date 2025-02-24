@@ -55,9 +55,7 @@ func New(units []*Unit, opts ...TypeCheckerOpt) *TypeChecker {
 	return tc
 }
 
-func (tc *TypeChecker) getLineColumn(multiset typeMultiset, i int) (line, col uint32) {
-	offset := multiset.offsets[i]
-	unit := multiset.units[i]
+func (tc *TypeChecker) getLineColumn(unit *Unit, offset uint32) (line, col uint32) {
 	line = uint32(unit.Toks.FindLineIndex(offset))
 	lineStart := unit.Toks.LineInfos[line].Start
 	col = offset - lineStart
@@ -210,13 +208,14 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 				continue
 			}
 
-			line, col := tc.getLineColumn(multiset, i)
-
+			unit := multiset.units[i]
+			offset := multiset.offsets[i]
+			line, col := tc.getLineColumn(unit, offset)
 			errs = append(errs, &TypeNotDefinedError{
 				Name: name.Value(),
 				File: multiset.units[i].File,
 				Line: int(line + 1),
-				Col:  int(col),
+				Col:  int(col + 1),
 			})
 		} else {
 			infos[declIdx][0] += decls
@@ -234,10 +233,12 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 						continue
 					}
 
-					line, col := tc.getLineColumn(multiset, j)
+					unit := multiset.units[j]
+					offset := multiset.offsets[j]
+					line, col := tc.getLineColumn(unit, offset)
 					files = append(files, multiset.units[j].File)
 					lines = append(lines, int(line+1))
-					cols = append(cols, int(col))
+					cols = append(cols, int(col+1))
 				}
 
 				errs = append(errs, &TypeRedefinedError{

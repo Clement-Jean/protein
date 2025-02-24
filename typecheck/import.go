@@ -52,7 +52,22 @@ found:
 		*depGraph = append(*depGraph, make([]int, 0))
 	}
 
-	(*depGraph)[from] = append((*depGraph)[from], tc.depsIDs[to])
+	toId := tc.depsIDs[to]
+
+	if tc.errorLevel <= ErrorLevelWarning {
+		if slices.Contains((*depGraph)[from], toId) {
+			line, col := tc.getLineColumn(unit, start)
+
+			return &ImportAlreadyImportedWarning{
+				ImportingFile: unit.File,
+				ImportedFile:  tc.depsNames[toId].File,
+				Line:          int(line + 1),
+				Col:           int(col + 1),
+			}
+		}
+	}
+
+	(*depGraph)[from] = append((*depGraph)[from], toId)
 	return nil
 }
 

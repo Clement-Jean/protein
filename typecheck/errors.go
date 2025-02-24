@@ -75,3 +75,16 @@ func (w *TypeUnusedWarning) Warning() string {
 func (w *TypeUnusedWarning) Error() string {
 	return w.Warning()
 }
+
+type ImportAlreadyImportedWarning struct {
+	ImportingFile, ImportedFile string
+	Line, Col                   int
+}
+
+func (w *ImportAlreadyImportedWarning) Warning() string {
+	return fmt.Sprintf("%s is already imported", w.ImportedFile)
+}
+
+func (w *ImportAlreadyImportedWarning) Error() string {
+	return w.Warning()
+}
