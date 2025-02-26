@@ -12,8 +12,8 @@ func _() {
 	_ = x[NodeKindImportStmt-1]
 	_ = x[NodeKindPackageStmt-2]
 	_ = x[NodeKindMessageClose-3]
-	_ = x[NodeKindMessageOneOfDecl-4]
-	_ = x[NodeKindMessageDecl-5]
+	_ = x[NodeKindMessageDecl-4]
+	_ = x[NodeKindMessageOneOfDecl-5]
 	_ = x[NodeKindEnumDecl-6]
 	_ = x[NodeKindServiceDecl-7]
 	_ = x[NodeKindMessageFieldDecl-8]
@@ -22,9 +22,9 @@ func _() {
 	_ = x[NodeKindRPCInputOutput-11]
 }
 
-const _NodeKind_name = "UndefinedImportStmtPackageStmtMessageCloseOneOfDeclMessageDeclEnumDeclServiceDeclFieldDeclValueDeclMapValueRPCInputOutput"
+const _NodeKind_name = "UndefinedImportStmtPackageStmtMessageCloseMessageDeclOneOfDeclEnumDeclServiceDeclFieldDeclValueDeclMapValueRPCInputOutput"
 
-var _NodeKind_index = [...]uint8{0, 9, 19, 30, 42, 51, 62, 70, 81, 90, 99, 107, 121}
+var _NodeKind_index = [...]uint8{0, 9, 19, 30, 42, 53, 62, 70, 81, 90, 99, 107, 121}
 
 func (i NodeKind) String() string {
 	if i >= NodeKind(len(_NodeKind_index)-1) {

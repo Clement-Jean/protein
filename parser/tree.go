@@ -15,16 +15,16 @@ import (
 type NodeKind uint16
 
 const (
-	NodeKindUndefined        NodeKind = iota // Undefined
-	NodeKindImportStmt                       // ImportStmt
-	NodeKindPackageStmt                      // PackageStmt
-	NodeKindMessageClose                     // MessageClose
-	NodeKindMessageOneOfDecl                 // OneOfDecl
+	NodeKindUndefined    NodeKind = iota // Undefined
+	NodeKindImportStmt                   // ImportStmt
+	NodeKindPackageStmt                  // PackageStmt
+	NodeKindMessageClose                 // MessageClose
 
 	// type defs
-	NodeKindMessageDecl // MessageDecl
-	NodeKindEnumDecl    // EnumDecl
-	NodeKindServiceDecl // ServiceDecl
+	NodeKindMessageDecl      // MessageDecl
+	NodeKindMessageOneOfDecl // OneOfDecl
+	NodeKindEnumDecl         // EnumDecl
+	NodeKindServiceDecl      // ServiceDecl
 
 	// type refs
 	NodeKindMessageFieldDecl // FieldDecl
