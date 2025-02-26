@@ -115,7 +115,7 @@ func TestTypeCheck(t *testing.T) {
 		{
 			name: "redefined",
 			contents: []testFile{
-				{"a.proto", "message A { } message A { }"},
+				{"a.proto", "message A {} message A {}"},
 			},
 			errors: []error{
 				&typecheck.TypeRedefinedError{Name: ".A"},
@@ -124,8 +124,8 @@ func TestTypeCheck(t *testing.T) {
 		{
 			name: "redefined across files",
 			contents: []testFile{
-				{"a.proto", "message A { }"},
-				{"b.proto", "message A { }"},
+				{"a.proto", "message A {}"},
+				{"b.proto", "message A {}"},
 			},
 			errors: []error{
 				&typecheck.TypeRedefinedError{Name: ".A"},

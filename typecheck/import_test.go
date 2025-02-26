@@ -114,7 +114,11 @@ func TestImports(t *testing.T) {
 				{"d.proto", "package a.b.c.d; message D {}"},
 			},
 			errors: []error{
-				&typecheck.TypeNotDefinedError{Name: "a.b.c.d.D"},
+				&typecheck.TypeNotImportedError{
+					Name:    "a.b.c.d.D",
+					DefFile: "d.proto",
+					RefFile: "a.proto",
+				},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
 				&typecheck.TypeUnusedWarning{Name: "a.b.c.d.D"},
 			},

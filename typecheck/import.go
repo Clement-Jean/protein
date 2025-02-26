@@ -70,8 +70,8 @@ found:
 			return &ImportAlreadyImportedWarning{
 				ImportingFile: unit.File,
 				ImportedFile:  tc.depsNames[toId].File,
-				Line:          int(line + 1),
-				Col:           int(col + 1),
+				Line:          line,
+				Col:           col,
 			}
 		}
 	}

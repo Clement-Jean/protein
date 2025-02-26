@@ -52,6 +52,16 @@ func (e *TypeNotDefinedError) Error() string {
 	return fmt.Sprintf("%s is not defined", e.Name)
 }
 
+type TypeNotImportedError struct {
+	Name             string
+	DefFile, RefFile string
+	Line, Col        int
+}
+
+func (e *TypeNotImportedError) Error() string {
+	return fmt.Sprintf("%s seems to be defined in %s, which is not imported by %s. To use it here, please add the necessary import.", e.Name, e.DefFile, e.RefFile)
+}
+
 type TypeRedefinedError struct {
 	Name        string
 	Files       []string
