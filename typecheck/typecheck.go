@@ -77,16 +77,6 @@ func (tc *TypeChecker) checkTypeUpperScopes(depGraph [][]int, multiset *typeMult
 	namePart := parts[len(parts)-1]
 
 	if len(parts) > 1 {
-		// cmpFn := func(h unique.Handle[string], s string) int {
-		// 	if h.Value() < s {
-		// 		return -1
-		// 	} else if h.Value() > s {
-		// 		return 1
-		// 	}
-
-		// 	return 0
-		// }
-
 		idx := 0
 		if len(parts[0]) == 0 {
 			idx++
@@ -107,35 +97,6 @@ func (tc *TypeChecker) checkTypeUpperScopes(depGraph [][]int, multiset *typeMult
 					return idx, true
 				}
 			}
-
-			// idx, ok := slices.BinarySearchFunc(multiset.names, newName, cmpFn)
-
-			// 	if ok {
-			// 		if multiset.kinds[idx].IsTypeDef() {
-			// 			accessible := multiset.units[idx] == unit || // in same file
-			// 				slices.Contains(depGraph[tc.depsIDs[unit]], tc.depsIDs[multiset.units[idx]]) // imported
-
-			// 			if accessible {
-			// 				return idx, true
-			// 			}
-			// 		}
-
-			// 		item := multiset.names[idx]
-			// 		idx--
-			// 		for idx >= 0 && multiset.names[idx] == item {
-			// 			if multiset.kinds[idx].IsTypeDef() {
-			// 				accessible := multiset.units[idx] == unit || // in same file
-			// 					slices.Contains(depGraph[tc.depsIDs[unit]], tc.depsIDs[multiset.units[idx]]) // imported
-
-			// 				if accessible {
-			// 					return idx, true
-			// 				}
-			// 			}
-			// 			idx--
-			// 		}
-
-			// 		return 0, false
-			// 	}
 		}
 	}
 
