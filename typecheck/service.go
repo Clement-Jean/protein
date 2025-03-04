@@ -1,7 +1,6 @@
 package typecheck
 
 import (
-	"fmt"
 	"strings"
 	"unique"
 
@@ -25,28 +24,19 @@ func (tc *TypeChecker) handleRPC(multiset *typeMultiset, pkg []string, unit *Uni
 	isPrecededByDot := idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot
 	id := collectIdentifier(idx, unit, start)
 
-	// if name is fully qualified -> add as is
-	// else -> add the curr pkg + potential parent messages
-	//
-	// e.g.
-	// google.protobuf.Empty -> google.protobuf.Empty
-	// .google.protobuf.Empty -> google.protobuf.Empty
-	// D -> the.curr.pkg.Parent.D
-	// .D -> D
-
-	isFullyQualified := isPrecededByDot || strings.Contains(id, ".")
-
-	if !isFullyQualified {
-		prefix := strings.Join(pkg, ".")
-		multiset.offsets = append(multiset.offsets, start.Offset)
-		multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
-		return
+	var prefix string
+	if len(pkg) != 0 {
+		prefix = strings.Join(pkg, ".")
+	} else {
+		prefix = "."
 	}
+
+	name := splitAndMerge(id, prefix)
 
 	if isPrecededByDot {
 		start = unit.Toks.TokenInfos[idx-1]
 	}
 
 	multiset.offsets = append(multiset.offsets, start.Offset)
-	multiset.names = append(multiset.names, unique.Make(id))
+	multiset.names = append(multiset.names, unique.Make(name))
 }

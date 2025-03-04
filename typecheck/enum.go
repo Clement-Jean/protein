@@ -14,6 +14,10 @@ func (tc *TypeChecker) handleEnum(multiset *typeMultiset, pkg []string, unit *Un
 	name := strings.TrimSpace(string(unit.Buffer.Range(start, end)))
 	prefix := strings.Join(pkg, ".")
 
+	if len(prefix) != 0 && !strings.HasPrefix(prefix, ".") {
+		prefix = "." + prefix
+	}
+
 	multiset.offsets = append(multiset.offsets, start)
 	multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, name)))
 }

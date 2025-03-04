@@ -37,6 +37,10 @@ func (tc *TypeChecker) handleMessage(multiset *typeMultiset, pkg *[]string, unit
 	name := strings.TrimSpace(string(unit.Buffer.Range(start, end)))
 	prefix := strings.Join(*pkg, ".")
 
+	if len(prefix) != 0 && !strings.HasPrefix(prefix, ".") {
+		prefix = "." + prefix
+	}
+
 	multiset.offsets = append(multiset.offsets, start)
 	multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, name)))
 	(*pkg) = append((*pkg), name)
@@ -49,6 +53,10 @@ func (tc *TypeChecker) handleOneof(multiset *typeMultiset, pkg []string, unit *U
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	name := strings.TrimSpace(string(unit.Buffer.Range(start, end)))
 	prefix := strings.Join(pkg, ".")
+
+	if len(prefix) != 0 && !strings.HasPrefix(prefix, ".") {
+		prefix = "." + prefix
+	}
 
 	multiset.offsets = append(multiset.offsets, start)
 	multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, name)))
@@ -63,30 +71,21 @@ func (tc *TypeChecker) handleMapValue(multiset *typeMultiset, pkg []string, unit
 		return
 	}
 
-	// if name is fully qualified -> add as is
-	// else -> add the curr pkg + potential parent messages
-	//
-	// e.g.
-	// google.protobuf.Empty -> google.protobuf.Empty
-	// .google.protobuf.Empty -> google.protobuf.Empty
-	// D -> the.curr.pkg.Parent.D
-	// .D -> D
-
-	isFullyQualified := isPrecededByDot || strings.Contains(id, ".")
-
-	if !isFullyQualified {
-		prefix := strings.Join(pkg, ".")
-		multiset.offsets = append(multiset.offsets, start.Offset)
-		multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
-		return
+	var prefix string
+	if len(pkg) != 0 {
+		prefix = strings.Join(pkg, ".")
+	} else {
+		prefix = "."
 	}
+
+	name := splitAndMerge(id, prefix)
 
 	if isPrecededByDot {
 		start = unit.Toks.TokenInfos[idx-1]
 	}
 
 	multiset.offsets = append(multiset.offsets, start.Offset)
-	multiset.names = append(multiset.names, unique.Make(id))
+	multiset.names = append(multiset.names, unique.Make(name))
 }
 
 func (tc *TypeChecker) handleField(multiset *typeMultiset, pkg []string, unit *Unit, idx uint32) {
@@ -98,28 +97,19 @@ func (tc *TypeChecker) handleField(multiset *typeMultiset, pkg []string, unit *U
 		return
 	}
 
-	// if name is fully qualified -> add as is
-	// else -> add the curr pkg + potential parent messages
-	//
-	// e.g.
-	// google.protobuf.Empty -> google.protobuf.Empty
-	// .google.protobuf.Empty -> google.protobuf.Empty
-	// D -> the.curr.pkg.Parent.D
-	// .D -> D
-
-	isFullyQualified := isPrecededByDot || strings.Contains(id, ".")
-
-	if !isFullyQualified {
-		prefix := strings.Join(pkg, ".")
-		multiset.offsets = append(multiset.offsets, start.Offset)
-		multiset.names = append(multiset.names, unique.Make(fmt.Sprintf("%s.%s", prefix, id)))
-		return
+	var prefix string
+	if len(pkg) != 0 {
+		prefix = strings.Join(pkg, ".")
+	} else {
+		prefix = "."
 	}
+
+	name := splitAndMerge(id, prefix)
 
 	if isPrecededByDot {
 		start = unit.Toks.TokenInfos[idx-1]
 	}
 
 	multiset.offsets = append(multiset.offsets, start.Offset)
-	multiset.names = append(multiset.names, unique.Make(id))
+	multiset.names = append(multiset.names, unique.Make(name))
 }

@@ -5,11 +5,11 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"unique"
 
 	"github.com/Clement-Jean/protein/lexer"
 	"github.com/Clement-Jean/protein/parser"
 	"github.com/Clement-Jean/protein/source"
+	"github.com/bits-and-blooms/bitset"
 )
 
 type Unit struct {
@@ -72,194 +72,36 @@ func (tc *TypeChecker) registerDep(unit *Unit) {
 	tc.depId++
 }
 
-func (tc *TypeChecker) checkTypeUpperScopes(depGraph [][]int, multiset *typeMultiset, name unique.Handle[string], unit *Unit) (idx int, ok bool) {
-	parts := strings.Split(name.Value(), ".")
-	namePart := parts[len(parts)-1]
+func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [][]int) (errs []error) {
+	var used bitset.BitSet
 
-	if len(parts) > 1 {
-		idx := 0
-		if len(parts[0]) == 0 {
-			idx++
+	for i := 0; i < len(decls.names)-1; i++ {
+		name := decls.names[i]
+		oldI := i
+
+		for i < len(decls.names)-1 && decls.names[i+1] == name {
+			i++
 		}
 
-		scope := parts[idx : len(parts)-1]
-
-		for len(scope) != 0 {
-			scope = scope[:len(scope)-1] // pop
-
-			newName := strings.Join(scope, ".") + "." + namePart
-
-			if idx, ok := tc.findDef(multiset, newName); ok {
-				accessible := multiset.units[idx] == unit || // in same file
-					slices.Contains(depGraph[tc.depsIDs[unit]], tc.depsIDs[multiset.units[idx]]) // imported
-
-				if accessible {
-					return idx, true
-				}
-			}
-		}
-	}
-
-	return 0, false
-}
-
-func (tc *TypeChecker) checkUnusedTypes(multiset *typeMultiset, infos [][2]int) (errs []error) {
-	n := len(multiset.names)
-
-	for i := 0; i < n; i++ {
-		decls := infos[i][0]
-		refs := infos[i][1]
-
-		if multiset.kinds[i].IsTypeDef() && decls == 1 && refs == 0 {
-			name := multiset.names[i].Value()
-			unit := multiset.units[i]
-			offset := multiset.offsets[i]
-			line, col := tc.getLineColumn(unit, offset)
-			errs = append(errs, &TypeUnusedWarning{
-				Name: name,
-				File: multiset.units[i].File,
-				Line: line,
-				Col:  col,
-			})
-			continue
-		}
-	}
-	return errs
-}
-
-func (tc *TypeChecker) checkFromInnerScope(pkgParts, nameParts []string) (newName string, ok bool) {
-	var sb strings.Builder
-
-	i := 0
-	j := 0
-	match := false
-	for i < len(pkgParts) && j < len(nameParts) {
-		if pkgParts[i] == nameParts[j] {
-			match = true
-			j++
-		}
-		sb.WriteString(pkgParts[i])
-		sb.WriteRune('.')
-		i++
-	}
-
-	sb.WriteString(strings.Join(nameParts[j:], "."))
-	return sb.String(), match
-}
-
-func (tc *TypeChecker) findDef(multiset *typeMultiset, name string) (int, bool) {
-	cmpFn := func(h unique.Handle[string], s string) int {
-		if h.Value() < s {
-			return -1
-		} else if h.Value() > s {
-			return 1
-		}
-
-		return 0
-	}
-	idx, ok := slices.BinarySearchFunc(multiset.names, name, cmpFn)
-
-	if ok {
-		if multiset.kinds[idx].IsTypeDef() {
-			return idx, true
-		}
-
-		item := multiset.names[idx]
-		idx--
-		for idx >= 0 && multiset.names[idx] == item {
-			if multiset.kinds[idx].IsTypeDef() {
-				return idx, true
-			}
-			idx--
-		}
-	}
-
-	return -1, false
-}
-
-func (tc *TypeChecker) checkTypesDeclsRefs(multiset *typeMultiset, depGraph [][]int) (errs []error) {
-	n := len(multiset.names)
-	infos := make([][2]int, n) // decls, refs // FIX: can probably make this array smaller
-
-	for i := 0; i < n; i++ {
-		declIdx := -1
-		decls := 0
-		refs := 0
-		name := multiset.names[i]
-		unit := multiset.units[i]
-
-		if multiset.kinds[i].IsTypeDef() {
-			declIdx = i
-			decls++
-		}
-
-		for i = i + 1; i < n && multiset.names[i] == name; i++ {
-			if multiset.kinds[i].IsTypeRef() {
-				accessible := multiset.units[i] == unit || // in same file
-					slices.Contains(depGraph[tc.depsIDs[multiset.units[i]]], tc.depsIDs[unit]) // imported
-
-				if accessible {
-					refs++
-				} else if declIdx != -1 {
-					offset := multiset.offsets[i]
-					line, col := tc.getLineColumn(multiset.units[i], offset)
-					errs = append(errs, &TypeNotImportedError{
-						Name:    name.Value(),
-						RefFile: multiset.units[i].File,
-						DefFile: unit.File,
-						Line:    line,
-						Col:     col,
-					})
-				} else {
-					offset := multiset.offsets[i]
-					line, col := tc.getLineColumn(multiset.units[i], offset)
-					errs = append(errs, &TypeNotDefinedError{
-						File: multiset.units[i].File,
-						Name: name.Value(),
-						Line: line,
-						Col:  col,
-					})
-				}
-			} else if multiset.kinds[i].IsTypeDef() {
-				decls++
-				// FIX: maybe we can break here? because we know it redefined
-			}
-		}
-		i--
-
-		if decls == 0 {
-			if idx, ok := tc.checkTypeUpperScopes(depGraph, multiset, name, unit); ok {
-				// found in upper scopes
-				infos[idx][1]++
-				continue
-			}
-
-			offset := multiset.offsets[i]
-			line, col := tc.getLineColumn(unit, offset)
-			errs = append(errs, &TypeNotDefinedError{
-				Name: name.Value(),
-				File: multiset.units[i].File,
-				Line: line,
-				Col:  col,
-			})
-		} else if decls > 1 {
-			// backtracks to find the multiple defs
+		if oldI != i {
 			var (
 				files []string
 				lines []int
 				cols  []int
 			)
-			for j := i; j >= 0 && multiset.names[j] == name; j-- {
-				if !multiset.kinds[j].IsTypeDef() {
+			for j := oldI; j <= i; j++ {
+				if !decls.kinds[j].IsTypeDef() {
 					continue
 				}
 
-				unit := multiset.units[j]
-				offset := multiset.offsets[j]
+				unit := decls.units[j]
+				offset := decls.offsets[j]
 				line, col := tc.getLineColumn(unit, offset)
-				files = append(files, multiset.units[j].File)
+				files = append(files, unit.File)
 				lines = append(lines, line)
 				cols = append(cols, col)
+
+				used.Set(uint(j)) // if error don't show warnings...
 			}
 
 			errs = append(errs, &TypeRedefinedError{
@@ -268,31 +110,96 @@ func (tc *TypeChecker) checkTypesDeclsRefs(multiset *typeMultiset, depGraph [][]
 				Lines: lines,
 				Cols:  cols,
 			})
-		} else {
-			infos[declIdx][0] += decls
-			infos[declIdx][1] += refs
 		}
 	}
 
-	if tc.errorLevel <= ErrorLevelWarning {
-		// we can only check the uses of a type here because
-		// checkTypeUpperScopes could use a type later/earlier
-		// than when we check its definition, it could lead to
-		// incorrect warnings.
-		errs = append(errs, tc.checkUnusedTypes(multiset, infos)...)
+	for i, ref := range refs.names {
+		name := ref.Value()
+		unit := refs.units[i]
+		declIdx, ok := checkUpperScopes(decls, name)
+
+		// TODO can probably cache by unit and name
+
+		if !ok {
+			offset := refs.offsets[i]
+			line, col := tc.getLineColumn(unit, offset)
+			closeIdx := strings.LastIndexByte(name, ']')
+
+			if closeIdx != -1 {
+				name = name[closeIdx+1:]
+			}
+
+			errs = append(errs, &TypeNotDefinedError{
+				File: unit.File,
+				Name: name,
+				Line: line,
+				Col:  col,
+			})
+		} else {
+			declUnit := decls.units[declIdx]
+			accessible := declUnit == unit || // in same file
+				slices.Contains(depGraph[tc.depsIDs[unit]], tc.depsIDs[declUnit]) // imported
+
+			if !accessible {
+				offset := decls.offsets[declIdx]
+				line, col := tc.getLineColumn(declUnit, offset)
+				closeIdx := strings.LastIndexByte(name, ']')
+
+				if closeIdx != -1 {
+					name = name[closeIdx+1:]
+				}
+
+				errs = append(errs, &TypeNotImportedError{
+					Name:    name,
+					RefFile: unit.File,
+					DefFile: declUnit.File,
+					Line:    line,
+					Col:     col,
+				})
+			} else {
+				used.Set(uint(declIdx))
+			}
+		}
+	}
+
+	if used.Count() != uint(len(decls.names)) {
+		for i := 0; i < len(decls.names); i++ {
+			ok := used.Test(uint(i))
+
+			if !ok {
+				name := decls.names[i].Value()
+				unit := decls.units[i]
+				offset := decls.offsets[i]
+				line, col := tc.getLineColumn(unit, offset)
+				closeIdx := strings.LastIndexByte(name, ']')
+
+				if closeIdx != -1 {
+					name = name[closeIdx+1:]
+				}
+
+				errs = append(errs, &TypeUnusedWarning{
+					Name: name,
+					File: unit.File,
+					Line: line,
+					Col:  col,
+				})
+			}
+		}
 	}
 	return errs
 }
 
 func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
-	var multiset typeMultiset
+	var decls typeMultiset
+	var refs typeMultiset
 
 	for i := 0; i < len(tc.units); i++ {
 		pkg := tc.pkgs[tc.units[i]]
 		st := []string{pkg} // stack keeping track of type nesting
 
 		for _, node := range tc.units[i].Tree {
-			size := len(multiset.names)
+			declsSize := len(decls.names)
+			refsSize := len(refs.names)
 
 			switch node.Kind {
 			case parser.NodeKindMessageClose:
@@ -301,33 +208,42 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 				}
 				continue
 
+			// DEFS
 			case parser.NodeKindMessageDecl:
-				tc.handleMessage(&multiset, &st, tc.units[i], node.TokIdx)
+				tc.handleMessage(&decls, &st, tc.units[i], node.TokIdx)
 			case parser.NodeKindMessageOneOfDecl:
-				tc.handleOneof(&multiset, st, tc.units[i], node.TokIdx)
-			case parser.NodeKindMessageFieldDecl:
-				tc.handleField(&multiset, st, tc.units[i], node.TokIdx)
-			case parser.NodeKindMapValue:
-				tc.handleMapValue(&multiset, st, tc.units[i], node.TokIdx)
+				tc.handleOneof(&decls, st, tc.units[i], node.TokIdx)
 			case parser.NodeKindEnumDecl:
-				tc.handleEnum(&multiset, st, tc.units[i], node.TokIdx)
+				tc.handleEnum(&decls, st, tc.units[i], node.TokIdx)
 			case parser.NodeKindServiceDecl:
-				tc.handleService(&multiset, st, tc.units[i], node.TokIdx)
+				tc.handleService(&decls, st, tc.units[i], node.TokIdx)
+			// REFS
+			case parser.NodeKindMessageFieldDecl:
+				tc.handleField(&refs, st, tc.units[i], node.TokIdx)
+			case parser.NodeKindMapValue:
+				tc.handleMapValue(&refs, st, tc.units[i], node.TokIdx)
 			case parser.NodeKindRPCInputOutput:
-				tc.handleRPC(&multiset, st, tc.units[i], node.TokIdx)
+				tc.handleRPC(&refs, st, tc.units[i], node.TokIdx)
+			// OTHER
 			default:
 				continue
 			}
 
-			if size != len(multiset.names) { // added element
-				multiset.units = append(multiset.units, tc.units[i])
-				multiset.kinds = append(multiset.kinds, node.Kind)
+			if declsSize != len(decls.names) || refsSize != len(refs.names) {
+				if node.Kind.IsTypeRef() {
+					refs.units = append(refs.units, tc.units[i])
+					refs.kinds = append(refs.kinds, node.Kind)
+				} else if node.Kind.IsTypeDef() {
+					decls.units = append(decls.units, tc.units[i])
+					decls.kinds = append(decls.kinds, node.Kind)
+				}
 			}
 		}
 	}
 
-	multisetSort(&multiset)
-	return tc.checkTypesDeclsRefs(&multiset, depGraph)
+	multisetSort(&refs)
+	multisetSort(&decls)
+	return tc.checkTypesDeclsRefs(&decls, &refs, depGraph)
 }
 
 func (tc *TypeChecker) Check() []error {

@@ -120,7 +120,7 @@ func TestImports(t *testing.T) {
 					RefFile: "a.proto",
 				},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
-				&typecheck.TypeUnusedWarning{Name: "a.b.c.d.D"},
+				&typecheck.TypeUnusedWarning{Name: ".a.b.c.d.D"},
 			},
 		},
 	}

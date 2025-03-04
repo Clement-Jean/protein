@@ -108,7 +108,7 @@ func TestTypeCheck(t *testing.T) {
 				{"a.proto", "message A { C c = 1; }"},
 			},
 			errors: []error{
-				&typecheck.TypeNotDefinedError{Name: ".A.C"},
+				&typecheck.TypeNotDefinedError{Name: "C"},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
 			},
 		},
@@ -151,7 +151,7 @@ func TestTypeCheck(t *testing.T) {
 				{"test/b.proto", "message C {}"},
 			},
 			errors: []error{
-				&typecheck.TypeNotDefinedError{Name: ".A.C"},
+				&typecheck.TypeNotImportedError{Name: "C", DefFile: "test/b.proto", RefFile: "a.proto"},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
 				&typecheck.TypeUnusedWarning{Name: ".B"},
 				&typecheck.TypeUnusedWarning{Name: ".C"},
@@ -180,7 +180,7 @@ func TestTypeCheck(t *testing.T) {
 				{"test/b.proto", "message C {}"}, // never parsed
 			},
 			errors: []error{
-				&typecheck.TypeNotDefinedError{Name: ".A.C"},
+				&typecheck.TypeNotDefinedError{Name: "C"},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
 				&typecheck.TypeUnusedWarning{Name: ".B"},
 			},
@@ -253,7 +253,7 @@ func TestTypeCheck(t *testing.T) {
 				{"a.proto", "package a.b; message A { message B {} map<int32, B> b = 1; }"},
 			},
 			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: "a.b.A"},
+				&typecheck.TypeUnusedWarning{Name: ".a.b.A"},
 			},
 		},
 	}
