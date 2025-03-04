@@ -269,9 +269,10 @@ message A {
 				{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
 			},
 			errors: []error{
-				// TODO replace with
-				// "google.protobuf.Empty" is resolved to "com.google.protobuf.Empty", which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.'(i.e., ".google.protobuf.Empty") to start from the outermost scope.
-				&typecheck.TypeNotDefinedError{Name: "google.protobuf.Empty"},
+				&typecheck.TypeResolvedNotDefinedError{
+					Name:         "google.protobuf.Empty",
+					ResolvedName: ".com.google.protobuf.Empty",
+				},
 				&typecheck.TypeUnusedWarning{Name: ".com.google.A"},
 				&typecheck.TypeUnusedWarning{Name: ".google.protobuf.Empty"},
 			},
@@ -289,9 +290,10 @@ message A {
 				{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
 			},
 			errors: []error{
-				// TODO replace with
-				// "google.protobuf.Empty" is resolved to "com.google.protobuf.Empty", which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.'(i.e., ".google.protobuf.Empty") to start from the outermost scope.
-				&typecheck.TypeNotDefinedError{Name: "google.protobuf.Empty"},
+				&typecheck.TypeResolvedNotDefinedError{
+					Name:         "google.protobuf.Empty",
+					ResolvedName: ".com.google.protobuf.Empty",
+				},
 				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
 				&typecheck.TypeUnusedWarning{Name: ".google.protobuf.Empty"},
 			},

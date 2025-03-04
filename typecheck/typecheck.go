@@ -116,7 +116,7 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 	for i, ref := range refs.names {
 		name := ref.Value()
 		unit := refs.units[i]
-		declIdx, ok := checkUpperScopes(decls, name)
+		declIdx, lastNameChecked, ok := checkUpperScopes(decls, name)
 
 		// TODO can probably cache by unit and name
 
@@ -129,12 +129,22 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 				name = name[closeIdx+1:]
 			}
 
-			errs = append(errs, &TypeNotDefinedError{
-				File: unit.File,
-				Name: name,
-				Line: line,
-				Col:  col,
-			})
+			if lastNameChecked != name && lastNameChecked != ("."+name) {
+				errs = append(errs, &TypeResolvedNotDefinedError{
+					File:         unit.File,
+					Name:         name,
+					ResolvedName: lastNameChecked,
+					Line:         line,
+					Col:          col,
+				})
+			} else {
+				errs = append(errs, &TypeNotDefinedError{
+					File: unit.File,
+					Name: name,
+					Line: line,
+					Col:  col,
+				})
+			}
 		} else {
 			declUnit := decls.units[declIdx]
 			accessible := declUnit == unit || // in same file

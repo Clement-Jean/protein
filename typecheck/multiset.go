@@ -198,7 +198,7 @@ func splitAndMerge(id, scope string) string {
 	return string(b)
 }
 
-func checkUpperScopes(decls *typeMultiset, s string) (int, bool) {
+func checkUpperScopes(decls *typeMultiset, s string) (int, string, bool) {
 	cmpFn := func(h unique.Handle[string], s string) int {
 		return cmp.Compare(h.Value(), s)
 	}
@@ -207,9 +207,9 @@ func checkUpperScopes(decls *typeMultiset, s string) (int, bool) {
 	if idxEnd == -1 {
 		//println("check", s)
 		if idx, ok := slices.BinarySearchFunc(decls.names, s, cmpFn); ok {
-			return idx, ok
+			return idx, s, ok
 		}
-		return -1, false
+		return -1, s, false
 	}
 
 	idxStart := strings.IndexByte(s, '[')
@@ -229,7 +229,7 @@ func checkUpperScopes(decls *typeMultiset, s string) (int, bool) {
 
 		//println("check", name)
 		if idx, ok := slices.BinarySearchFunc(decls.names, name, cmpFn); ok {
-			return idx, ok
+			return idx, name, ok
 		}
 
 		scopeParts = scopeParts[:len(scopeParts)-1]
@@ -239,5 +239,5 @@ func checkUpperScopes(decls *typeMultiset, s string) (int, bool) {
 	name := fmt.Sprintf("%s.%s", minScope, ref)
 	//println("check", name)
 	idx, ok := slices.BinarySearchFunc(decls.names, name, cmpFn)
-	return idx, ok
+	return idx, name, ok
 }

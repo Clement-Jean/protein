@@ -42,6 +42,16 @@ func (e *PackageMultipleDefError) Error() string {
 	return fmt.Sprintf("multiple package definitions in %s", e.File)
 }
 
+type TypeResolvedNotDefinedError struct {
+	Name, ResolvedName string
+	File               string
+	Line, Col          int
+}
+
+func (e *TypeResolvedNotDefinedError) Error() string {
+	return fmt.Sprintf("%q is resolved to %q, which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.' (i.e., %q) to start from the outermost scope.)", e.Name, e.ResolvedName, "."+e.Name)
+}
+
 type TypeNotDefinedError struct {
 	Name      string
 	File      string
