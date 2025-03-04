@@ -256,6 +256,111 @@ func TestTypeCheck(t *testing.T) {
 				&typecheck.TypeUnusedWarning{Name: ".a.b.A"},
 			},
 		},
+		{
+			name: "package override",
+			contents: []testFile{
+				{"a.proto", `package com.google;
+
+import 'google/protobuf/empty.proto';
+
+message A {
+  google.protobuf.Empty e = 1;
+}`},
+				{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
+			},
+			errors: []error{
+				// TODO replace with
+				// "google.protobuf.Empty" is resolved to "com.google.protobuf.Empty", which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.'(i.e., ".google.protobuf.Empty") to start from the outermost scope.
+				&typecheck.TypeNotDefinedError{Name: "google.protobuf.Empty"},
+				&typecheck.TypeUnusedWarning{Name: ".com.google.A"},
+				&typecheck.TypeUnusedWarning{Name: ".google.protobuf.Empty"},
+			},
+		},
+		{
+			name: "package override not exact same path",
+			contents: []testFile{
+				{"a.proto", `package com.google.notprotobuf;
+
+import 'google/protobuf/empty.proto';
+
+message A {
+  google.protobuf.Empty e = 1;
+}`},
+				{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
+			},
+			errors: []error{
+				// TODO replace with
+				// "google.protobuf.Empty" is resolved to "com.google.protobuf.Empty", which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.'(i.e., ".google.protobuf.Empty") to start from the outermost scope.
+				&typecheck.TypeNotDefinedError{Name: "google.protobuf.Empty"},
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
+				&typecheck.TypeUnusedWarning{Name: ".google.protobuf.Empty"},
+			},
+		},
+		{
+			name: "google protobuf as message names",
+			contents: []testFile{
+				{"a.proto", `package com.google.notprotobuf;
+
+message google {
+  message protobuf {
+    message Empty {
+    }
+  }
+}
+
+message A {
+  google.protobuf.Empty e = 1;
+}`},
+			},
+			errors: []error{
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.google"},
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.google.protobuf"},
+			},
+		},
+		{
+			name: "google protobuf as inner message names",
+			contents: []testFile{
+				{"a.proto", `package com.google.notprotobuf;
+
+message A {
+  message google {
+    message protobuf {
+      message Empty {
+      }
+    }
+  }
+
+  google.protobuf.Empty e = 1;
+}`},
+			},
+			errors: []error{
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A.google"},
+				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A.google.protobuf"},
+			},
+		},
+		{
+			name: "google protobuf as inner message names without package",
+			contents: []testFile{
+				{"a.proto", `
+message A {
+  message google {
+    message protobuf {
+      message Empty {
+      }
+    }
+  }
+
+  google.protobuf.Empty e = 1;
+}`},
+			},
+			errors: []error{
+				&typecheck.TypeUnusedWarning{Name: ".A"},
+				&typecheck.TypeUnusedWarning{Name: ".A.google"},
+				&typecheck.TypeUnusedWarning{Name: ".A.google.protobuf"},
+			},
+		},
 	}
 
 	for _, test := range tests {
