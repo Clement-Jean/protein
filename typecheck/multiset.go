@@ -33,16 +33,19 @@ func partition(a *typeMultiset, lo, hi, d int) (lt, gt, pivot int) {
 	for i <= hi {
 		if a.names[i] == a.names[lo] {
 			if a.kinds[i] < a.kinds[lo] {
-				a.kinds[i], a.kinds[lo] = a.kinds[lo], a.kinds[i]
-				a.offsets[i], a.offsets[lo] = a.offsets[lo], a.offsets[i]
-				a.units[i], a.units[lo] = a.units[lo], a.units[i]
+				a.kinds[lo], a.kinds[i] = a.kinds[i], a.kinds[lo]
+				a.offsets[lo], a.offsets[i] = a.offsets[i], a.offsets[lo]
+				a.units[lo], a.units[i] = a.units[i], a.units[lo]
+				lo++
+				i++
 			} else if a.kinds[i] > a.kinds[lo] {
 				a.kinds[i], a.kinds[hi] = a.kinds[hi], a.kinds[i]
 				a.offsets[i], a.offsets[hi] = a.offsets[hi], a.offsets[i]
 				a.units[i], a.units[hi] = a.units[hi], a.units[i]
+				hi--
+			} else {
+				i++
 			}
-
-			i++
 			continue
 		}
 
