@@ -346,7 +346,6 @@ func (tc *TypeChecker) Check() []error {
 		return slices.Concat(fatalErrs, errs)
 	}
 
-	// TODO: oneof is not a type (cannot ref it)
 	// TODO: ref inner type in same package (e.g. message A { message B {} } message C { A.B b = 1; })
 
 	errs = append(errs, tc.checkTypes(depGraph)...)
