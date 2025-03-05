@@ -248,20 +248,20 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 }
 
 func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
-	var (
-		decls typeMultiset
-		refs  typeMultiset
-	)
+	decls := &typeMultiset{}
+	refs := &typeMultiset{}
 
-	for i := 0; i < len(tc.units); i++ {
-		pkg := tc.pkgs[tc.units[i]]
+	for _, unit := range tc.units {
+		pkg := tc.pkgs[unit]
 		st := []string{pkg} // stack keeping track of type nesting
 
-		for _, node := range tc.units[i].Tree {
+		for _, node := range unit.Tree {
 			declsSize := len(decls.names)
 			refsSize := len(refs.names)
+			tokIdx := node.TokIdx
+			kind := node.Kind
 
-			switch node.Kind {
+			switch kind {
 			case parser.NodeKindMessageClose:
 				if len(st) > 0 {
 					st = st[:len(st)-1]
@@ -270,20 +270,20 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 
 			// DEFS
 			case parser.NodeKindMessageDecl:
-				tc.handleMessage(&decls, &st, tc.units[i], node.TokIdx)
+				tc.handleMessage(decls, &st, unit, tokIdx)
 			case parser.NodeKindMessageOneOfDecl:
-				tc.handleOneof(&decls, st, tc.units[i], node.TokIdx)
+				tc.handleOneof(decls, st, unit, tokIdx)
 			case parser.NodeKindEnumDecl:
-				tc.handleEnum(&decls, st, tc.units[i], node.TokIdx)
+				tc.handleEnum(decls, st, unit, tokIdx)
 			case parser.NodeKindServiceDecl:
-				tc.handleService(&decls, st, tc.units[i], node.TokIdx)
+				tc.handleService(decls, st, unit, tokIdx)
 			// REFS
 			case parser.NodeKindMessageFieldDecl:
-				tc.handleField(&refs, st, tc.units[i], node.TokIdx)
+				tc.handleField(refs, st, unit, tokIdx)
 			case parser.NodeKindMapValue:
-				tc.handleMapValue(&refs, st, tc.units[i], node.TokIdx)
+				tc.handleMapValue(refs, st, unit, tokIdx)
 			case parser.NodeKindRPCInputOutput:
-				tc.handleRPC(&refs, st, tc.units[i], node.TokIdx)
+				tc.handleRPC(refs, st, unit, tokIdx)
 			// OTHER
 			default:
 				continue
@@ -291,19 +291,19 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 
 			if declsSize != len(decls.names) || refsSize != len(refs.names) {
 				if node.Kind.IsTypeRef() {
-					refs.units = append(refs.units, tc.units[i])
-					refs.kinds = append(refs.kinds, node.Kind)
+					refs.units = append(refs.units, unit)
+					refs.kinds = append(refs.kinds, kind)
 				} else if node.Kind.IsTypeDef() {
-					decls.units = append(decls.units, tc.units[i])
-					decls.kinds = append(decls.kinds, node.Kind)
+					decls.units = append(decls.units, unit)
+					decls.kinds = append(decls.kinds, kind)
 				}
 			}
 		}
 	}
 
-	multisetSort(&refs)
-	multisetSort(&decls)
-	return tc.checkTypesDeclsRefs(&decls, &refs, depGraph)
+	multisetSort(refs)
+	multisetSort(decls)
+	return tc.checkTypesDeclsRefs(decls, refs, depGraph)
 }
 
 func (tc *TypeChecker) Check() []error {
