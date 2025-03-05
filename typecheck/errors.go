@@ -59,7 +59,7 @@ type TypeResolvedNotDefinedError struct {
 }
 
 func (e *TypeResolvedNotDefinedError) Error() string {
-	return fmt.Sprintf("%q is resolved to %q, which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.' (i.e., %q) to start from the outermost scope.)", e.Name, e.ResolvedName, "."+e.Name)
+	return fmt.Sprintf("%s is resolved to %s, which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.' (i.e., %s) to start from the outermost scope", e.Name, e.ResolvedName, "."+e.Name)
 }
 
 type TypeNotDefinedError struct {
