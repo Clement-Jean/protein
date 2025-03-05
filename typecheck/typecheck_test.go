@@ -371,7 +371,6 @@ message A {
 			errors: []error{
 				&typecheck.NotTypeError{Name: "B"},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
-				&typecheck.TypeUnusedWarning{Name: ".A.B"},
 			},
 		},
 	}
