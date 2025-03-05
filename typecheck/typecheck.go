@@ -74,6 +74,7 @@ func (tc *TypeChecker) registerDep(unit *Unit) {
 
 func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [][]int) (errs []error) {
 	var used bitset.BitSet
+	hasWarning := tc.errorLevel <= ErrorLevelWarning
 
 	for i := 0; i < len(decls.names)-1; i++ {
 		name := decls.names[i]
@@ -101,7 +102,9 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 				lines = append(lines, line)
 				cols = append(cols, col)
 
-				used.Set(uint(j)) // if error don't show warnings...
+				if hasWarning {
+					used.Set(uint(j)) // if error don't show warnings...
+				}
 			}
 
 			errs = append(errs, &TypeRedefinedError{
@@ -165,7 +168,10 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 					Line: line,
 					Col:  col,
 				})
-				used.Set(uint(declIdx)) // if error don't show warnings...
+
+				if hasWarning {
+					used.Set(uint(declIdx)) // if error don't show warnings...
+				}
 				continue
 			} else if declKind != parser.NodeKindMessageDecl && refKind == parser.NodeKindRPCInputOutput {
 				offset := refs.offsets[i]
@@ -182,7 +188,10 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 					Line: line,
 					Col:  col,
 				})
-				used.Set(uint(declIdx)) // if error don't show warnings...
+
+				if hasWarning {
+					used.Set(uint(declIdx)) // if error don't show warnings...
+				}
 				continue
 			}
 
@@ -205,13 +214,13 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 					Line:    line,
 					Col:     col,
 				})
-			} else {
+			} else if hasWarning {
 				used.Set(uint(declIdx))
 			}
 		}
 	}
 
-	if used.Count() != uint(len(decls.names)) {
+	if hasWarning && used.Count() != uint(len(decls.names)) {
 		for i := 0; i < len(decls.names); i++ {
 			ok := used.Test(uint(i))
 
