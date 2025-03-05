@@ -225,21 +225,25 @@ func checkUpperScopes(decls *typeMultiset, s string) (int, string, bool) {
 	ref := s[idxEnd+1:]
 
 	pkgName := scope
-	scopeParts := strings.Split(scope, ".")
+	name := fmt.Sprintf("%s.%s.%s", minScope, pkgName, ref)
+	scopeIdx := strings.LastIndexByte(pkgName, '.')
 
-	for len(scopeParts) != 0 {
-		name := fmt.Sprintf("%s.%s.%s", minScope, pkgName, ref)
-
+	for {
 		//println("check", name)
 		if idx, ok := slices.BinarySearchFunc(decls.names, name, cmpFn); ok {
 			return idx, name, ok
 		}
 
-		scopeParts = scopeParts[:len(scopeParts)-1]
-		pkgName = strings.Join(scopeParts, ".")
+		scopeIdx = strings.LastIndexByte(pkgName, '.')
+		if scopeIdx == -1 {
+			break
+		}
+
+		pkgName = pkgName[:scopeIdx]
+		name = fmt.Sprintf("%s.%s.%s", minScope, pkgName, ref)
 	}
 
-	name := fmt.Sprintf("%s.%s", minScope, ref)
+	name = fmt.Sprintf("%s.%s", minScope, ref)
 	//println("check", name)
 	idx, ok := slices.BinarySearchFunc(decls.names, name, cmpFn)
 	return idx, name, ok
