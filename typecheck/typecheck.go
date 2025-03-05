@@ -248,8 +248,10 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 }
 
 func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
-	var decls typeMultiset
-	var refs typeMultiset
+	var (
+		decls typeMultiset
+		refs  typeMultiset
+	)
 
 	for i := 0; i < len(tc.units); i++ {
 		pkg := tc.pkgs[tc.units[i]]
@@ -307,8 +309,10 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) []error {
 func (tc *TypeChecker) Check() []error {
 	// TODO: embed WKT to avoid reparsing them
 
-	var errs []error
-	var fatalErrs []error
+	var (
+		errs      []error
+		fatalErrs []error
+	)
 
 	for j := 0; j < len(tc.units); j++ {
 		tc.registerDep(tc.units[j])
