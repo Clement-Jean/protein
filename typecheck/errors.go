@@ -52,6 +52,16 @@ func (e *NotTypeError) Error() string {
 	return fmt.Sprintf("%s is not a type", e.Name)
 }
 
+type NotMessageTypeError struct {
+	Name      string
+	File      string
+	Line, Col int
+}
+
+func (e *NotMessageTypeError) Error() string {
+	return fmt.Sprintf("%s is not a message type", e.Name)
+}
+
 type TypeResolvedNotDefinedError struct {
 	Name, ResolvedName string
 	File               string

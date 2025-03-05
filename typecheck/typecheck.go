@@ -114,73 +114,93 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 	}
 
 	for i, ref := range refs.names {
-		name := ref.Value()
-		unit := refs.units[i]
-		declIdx, lastNameChecked, ok := checkUpperScopes(decls, name)
+		refName := ref.Value()
+		refUnit := refs.units[i]
+		refKind := refs.kinds[i]
+		declIdx, lastNameChecked, ok := checkUpperScopes(decls, refName)
 
 		// TODO can probably cache by unit and name
 
 		if !ok {
 			offset := refs.offsets[i]
-			line, col := tc.getLineColumn(unit, offset)
-			closeIdx := strings.LastIndexByte(name, ']')
+			line, col := tc.getLineColumn(refUnit, offset)
+			closeIdx := strings.LastIndexByte(refName, ']')
 
 			if closeIdx != -1 {
-				name = name[closeIdx+1:]
+				refName = refName[closeIdx+1:]
 			}
 
-			if lastNameChecked != name && lastNameChecked != ("."+name) {
+			if lastNameChecked != refName && lastNameChecked != ("."+refName) {
 				errs = append(errs, &TypeResolvedNotDefinedError{
-					File:         unit.File,
-					Name:         name,
+					File:         refUnit.File,
+					Name:         refName,
 					ResolvedName: lastNameChecked,
 					Line:         line,
 					Col:          col,
 				})
 			} else {
 				errs = append(errs, &TypeNotDefinedError{
-					File: unit.File,
-					Name: name,
+					File: refUnit.File,
+					Name: refName,
 					Line: line,
 					Col:  col,
 				})
 			}
 		} else {
 			declUnit := decls.units[declIdx]
+			declKind := decls.kinds[declIdx]
 
-			if decls.kinds[declIdx].NotType() {
+			if declKind.NotType() {
 				offset := refs.offsets[i]
-				line, col := tc.getLineColumn(unit, offset)
-				closeIdx := strings.LastIndexByte(name, ']')
+				line, col := tc.getLineColumn(refUnit, offset)
+				closeIdx := strings.LastIndexByte(refName, ']')
 
 				if closeIdx != -1 {
-					name = name[closeIdx+1:]
+					refName = refName[closeIdx+1:]
 				}
 
 				errs = append(errs, &NotTypeError{
-					Name: name,
-					File: unit.File,
+					Name: refName,
+					File: refUnit.File,
 					Line: line,
 					Col:  col,
 				})
+				used.Set(uint(declIdx)) // if error don't show warnings...
+				continue
+			} else if declKind != parser.NodeKindMessageDecl && refKind == parser.NodeKindRPCInputOutput {
+				offset := refs.offsets[i]
+				line, col := tc.getLineColumn(refUnit, offset)
+				closeIdx := strings.LastIndexByte(refName, ']')
+
+				if closeIdx != -1 {
+					refName = refName[closeIdx+1:]
+				}
+
+				errs = append(errs, &NotMessageTypeError{
+					Name: refName,
+					File: refUnit.File,
+					Line: line,
+					Col:  col,
+				})
+				used.Set(uint(declIdx)) // if error don't show warnings...
 				continue
 			}
 
-			accessible := declUnit == unit || // in same file
-				slices.Contains(depGraph[tc.depsIDs[unit]], tc.depsIDs[declUnit]) // imported
+			accessible := declUnit == refUnit || // in same file
+				slices.Contains(depGraph[tc.depsIDs[refUnit]], tc.depsIDs[declUnit]) // imported
 
 			if !accessible {
 				offset := decls.offsets[declIdx]
 				line, col := tc.getLineColumn(declUnit, offset)
-				closeIdx := strings.LastIndexByte(name, ']')
+				closeIdx := strings.LastIndexByte(refName, ']')
 
 				if closeIdx != -1 {
-					name = name[closeIdx+1:]
+					refName = refName[closeIdx+1:]
 				}
 
 				errs = append(errs, &TypeNotImportedError{
-					Name:    name,
-					RefFile: unit.File,
+					Name:    refName,
+					RefFile: refUnit.File,
 					DefFile: declUnit.File,
 					Line:    line,
 					Col:     col,
