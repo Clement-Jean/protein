@@ -42,6 +42,16 @@ func (e *PackageMultipleDefError) Error() string {
 	return fmt.Sprintf("multiple package definitions in %s", e.File)
 }
 
+type NotTypeError struct {
+	Name      string
+	File      string
+	Line, Col int
+}
+
+func (e *NotTypeError) Error() string {
+	return fmt.Sprintf("%s is not a type", e.Name)
+}
+
 type TypeResolvedNotDefinedError struct {
 	Name, ResolvedName string
 	File               string

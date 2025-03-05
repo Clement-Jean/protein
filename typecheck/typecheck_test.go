@@ -363,6 +363,17 @@ message A {
 				&typecheck.TypeUnusedWarning{Name: ".A.google.protobuf"},
 			},
 		},
+		{
+			name: "oneof",
+			contents: []testFile{
+				{"a.proto", "message A { oneof B {} B b = 1; }"},
+			},
+			errors: []error{
+				&typecheck.NotTypeError{Name: "B"},
+				&typecheck.TypeUnusedWarning{Name: ".A"},
+				&typecheck.TypeUnusedWarning{Name: ".A.B"},
+			},
+		},
 	}
 
 	for _, test := range tests {

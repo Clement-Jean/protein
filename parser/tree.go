@@ -41,6 +41,10 @@ func (k NodeKind) IsTypeRef() bool {
 	return k >= NodeKindMessageFieldDecl
 }
 
+func (k NodeKind) NotType() bool {
+	return k == NodeKindMessageOneOfDecl
+}
+
 type Node struct {
 	TokIdx      uint32
 	SubtreeSize uint32

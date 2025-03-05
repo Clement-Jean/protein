@@ -147,6 +147,25 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 			}
 		} else {
 			declUnit := decls.units[declIdx]
+
+			if decls.kinds[declIdx].NotType() {
+				offset := refs.offsets[i]
+				line, col := tc.getLineColumn(unit, offset)
+				closeIdx := strings.LastIndexByte(name, ']')
+
+				if closeIdx != -1 {
+					name = name[closeIdx+1:]
+				}
+
+				errs = append(errs, &NotTypeError{
+					Name: name,
+					File: unit.File,
+					Line: line,
+					Col:  col,
+				})
+				continue
+			}
+
 			accessible := declUnit == unit || // in same file
 				slices.Contains(depGraph[tc.depsIDs[unit]], tc.depsIDs[declUnit]) // imported
 
