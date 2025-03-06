@@ -108,6 +108,14 @@ func TestImports(t *testing.T) {
 			errors: []error{&typecheck.TypeUnusedWarning{Name: ".B"}},
 		},
 		{
+			name: "weak import",
+			contents: []testFile{
+				{"a.proto", "import weak 'b.proto';"},
+				{"b.proto", ""},
+			},
+			errors: []error{&typecheck.WeakImportNoEffectWarning{}},
+		},
+		{
 			name: "public import not accessible error",
 			contents: []testFile{
 				{"a.proto", "import 'b.proto'; message A { a.b.c.d.D d = 1; }"},

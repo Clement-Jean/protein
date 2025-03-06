@@ -9,14 +9,16 @@ import (
 	"github.com/Clement-Jean/protein/parser"
 )
 
-func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) error {
+func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) []error {
 	isPublic := false
+	isWeak := false
 
 	switch unit.Toks.TokenInfos[idx+1].Kind {
 	case lexer.TokenKindPublic:
 		isPublic = true
 		idx += 1
 	case lexer.TokenKindWeak:
+		isWeak = true
 		idx += 1
 	default:
 
@@ -63,16 +65,21 @@ found:
 
 	toId := tc.depsIDs[to]
 
+	var errs []error
 	if tc.errorLevel <= ErrorLevelWarning {
+		if isWeak {
+			errs = append(errs, &WeakImportNoEffectWarning{})
+		}
+
 		if slices.Contains((*depGraph)[from], toId) {
 			line, col := tc.getLineColumn(unit, start)
 
-			return &ImportAlreadyImportedWarning{
+			errs = append(errs, &ImportAlreadyImportedWarning{
 				ImportingFile: unit.File,
 				ImportedFile:  tc.depsNames[toId].File,
 				Line:          line,
 				Col:           col,
-			}
+			})
 		}
 	}
 
@@ -89,7 +96,7 @@ found:
 	}
 
 	(*depGraph)[from] = append((*depGraph)[from], toId)
-	return nil
+	return errs
 }
 
 // parse the file included but not added as inputs

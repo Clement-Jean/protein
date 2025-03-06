@@ -127,3 +127,13 @@ func (w *ImportAlreadyImportedWarning) Warning() string {
 func (w *ImportAlreadyImportedWarning) Error() string {
 	return w.Warning()
 }
+
+type WeakImportNoEffectWarning struct{}
+
+func (w *WeakImportNoEffectWarning) Warning() string {
+	return "weak imports have no effect in Protein"
+}
+
+func (w *WeakImportNoEffectWarning) Error() string {
+	return w.Warning()
+}

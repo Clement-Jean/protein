@@ -349,7 +349,7 @@ func (tc *TypeChecker) Check() []error {
 				switch node.Kind {
 				case parser.NodeKindImportStmt:
 					if err := tc.handleImport(&depGraph, tc.units[j], node.TokIdx); err != nil {
-						errs = append(errs, err)
+						errs = append(errs, err...)
 					}
 				case parser.NodeKindPackageStmt:
 					if _, ok := tc.pkgs[tc.units[j]]; ok {
