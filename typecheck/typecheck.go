@@ -85,7 +85,9 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 		}
 
 		if oldI != i {
-			var err TypeRedefinedError
+			err := &TypeRedefinedError{
+				Name: name.Value(),
+			}
 
 			for j := oldI; j <= i; j++ {
 				if !decls.kinds[j].IsTypeDef() {
@@ -104,7 +106,7 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 				}
 			}
 
-			errs = append(errs, &err)
+			errs = append(errs, err)
 		}
 	}
 
