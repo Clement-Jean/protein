@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 )
 
@@ -236,7 +235,7 @@ func (l *Lexer) lexProto() (state stateFn) {
 				state = l.emit(TokenKindSlash, l.tokPos)
 			}
 		default:
-			state = l.error(fmt.Errorf("invalid char %q", ch))
+			state = l.error(&InvalidChar{Character: ch})
 		}
 	}
 

@@ -20,7 +20,7 @@ type Lexer struct {
 
 func NewFromSource(src *source.Buffer) *Lexer {
 	var srcPos uint32 = 0
-	if src.Len() > 3 && bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
+	if src.Len() >= 3 && bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
 		// skip UTF8 BOM
 		srcPos = 3
 	}
@@ -46,7 +46,7 @@ func NewFromReader(r io.Reader) (*Lexer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewFromSource(src)
+	return NewFromSource(src), nil
 }
 
 func (l *Lexer) next() byte {

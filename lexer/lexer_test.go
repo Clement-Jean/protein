@@ -2,7 +2,6 @@ package lexer_test
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"path/filepath"
 	"reflect"
@@ -113,7 +112,7 @@ var tests = []TestCase{
 		lineInfos: []lexer.LineInfo{
 			{Start: 0},
 		},
-		errs: []error{errors.New("invalid char '&'")},
+		errs: []error{&lexer.InvalidChar{Character: '&'}},
 	},
 	{
 		name:  "invalid_utf8",
@@ -130,10 +129,10 @@ var tests = []TestCase{
 			{Start: 0},
 		},
 		errs: []error{
-			fmt.Errorf("invalid char %q", "🙈"[0]),
-			fmt.Errorf("invalid char %q", "🙈"[1]),
-			fmt.Errorf("invalid char %q", "🙈"[2]),
-			fmt.Errorf("invalid char %q", "🙈"[3]),
+			&lexer.InvalidChar{Character: "🙈"[0]},
+			&lexer.InvalidChar{Character: "🙈"[1]},
+			&lexer.InvalidChar{Character: "🙈"[2]},
+			&lexer.InvalidChar{Character: "🙈"[3]},
 		},
 	},
 	{

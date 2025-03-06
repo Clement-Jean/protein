@@ -120,26 +120,20 @@ func (tc *TypeChecker) handleUnknownImports(offset int) []error {
 
 			tc.units[i].Buffer, err = tc.srcCreator(path)
 			if err != nil {
-				panic(err) // TODO better handling
-<<<<<<< Updated upstream
+				continue
 			}
 
-			lex, err = lexer.NewFromSource(tc.units[i].Buffer)
-			if err != nil {
-				panic(err) // TODO better handling
-=======
->>>>>>> Stashed changes
-			}
-
+			lex = lexer.NewFromSource(tc.units[i].Buffer)
 			tc.units[i].Toks, errs = lex.Lex()
 			if len(errs) != 0 {
-				panic(errs) // TODO better handling
+				continue
 			}
 
 			p = parser.New(tc.units[i].Toks)
 			tc.units[i].Tree, errs = p.Parse()
 			if len(errs) != 0 {
-				panic(errs) // TODO better handling
+				tc.units[i].Tree = nil
+				continue
 			}
 
 			break
@@ -147,8 +141,7 @@ func (tc *TypeChecker) handleUnknownImports(offset int) []error {
 
 		if tc.units[i].Tree == nil {
 			errs = append(errs, &ImportFileNotFoundError{
-				File:         tc.units[i].File,
-				IncludePaths: tc.includePaths,
+				File: tc.units[i].File,
 			})
 		}
 	}

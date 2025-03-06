@@ -37,11 +37,7 @@ func createUnits(t *testing.T, contents []testFile) []*typecheck.Unit {
 			t.Fatal(err)
 		}
 
-		l, err := lexer.NewFromSource(s)
-		if err != nil {
-			t.Fatal(err)
-		}
-
+		l := lexer.NewFromSource(s)
 		tb, errs := l.Lex()
 		if len(errs) != 0 {
 			t.Fatal(errs)

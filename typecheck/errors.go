@@ -26,12 +26,11 @@ func (e *ImportCycleError) Error() string {
 }
 
 type ImportFileNotFoundError struct {
-	File         string
-	IncludePaths []string
+	File string
 }
 
 func (e *ImportFileNotFoundError) Error() string {
-	return fmt.Sprintf("file %s was not found in include paths %v", e.File, e.IncludePaths)
+	return fmt.Sprintf("file %s was not found or had errors", e.File)
 }
 
 type PackageMultipleDefError struct {

@@ -3,6 +3,8 @@ package typecheck_test
 import (
 	"testing"
 
+	"github.com/Clement-Jean/protein/lexer"
+	"github.com/Clement-Jean/protein/parser"
 	"github.com/Clement-Jean/protein/typecheck"
 )
 
@@ -93,7 +95,7 @@ func TestImports(t *testing.T) {
 			contents: []testFile{
 				{"a.proto", "import 'b.proto';"},
 			},
-			errors: []error{&typecheck.ImportFileNotFoundError{File: "b.proto", IncludePaths: includePaths}},
+			errors: []error{&typecheck.ImportFileNotFoundError{File: "b.proto"}},
 		},
 		{
 			name: "public import",
@@ -121,6 +123,37 @@ func TestImports(t *testing.T) {
 				},
 				&typecheck.TypeUnusedWarning{Name: ".A"},
 				&typecheck.TypeUnusedWarning{Name: ".a.b.c.d.D"},
+			},
+		},
+		{
+			name: "unknown import file with lexer error",
+			contents: []testFile{
+				{"a.proto", "import 'b.proto';"},
+			},
+			unknown: []testFile{
+				{"b.proto", "错"},
+			},
+			errors: []error{
+				&lexer.InvalidChar{Character: "错"[0]},
+				&lexer.InvalidChar{Character: "错"[1]},
+				&lexer.InvalidChar{Character: "错"[2]},
+				&typecheck.ImportFileNotFoundError{File: "b.proto"},
+			},
+		},
+		{
+			name: "unknown import file with parse error",
+			contents: []testFile{
+				{"a.proto", "import 'b.proto';"},
+			},
+			unknown: []testFile{
+				{"b.proto", "message {}"},
+			},
+			errors: []error{
+				&parser.ExpectedError{
+					Expected: []lexer.TokenKind{lexer.TokenKindIdentifier},
+					Got:      lexer.TokenKindLeftBrace,
+				},
+				&typecheck.ImportFileNotFoundError{File: "b.proto"},
 			},
 		},
 	}
