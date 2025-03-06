@@ -121,11 +121,14 @@ func (tc *TypeChecker) handleUnknownImports(offset int) []error {
 			tc.units[i].Buffer, err = tc.srcCreator(path)
 			if err != nil {
 				panic(err) // TODO better handling
+<<<<<<< Updated upstream
 			}
 
 			lex, err = lexer.NewFromSource(tc.units[i].Buffer)
 			if err != nil {
 				panic(err) // TODO better handling
+=======
+>>>>>>> Stashed changes
 			}
 
 			tc.units[i].Toks, errs = lex.Lex()

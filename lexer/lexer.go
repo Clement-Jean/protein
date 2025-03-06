@@ -18,9 +18,9 @@ type Lexer struct {
 	readPos     uint32 // the idx we are reading at in src
 }
 
-func NewFromSource(src *source.Buffer) (*Lexer, error) {
+func NewFromSource(src *source.Buffer) *Lexer {
 	var srcPos uint32 = 0
-	if bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
+	if src.Len() > 3 && bytes.Equal(src.Range(0, 3), []byte{0xEF, 0xBB, 0xBF}) {
 		// skip UTF8 BOM
 		srcPos = 3
 	}
@@ -30,7 +30,7 @@ func NewFromSource(src *source.Buffer) (*Lexer, error) {
 		toks:    &TokenizedBuffer{},
 		srcPos:  srcPos,
 		readPos: srcPos,
-	}, nil
+	}
 }
 
 func NewFromFile(filename string) (*Lexer, error) {
@@ -38,7 +38,7 @@ func NewFromFile(filename string) (*Lexer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewFromSource(src)
+	return NewFromSource(src), nil
 }
 
 func NewFromReader(r io.Reader) (*Lexer, error) {
