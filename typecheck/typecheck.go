@@ -110,13 +110,36 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 		}
 	}
 
+	// these types are only relevant in the context of this function
+	type CacheKey struct {
+		unit *Unit
+		name string
+	}
+	type CacheVal struct {
+		declIdx         int
+		lastNameChecked string
+		ok              bool
+	}
+
+	cache := make(map[CacheKey]CacheVal)
 	for i, ref := range refs.names {
 		refName := ref.Value()
 		refUnit := refs.units[i]
 		refKind := refs.kinds[i]
-		declIdx, lastNameChecked, ok := checkUpperScopes(decls, refName)
 
-		// TODO can probably cache by unit and name
+		var (
+			declIdx         int
+			lastNameChecked string
+			ok              bool
+		)
+
+		cacheKey := CacheKey{refUnit, refName}
+		if val, hasVal := cache[cacheKey]; hasVal {
+			declIdx, lastNameChecked, ok = val.declIdx, val.lastNameChecked, val.ok
+		} else {
+			declIdx, lastNameChecked, ok = checkUpperScopes(decls, refName)
+			cache[cacheKey] = CacheVal{declIdx, lastNameChecked, ok}
+		}
 
 		if !ok {
 			offset := refs.offsets[i]
