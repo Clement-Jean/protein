@@ -85,11 +85,8 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 		}
 
 		if oldI != i {
-			var (
-				files []string
-				lines []int
-				cols  []int
-			)
+			var err TypeRedefinedError
+
 			for j := oldI; j <= i; j++ {
 				if !decls.kinds[j].IsTypeDef() {
 					continue
@@ -98,21 +95,16 @@ func (tc *TypeChecker) checkTypesDeclsRefs(decls, refs *typeMultiset, depGraph [
 				unit := decls.units[j]
 				offset := decls.offsets[j]
 				line, col := tc.getLineColumn(unit, offset)
-				files = append(files, unit.File)
-				lines = append(lines, line)
-				cols = append(cols, col)
+				err.Files = append(err.Files, unit.File)
+				err.Lines = append(err.Lines, line)
+				err.Cols = append(err.Cols, col)
 
 				if hasWarning {
 					used.Set(uint(j)) // if error don't show warnings...
 				}
 			}
 
-			errs = append(errs, &TypeRedefinedError{
-				Name:  name.Value(),
-				Files: files,
-				Lines: lines,
-				Cols:  cols,
-			})
+			errs = append(errs, &err)
 		}
 	}
 
