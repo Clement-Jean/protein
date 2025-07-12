@@ -19,13 +19,13 @@ parseTree = [
 name
 ================================================================================
 
-message Test {}
+enum Test {}
 
 --------------------------------------------------------------------------------
 
 parseTree = [
   {kind: BOF},
-    {kind: message},
+    {kind: enum},
     {kind: Identifier},
     {kind: {},
   {kind: }, subtreeSize: 4},
@@ -95,6 +95,27 @@ parseTree = [
       {kind: =, subtreeSize: 3},
     {kind: ;, subtreeSize: 5},
   {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
+value
+================================================================================
+
+enum Test { TEST_UNSPECIFIED = 0; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: enum},
+    {kind: Identifier},
+    {kind: {},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+    {kind: ;, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
   {kind: EOF},
 ]
 

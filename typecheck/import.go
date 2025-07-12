@@ -7,13 +7,14 @@ import (
 
 	"github.com/Clement-Jean/protein/lexer"
 	"github.com/Clement-Jean/protein/parser"
+	"github.com/Clement-Jean/protein/unit"
 )
 
-func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) []error {
+func (tc *TypeChecker) handleImport(depGraph *[][]int, u *unit.Unit, idx uint32) []error {
 	isPublic := false
 	isWeak := false
 
-	switch unit.Toks.TokenInfos[idx+1].Kind {
+	switch u.Toks.TokenInfos[idx+1].Kind {
 	case lexer.TokenKindPublic:
 		isPublic = true
 		idx += 1
@@ -21,18 +22,17 @@ func (tc *TypeChecker) handleImport(depGraph *[][]int, unit *Unit, idx uint32) [
 		isWeak = true
 		idx += 1
 	default:
-
 	}
 
 	idx += 1
 
-	start := unit.Toks.TokenInfos[idx].Offset
-	end := unit.Toks.TokenInfos[idx+1].Offset
-	file := string(unit.Buffer.Range(start, end))
+	start := u.Toks.TokenInfos[idx].Offset
+	end := u.Toks.TokenInfos[idx+1].Offset
+	file := string(u.Buffer.Range(start, end))
 	file = strings.Trim(file, " \"'")
 
-	var to *Unit
-	from := tc.depsIDs[unit]
+	var to *unit.Unit
+	from := tc.depsIDs[u]
 
 	for i := 0; i < len(tc.units); i++ {
 		for j := 0; j < len(tc.includePaths); j++ {
@@ -57,7 +57,7 @@ found:
 
 	if to == nil {
 		// add import to be parsed late (see: handleUnknownImports)
-		tc.units = append(tc.units, &Unit{File: file})
+		tc.units = append(tc.units, &unit.Unit{File: file})
 		to = tc.units[len(tc.units)-1]
 		tc.registerDep(to)
 		*depGraph = append(*depGraph, make([]int, 0))
@@ -68,14 +68,19 @@ found:
 	var errs []error
 	if tc.errorLevel <= ErrorLevelWarning {
 		if isWeak {
-			errs = append(errs, &WeakImportNoEffectWarning{})
+			line, col := tc.getLineColumn(u, start)
+			errs = append(errs, &WeakImportNoEffectWarning{
+				File: u.File,
+				Line: line,
+				Col:  col,
+			})
 		}
 
 		if slices.Contains((*depGraph)[from], toId) {
-			line, col := tc.getLineColumn(unit, start)
+			line, col := tc.getLineColumn(u, start)
 
 			errs = append(errs, &ImportAlreadyImportedWarning{
-				ImportingFile: unit.File,
+				ImportingFile: u.File,
 				ImportedFile:  tc.depsNames[toId].File,
 				Line:          line,
 				Col:           col,
@@ -84,7 +89,7 @@ found:
 	}
 
 	if isPublic {
-		for i := 0; i < len(*depGraph); i++ {
+		for i := range len(*depGraph) {
 			if i == from {
 				continue
 			}

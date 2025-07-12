@@ -10,6 +10,7 @@ import (
 	"github.com/Clement-Jean/protein/parser"
 	"github.com/Clement-Jean/protein/source"
 	"github.com/Clement-Jean/protein/typecheck"
+	"github.com/Clement-Jean/protein/unit"
 )
 
 type pair[K any, V any] struct {
@@ -19,10 +20,10 @@ type pair[K any, V any] struct {
 
 type testFile = pair[string, string]
 
-func createUnits(t *testing.T, contents []testFile) []*typecheck.Unit {
+func createUnits(t *testing.T, contents []testFile) []*unit.Unit {
 	t.Helper()
 
-	var units []*typecheck.Unit
+	var units []*unit.Unit
 
 	// sort for being able to use binary search
 	slices.SortFunc(contents, func(p, p2 testFile) int {
@@ -49,7 +50,7 @@ func createUnits(t *testing.T, contents []testFile) []*typecheck.Unit {
 			t.Fatal(errs)
 		}
 
-		units = append(units, &typecheck.Unit{
+		units = append(units, &unit.Unit{
 			File:   file,
 			Buffer: s,
 			Toks:   tb,
@@ -97,279 +98,15 @@ type typecheckTestCase struct {
 
 func TestTypeCheck(t *testing.T) {
 	includePaths := []string{"", "test"}
-	tests := []typecheckTestCase{
-		{
-			name: "not defined",
-			contents: []testFile{
-				{"a.proto", "message A { C c = 1; }"},
-			},
-			errors: []error{
-				&typecheck.TypeNotDefinedError{Name: "C"},
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "redefined",
-			contents: []testFile{
-				{"a.proto", "message A {} message A {}"},
-			},
-			errors: []error{
-				&typecheck.TypeRedefinedError{Name: ".A"},
-			},
-		},
-		{
-			name: "redefined across files",
-			contents: []testFile{
-				{"a.proto", "message A {}"},
-				{"b.proto", "message A {}"},
-			},
-			errors: []error{
-				&typecheck.TypeRedefinedError{Name: ".A"},
-			},
-		},
-		{
-			name: "import in all includePaths",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { C c = 1; }"},
-				{"b.proto", "message C {}"},
-				{"test/b.proto", "message B {}"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-				&typecheck.TypeUnusedWarning{Name: ".B"},
-			},
-		},
-		{
-			name: "import in all includePaths error",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { C c = 1; }"},
-				{"b.proto", "message B {}"},
-				{"test/b.proto", "message C {}"},
-			},
-			errors: []error{
-				&typecheck.TypeNotImportedError{Name: "C", DefFile: "test/b.proto", RefFile: "a.proto"},
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-				&typecheck.TypeUnusedWarning{Name: ".B"},
-				&typecheck.TypeUnusedWarning{Name: ".C"},
-			},
-		},
-		{
-			name: "unknown import in all includePaths",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { C c = 1; }"},
-			},
-			unknown: []testFile{
-				{"b.proto", "message C {}"},
-				{"test/b.proto", "message B {}"}, // never parsed
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "unknown import in all includePaths error",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { C c = 1; }"},
-			},
-			unknown: []testFile{
-				{"b.proto", "message B {}"},
-				{"test/b.proto", "message C {}"}, // never parsed
-			},
-			errors: []error{
-				&typecheck.TypeNotDefinedError{Name: "C"},
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-				&typecheck.TypeUnusedWarning{Name: ".B"},
-			},
-		},
-		{
-			name: "use nested type",
-			contents: []testFile{
-				{"a.proto", "message A { message B {} B b = 1; }"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "map value",
-			contents: []testFile{
-				{"a.proto", "message A { map<int32, B> b = 1; } message B {}"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "map value across files",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { map<int32, B> b = 1; }"},
-				{"b.proto", "message B {}"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "unknown import map value across files",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { map<int32, B> b = 1; }"},
-			},
-			unknown: []testFile{
-				{"b.proto", "message B {}"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "package map value across files",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { map<int32, google.protobuf.B> b = 1; }"},
-				{"b.proto", "package google.protobuf; message B {}"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "unknown import package map value across files",
-			contents: []testFile{
-				{"a.proto", "import 'b.proto'; message A { map<int32, google.protobuf.B> b = 1; }"},
-			},
-			unknown: []testFile{
-				{"b.proto", "package google.protobuf; message B {}"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-		{
-			name: "unnamed",
-			contents: []testFile{
-				{"a.proto", "package a.b; message A { message B {} map<int32, B> b = 1; }"},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".a.b.A"},
-			},
-		},
-		{
-			name: "package override",
-			contents: []testFile{
-				{"a.proto", `package com.google;
-
-import 'google/protobuf/empty.proto';
-
-message A {
-  google.protobuf.Empty e = 1;
-}`},
-				{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
-			},
-			errors: []error{
-				&typecheck.TypeResolvedNotDefinedError{
-					Name:         "google.protobuf.Empty",
-					ResolvedName: ".com.google.protobuf.Empty",
-				},
-				&typecheck.TypeUnusedWarning{Name: ".com.google.A"},
-				&typecheck.TypeUnusedWarning{Name: ".google.protobuf.Empty"},
-			},
-		},
-		{
-			name: "package override not exact same path",
-			contents: []testFile{
-				{"a.proto", `package com.google.notprotobuf;
-
-import 'google/protobuf/empty.proto';
-
-message A {
-  google.protobuf.Empty e = 1;
-}`},
-				{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
-			},
-			errors: []error{
-				&typecheck.TypeResolvedNotDefinedError{
-					Name:         "google.protobuf.Empty",
-					ResolvedName: ".com.google.protobuf.Empty",
-				},
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
-				&typecheck.TypeUnusedWarning{Name: ".google.protobuf.Empty"},
-			},
-		},
-		{
-			name: "google protobuf as message names",
-			contents: []testFile{
-				{"a.proto", `package com.google.notprotobuf;
-
-message google {
-  message protobuf {
-    message Empty {
-    }
-  }
-}
-
-message A {
-  google.protobuf.Empty e = 1;
-}`},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.google"},
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.google.protobuf"},
-			},
-		},
-		{
-			name: "google protobuf as inner message names",
-			contents: []testFile{
-				{"a.proto", `package com.google.notprotobuf;
-
-message A {
-  message google {
-    message protobuf {
-      message Empty {
-      }
-    }
-  }
-
-  google.protobuf.Empty e = 1;
-}`},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A"},
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A.google"},
-				&typecheck.TypeUnusedWarning{Name: ".com.google.notprotobuf.A.google.protobuf"},
-			},
-		},
-		{
-			name: "google protobuf as inner message names without package",
-			contents: []testFile{
-				{"a.proto", `
-message A {
-  message google {
-    message protobuf {
-      message Empty {
-      }
-    }
-  }
-
-  google.protobuf.Empty e = 1;
-}`},
-			},
-			errors: []error{
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-				&typecheck.TypeUnusedWarning{Name: ".A.google"},
-				&typecheck.TypeUnusedWarning{Name: ".A.google.protobuf"},
-			},
-		},
-		{
-			name: "oneof",
-			contents: []testFile{
-				{"a.proto", "message A { oneof B {} B b = 1; }"},
-			},
-			errors: []error{
-				&typecheck.NotTypeError{Name: "B"},
-				&typecheck.TypeUnusedWarning{Name: ".A"},
-			},
-		},
-	}
+	tests := slices.Concat(
+		packageTests,
+		importTests,
+		messageTests,
+		mapTests,
+		oneofTests,
+		enumTests,
+		serviceTests,
+	)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -382,7 +119,7 @@ message A {
 					typecheck.WithSourceCreator(fakeSourceCreator(test.contents, test.unknown)),
 					typecheck.WithFileCheck(fakeFileCheck(test.contents, test.unknown)),
 				)
-				errs := l.Check()
+				_, errs := l.Check()
 
 				if len(errs) != len(test.errors) {
 					t.Fatalf("expected %d errors, got %d: %v", len(test.errors), len(errs), errs)

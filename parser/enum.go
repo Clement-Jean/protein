@@ -5,7 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseEnum() {
 	p.pushState(stateEnumFinish)
 	p.pushState(stateEnumBlock)
-	p.pushState(stateIdentifier)
+	p.pushTypedState(NodeKindEnumDecl, stateIdentifier)
 }
 
 func (p *Parser) parseEnumBlock() {
@@ -48,7 +48,7 @@ func (p *Parser) parseEnumValue() {
 	default:
 		if curr.IsIdentifier() {
 			p.pushState(stateMessageFieldFinish)
-			p.pushState(stateMessageFieldAssign)
+			p.pushTypedState(NodeKindEnumValueDecl, stateMessageFieldAssign)
 			break
 		}
 		p.expectedCurr(enumScopeExpected...)
@@ -69,5 +69,5 @@ func (p *Parser) parseEnumFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addNode(tokIdx, state)
+	p.addTypedNode(tokIdx, NodeKindEnumClose, state)
 }

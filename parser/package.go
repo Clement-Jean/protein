@@ -4,7 +4,7 @@ import "github.com/Clement-Jean/protein/lexer"
 
 func (p *Parser) parsePackage() {
 	p.pushState(statePackageFinish)
-	p.pushState(stateFullIdentifierRoot)
+	p.pushTypedState(NodeKindPackageStmt, stateFullIdentifierRoot)
 }
 
 func (p *Parser) parsePackageFinish() {

@@ -1,57 +1,115 @@
 package typecheck_test
 
-import (
-	"testing"
+import "github.com/Clement-Jean/protein/typecheck"
 
-	"github.com/Clement-Jean/protein/typecheck"
-)
+var packageTests = []typecheckTestCase{
+	{
+		name: "trivial package",
+		contents: []testFile{
+			{"a.proto", "package a.b;"},
+		},
+	},
+	{
+		name: "redefined package",
+		contents: []testFile{
+			{"a.proto", "package a.b; package b.a;"},
+		},
+		errors: []error{
+			&typecheck.PackageMultipleDefError{File: "a.proto"},
+		},
+	},
+	{
+		name: "package override",
+		contents: []testFile{
+			{"a.proto", `package com.google;
 
-type packageTestCase struct {
-	name     string
-	contents []testFile
-	errors   []error
+import 'google/protobuf/empty.proto';
+
+message A {
+  google.protobuf.Empty e = 1;
+}`},
+			{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
+		},
+		errors: []error{
+			&typecheck.TypeResolvedNotDefinedError{
+				File:         "a.proto",
+				Line:         6,
+				Col:          3,
+				Name:         "google.protobuf.Empty",
+				ResolvedName: ".com.google.protobuf.Empty",
+			},
+		},
+	},
+	{
+		name: "package override not exact same path",
+		contents: []testFile{
+			{"a.proto", `package com.google.notprotobuf;
+
+import 'google/protobuf/empty.proto';
+
+message A {
+  google.protobuf.Empty e = 1;
+}`},
+			{"google/protobuf/empty.proto", "package google.protobuf; message Empty {}"},
+		},
+		errors: []error{
+			&typecheck.TypeResolvedNotDefinedError{
+				File:         "a.proto",
+				Line:         6,
+				Col:          3,
+				Name:         "google.protobuf.Empty",
+				ResolvedName: ".com.google.protobuf.Empty",
+			},
+		},
+	},
+	{
+		name: "google protobuf as message names",
+		contents: []testFile{
+			{"a.proto", `package com.google.notprotobuf;
+
+message google {
+  message protobuf {
+    message Empty {
+    }
+  }
 }
 
-func TestPackage(t *testing.T) {
-	tests := []importTestCase{
-		{
-			name: "trivial package",
-			contents: []testFile{
-				{"a.proto", "package a.b;"},
-			},
+message A {
+  google.protobuf.Empty e = 1;
+}`},
 		},
-		{
-			name: "redefined package",
-			contents: []testFile{
-				{"a.proto", "package a.b; package b.a;"},
-			},
-			errors: []error{
-				&typecheck.PackageMultipleDefError{File: "a.proto"},
-			},
+	},
+	{
+		name: "google protobuf as inner message names",
+		contents: []testFile{
+			{"a.proto", `package com.google.notprotobuf;
+
+message A {
+  message google {
+    message protobuf {
+      message Empty {
+      }
+    }
+  }
+
+  google.protobuf.Empty e = 1;
+}`},
 		},
-	}
+	},
+	{
+		name: "google protobuf as inner message names without package",
+		contents: []testFile{
+			{"a.proto", `
+message A {
+  message google {
+    message protobuf {
+      message Empty {
+      }
+    }
+  }
 
-	for _, test := range tests {
-		units := createUnits(t, test.contents)
-
-		t.Run(test.name, func(t *testing.T) {
-			l := typecheck.New(
-				units,
-				typecheck.WithSourceCreator(fakeSourceCreator(test.contents, test.unknown)),
-				typecheck.WithFileCheck(fakeFileCheck(test.contents, test.unknown)),
-			)
-			errs := l.Check()
-
-			if len(errs) != len(test.errors) {
-				t.Fatalf("expected %d errors, got %d: %v", len(test.errors), len(errs), errs)
-			}
-
-			for i, err := range errs {
-				if err.Error() != test.errors[i].Error() {
-					t.Fatalf("expected %q, got %q", test.errors[i].Error(), err.Error())
-				}
-			}
-		})
-	}
-
+  google.protobuf.Empty e = 1;
+}`},
+		},
+	},
 }

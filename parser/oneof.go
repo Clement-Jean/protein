@@ -5,7 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseOneof() {
 	p.pushState(stateOneofFinish)
 	p.pushState(stateOneofBlock)
-	p.pushState(stateIdentifier)
+	p.pushTypedState(NodeKindOneOfDecl, stateIdentifier)
 }
 
 func (p *Parser) parseOneofBlock() {
@@ -50,7 +50,7 @@ func (p *Parser) parseOneofValue() {
 		if curr.IsIdentifier() {
 			p.pushState(stateMessageFieldFinish)
 			p.pushState(stateMessageFieldAssign)
-			p.pushState(stateFullIdentifierRoot)
+			p.pushTypedState(NodeKindMessageFieldDecl, stateFullIdentifierRoot)
 			if hasDot {
 				p.addLeafNode(false)
 			}
@@ -75,5 +75,5 @@ func (p *Parser) parseOneofFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addNode(tokIdx, state)
+	p.addTypedNode(tokIdx, NodeKindOneofClose, state)
 }

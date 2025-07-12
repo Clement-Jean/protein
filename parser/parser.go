@@ -158,18 +158,14 @@ func (p *Parser) parseTopLevel() {
 		p.tree[len(p.tree)-1].Kind = NodeKindImportStmt
 		p.parseImport()
 	case lexer.TokenKindPackage:
-		p.tree[len(p.tree)-1].Kind = NodeKindPackageStmt
 		p.parsePackage()
 	case lexer.TokenKindOption:
 		p.parseOption()
 	case lexer.TokenKindMessage:
-		p.tree[len(p.tree)-1].Kind = NodeKindMessageDecl
 		p.parseMessage()
 	case lexer.TokenKindEnum:
-		p.tree[len(p.tree)-1].Kind = NodeKindEnumDecl
 		p.parseEnum()
 	case lexer.TokenKindService:
-		p.tree[len(p.tree)-1].Kind = NodeKindServiceDecl
 		p.parseService()
 	}
 }

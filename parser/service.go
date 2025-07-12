@@ -5,7 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseService() {
 	p.pushState(stateServiceFinish)
 	p.pushState(stateServiceBlock)
-	p.pushState(stateIdentifier)
+	p.pushTypedState(NodeKindServiceDecl, stateIdentifier)
 }
 
 func (p *Parser) parseServiceBlock() {
@@ -64,5 +64,5 @@ func (p *Parser) parseServiceFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addNode(tokIdx, state)
+	p.addTypedNode(tokIdx, NodeKindServiceClose, state)
 }

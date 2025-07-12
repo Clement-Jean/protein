@@ -19,12 +19,17 @@ const (
 	NodeKindImportStmt                   // ImportStmt
 	NodeKindPackageStmt                  // PackageStmt
 	NodeKindMessageClose                 // MessageClose
+	NodeKindEnumClose                    // EnumClose
+	NodeKindServiceClose                 // ServiceClose
+	NodeKindOneofClose                   // OneofClose
 
 	// type defs
-	NodeKindMessageDecl      // MessageDecl
-	NodeKindMessageOneOfDecl // OneOfDecl
-	NodeKindEnumDecl         // EnumDecl
-	NodeKindServiceDecl      // ServiceDecl
+	NodeKindMessageDecl // MessageDecl
+	NodeKindOneOfDecl   // OneOfDecl
+	NodeKindMapDecl     // MapDecl
+	NodeKindEnumDecl    // EnumDecl
+	NodeKindServiceDecl // ServiceDecl
+	NodeKindRPCDecl     // RPCDecl
 
 	// type refs
 	NodeKindMessageFieldDecl // FieldDecl
@@ -42,7 +47,7 @@ func (k NodeKind) IsTypeRef() bool {
 }
 
 func (k NodeKind) NotType() bool {
-	return k == NodeKindMessageOneOfDecl
+	return k == NodeKindOneOfDecl
 }
 
 type Node struct {

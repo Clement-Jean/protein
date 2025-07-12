@@ -5,7 +5,7 @@ import "github.com/Clement-Jean/protein/lexer"
 func (p *Parser) parseMessage() {
 	p.pushState(stateMessageFinish)
 	p.pushState(stateMessageBlock)
-	p.pushState(stateIdentifier)
+	p.pushTypedState(NodeKindMessageDecl, stateIdentifier)
 }
 
 func (p *Parser) parseMessageBlock() {
@@ -69,21 +69,21 @@ func (p *Parser) parseMessageValue() {
 		p.next()
 		p.parseExtensions()
 	case lexer.TokenKindOneOf:
-		p.addTypedLeafNode(NodeKindMessageOneOfDecl, false)
+		p.addLeafNode(false)
 		p.next()
 		p.parseOneof()
 	case lexer.TokenKindMap:
 		p.pushState(stateMessageFieldFinish)
-		p.pushState(stateMessageFieldAssign)
+		p.pushTypedState(NodeKindMapDecl, stateMessageFieldAssign)
 		p.parseMessageMap()
 		p.addLeafNode(false)
 		p.next()
 	case lexer.TokenKindMessage:
-		p.addTypedLeafNode(NodeKindMessageDecl, false)
+		p.addLeafNode(false)
 		p.next()
 		p.parseMessage()
 	case lexer.TokenKindEnum:
-		p.addTypedLeafNode(NodeKindEnumDecl, false)
+		p.addLeafNode(false)
 		p.next()
 		p.parseEnum()
 	default:

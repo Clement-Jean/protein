@@ -35,7 +35,11 @@ func (p *Parser) parseMessageFieldAssign() {
 	// than an identifier
 	p.toks.TokenInfos[p.currTok].Kind = lexer.TokenKindIdentifier
 
-	p.addLeafNode(hasError)
+	if state.kind != NodeKindUndefined {
+		p.addTypedLeafNode(state.kind, hasError)
+	} else {
+		p.addLeafNode(hasError)
+	}
 	curr = p.next()
 
 	hasError = curr != lexer.TokenKindEqual

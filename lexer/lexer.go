@@ -14,7 +14,7 @@ type Lexer struct {
 	errs        []error
 	currLineIdx LineIdx
 	srcPos      uint32 // the idx at which the file content really starts
-	tokPos      uint32 // the begining of a token
+	tokPos      uint32 // the beginning of a token
 	readPos     uint32 // the idx we are reading at in src
 }
 

@@ -11,6 +11,7 @@ type Warning interface {
 
 type ImportCycleError struct {
 	Files []string
+	// TODO LINES, COLS and change error message
 }
 
 func (e *ImportCycleError) Error() string {
@@ -27,6 +28,7 @@ func (e *ImportCycleError) Error() string {
 
 type ImportFileNotFoundError struct {
 	File string
+	// TODO LINE, COL and change error message
 }
 
 func (e *ImportFileNotFoundError) Error() string {
@@ -35,6 +37,7 @@ func (e *ImportFileNotFoundError) Error() string {
 
 type PackageMultipleDefError struct {
 	File string
+	// TODO LINES, COLS and change error message
 }
 
 func (e *PackageMultipleDefError) Error() string {
@@ -48,7 +51,7 @@ type NotTypeError struct {
 }
 
 func (e *NotTypeError) Error() string {
-	return fmt.Sprintf("%s is not a type", e.Name)
+	return fmt.Sprintf("%s:%d:%d: error: %s is not a type", e.File, e.Line, e.Col, e.Name)
 }
 
 type NotMessageTypeError struct {
@@ -58,7 +61,7 @@ type NotMessageTypeError struct {
 }
 
 func (e *NotMessageTypeError) Error() string {
-	return fmt.Sprintf("%s is not a message type", e.Name)
+	return fmt.Sprintf("%s:%d:%d: error: %s is not a message type", e.File, e.Line, e.Col, e.Name)
 }
 
 type TypeResolvedNotDefinedError struct {
@@ -68,7 +71,11 @@ type TypeResolvedNotDefinedError struct {
 }
 
 func (e *TypeResolvedNotDefinedError) Error() string {
-	return fmt.Sprintf("%s is resolved to %s, which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.' (i.e., %s) to start from the outermost scope", e.Name, e.ResolvedName, "."+e.Name)
+	return fmt.Sprintf(
+		"%s:%d:%d: error: %s is resolved to %s, which is not defined. The innermost scope is searched first in name resolution. Consider using a leading '.' (i.e., %s) to start from the outermost scope",
+		e.File, e.Line, e.Col,
+		e.Name, e.ResolvedName, "."+e.Name,
+	)
 }
 
 type TypeNotDefinedError struct {
@@ -78,7 +85,7 @@ type TypeNotDefinedError struct {
 }
 
 func (e *TypeNotDefinedError) Error() string {
-	return fmt.Sprintf("%s is not defined", e.Name)
+	return fmt.Sprintf("%s:%d:%d: error: %s is not defined", e.File, e.Line, e.Col, e.Name)
 }
 
 type TypeNotImportedError struct {
@@ -88,7 +95,12 @@ type TypeNotImportedError struct {
 }
 
 func (e *TypeNotImportedError) Error() string {
-	return fmt.Sprintf("%s seems to be defined in %s, which is not imported by %s. To use it here, please add the necessary import.", e.Name, e.DefFile, e.RefFile)
+	return fmt.Sprintf("%s:%d:%d: error: %s seems to be defined in %s, which is not imported by %s. To use it here, please add the necessary import.",
+		e.RefFile, e.Line, e.Col,
+		e.Name,
+		e.DefFile,
+		e.RefFile,
+	)
 }
 
 type TypeRedefinedError struct {
@@ -98,7 +110,21 @@ type TypeRedefinedError struct {
 }
 
 func (e *TypeRedefinedError) Error() string {
-	return fmt.Sprintf("%s is redefined", e.Name)
+	if len(e.Files) < 2 {
+		return ""
+	}
+
+	var sb strings.Builder
+
+	msg := fmt.Sprintf("%s:%d:%d: error: %s is redefined\n", e.Files[0], e.Lines[0], e.Cols[0], e.Name)
+	sb.WriteString(msg)
+
+	// FIX: we can do better for letting tools pickup the filepath
+	for i := 1; i < len(e.Files); i++ {
+		msg = fmt.Sprintf("\tredefined here: %s:%d:%d\n", e.Files[i], e.Lines[i], e.Cols[i])
+		sb.WriteString(msg)
+	}
+	return strings.TrimRight(sb.String(), "\n")
 }
 
 type TypeUnusedWarning struct {
@@ -108,7 +134,10 @@ type TypeUnusedWarning struct {
 }
 
 func (w *TypeUnusedWarning) Warning() string {
-	return fmt.Sprintf("%s is defined but not used", w.Name)
+	return fmt.Sprintf(
+		"%s:%d:%d: warning: %s is defined but not used",
+		w.File, w.Line, w.Col, w.Name,
+	)
 }
 
 func (w *TypeUnusedWarning) Error() string {
@@ -121,19 +150,111 @@ type ImportAlreadyImportedWarning struct {
 }
 
 func (w *ImportAlreadyImportedWarning) Warning() string {
-	return fmt.Sprintf("%s is already imported", w.ImportedFile)
+	return fmt.Sprintf(
+		"%s:%d:%d: warning: %s is already imported",
+		w.ImportingFile, w.Line, w.Col, w.ImportedFile,
+	)
 }
 
 func (w *ImportAlreadyImportedWarning) Error() string {
 	return w.Warning()
 }
 
-type WeakImportNoEffectWarning struct{}
+type WeakImportNoEffectWarning struct {
+	File      string
+	Line, Col int
+}
 
 func (w *WeakImportNoEffectWarning) Warning() string {
-	return "weak imports have no effect in Protein"
+	return fmt.Sprintf(
+		"%s:%d:%d: warning: weak imports have no effect in Protein",
+		w.File, w.Line, w.Col,
+	)
 }
 
 func (w *WeakImportNoEffectWarning) Error() string {
 	return w.Warning()
+}
+
+type FieldNameReusedError struct {
+	ParentName, Name string
+	File             string
+	Line, Col        int
+}
+
+func (e *FieldNameReusedError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: field name %q is already defined in %s",
+		e.File, e.Line, e.Col,
+		e.Name,
+		e.ParentName,
+	)
+}
+
+type FieldTagReusedError struct {
+	ParentName string
+	Tag        int64
+	File       string
+	Line, Col  int
+}
+
+func (e *FieldTagReusedError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: field tag %d is already defined in %s",
+		e.File, e.Line, e.Col,
+		e.Tag,
+		e.ParentName,
+	)
+}
+
+type EnumCannotBeEmptyError struct {
+	File      string
+	Name      string
+	Line, Col int
+}
+
+func (e *EnumCannotBeEmptyError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: enum %q must contain at least one value.",
+		e.File, e.Line, e.Col,
+		e.Name,
+	)
+}
+
+type OneofCannotHaveLessThan2FieldsError struct {
+	File      string
+	Name      string
+	Line, Col int
+}
+
+func (e *OneofCannotHaveLessThan2FieldsError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: oneof %q should contain at least two values.",
+		e.File, e.Line, e.Col,
+		e.Name,
+	)
+}
+
+type MaxFieldTagError struct {
+	File      string
+	Line, Col int
+}
+
+func (e *MaxFieldTagError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: field tags cannot be greater than 536,870,911.",
+		e.File, e.Line, e.Col,
+	)
+}
+
+type MaxEnumValueTagError struct {
+	File      string
+	Line, Col int
+}
+
+func (e *MaxEnumValueTagError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: enum value tags cannot be greater than 2,147,483,647.",
+		e.File, e.Line, e.Col,
+	)
 }

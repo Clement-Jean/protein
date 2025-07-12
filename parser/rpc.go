@@ -9,7 +9,7 @@ import (
 func (p *Parser) parseRPCDefinition() {
 	p.popState()
 	p.pushState(stateRPCReqRes)
-	p.pushState(stateIdentifier)
+	p.pushTypedState(NodeKindRPCDecl, stateIdentifier)
 }
 
 func (p *Parser) parseRPCReqRes() {

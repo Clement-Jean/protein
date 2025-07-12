@@ -4,11 +4,10 @@ import (
 	"strings"
 
 	"github.com/Clement-Jean/protein/lexer"
+	"github.com/Clement-Jean/protein/unit"
 )
 
-func (tc *TypeChecker) handlePackage(pkgs map[*Unit]string, unit *Unit, idx uint32) {
-	idx += 1
-
+func (tc *TypeChecker) handlePackage(pkgs map[*unit.Unit]string, unit *unit.Unit, idx uint32) {
 	var name strings.Builder
 
 	start := unit.Toks.TokenInfos[idx]
