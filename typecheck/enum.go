@@ -57,6 +57,7 @@ func (tc *TypeChecker) handleValue(sym *symtab.Symtab, scope []string, unit *uni
 	endNextOffset := unit.Toks.TokenInfos[idx+3].Offset
 	valueTag, _ := strconv.ParseInt(string(unit.Buffer.Range(endOffset, endNextOffset)), 10, 64)
 
+	println(valueTag, math.MaxInt32)
 	if valueTag > math.MaxInt32 {
 		return &MaxEnumValueTagError{
 			File: unit.File,
@@ -64,6 +65,8 @@ func (tc *TypeChecker) handleValue(sym *symtab.Symtab, scope []string, unit *uni
 			Col:  col,
 		}
 	}
+
+	var nonFatalErr error
 
 	prefix := fullyQualifyIdentifier(scope, "")
 
@@ -87,11 +90,19 @@ func (tc *TypeChecker) handleValue(sym *symtab.Symtab, scope []string, unit *uni
 			}
 		}
 
+		if len(decl.Fields) == 0 && valueTag != 0 {
+			nonFatalErr = &EnumFirstValueTagZeroError{
+				File: unit.File,
+				Line: line,
+				Col:  col,
+			}
+		}
+
 		ref := symtab.Ref{Unit: unit, Line: line, Col: col, Tag: valueTag}
 		sym.AddRef(&decl, prefix, valueName, valueTag, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}
 
-	return nil
+	return nonFatalErr
 }

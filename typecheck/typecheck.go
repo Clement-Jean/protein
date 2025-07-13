@@ -184,14 +184,16 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int)
 		}
 	}
 
-	for fullName, symbol := range sym.All() {
-		if _, ok := inDegree[fullName]; !ok {
-			errs = append(errs, &TypeUnusedWarning{
-				File: symbol.Unit.File,
-				Line: symbol.Line,
-				Col:  symbol.Col,
-				Name: symbol.Name,
-			})
+	if tc.errorLevel == ErrorLevelWarning {
+		for fullName, symbol := range sym.All() {
+			if _, ok := inDegree[fullName]; !ok {
+				errs = append(errs, &TypeUnusedWarning{
+					File: symbol.Unit.File,
+					Line: symbol.Line,
+					Col:  symbol.Col,
+					Name: symbol.Name,
+				})
+			}
 		}
 	}
 

@@ -258,3 +258,15 @@ func (e *MaxEnumValueTagError) Error() string {
 		e.File, e.Line, e.Col,
 	)
 }
+
+type EnumFirstValueTagZeroError struct {
+	File      string
+	Line, Col int
+}
+
+func (e *EnumFirstValueTagZeroError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: the first enum value must be zero for enums.",
+		e.File, e.Line, e.Col,
+	)
+}

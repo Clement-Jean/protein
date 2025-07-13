@@ -118,6 +118,7 @@ func TestTypeCheck(t *testing.T) {
 					typecheck.WithIncludePaths(includePaths...),
 					typecheck.WithSourceCreator(fakeSourceCreator(test.contents, test.unknown)),
 					typecheck.WithFileCheck(fakeFileCheck(test.contents, test.unknown)),
+					typecheck.WithErrorLevel(typecheck.ErrorLevelError),
 				)
 				_, errs := l.Check()
 
