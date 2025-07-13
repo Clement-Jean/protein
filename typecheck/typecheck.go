@@ -65,9 +65,7 @@ func (tc *TypeChecker) registerDep(unit *unit.Unit) {
 	tc.depId++
 }
 
-// TODO redefined error
-// TODO RPC "is not message type"
-func (tc *TypeChecker) checkTypesDeclsRefs(sym symtab.Symtab, depGraph [][]int) (errs []error) {
+func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int) (errs []error) {
 	// these types are only relevant in the context of this function
 	type CacheKey struct {
 		unit *unit.Unit
@@ -80,8 +78,9 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym symtab.Symtab, depGraph [][]int) 
 	}
 
 	cache := make(map[CacheKey]CacheVal)
+	inDegree := make(map[string]int) // in degree of types to find unused
 
-	for _, symbol := range sym {
+	for _, symbol := range sym.All() {
 		for _, ref := range symbol.Fields {
 			if ref.Type != parser.NodeKindUndefined || !strings.HasPrefix(ref.TypeName, ".") {
 				continue
@@ -96,9 +95,17 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym symtab.Symtab, depGraph [][]int) 
 			cacheKey := CacheKey{symbol.Unit, ref.TypeName}
 			if val, hasVal := cache[cacheKey]; hasVal {
 				lastNameChecked, ok = val.lastNameChecked, val.ok
+
+				if ok {
+					inDegree[lastNameChecked] += 1
+				}
 			} else {
 				lastNameChecked, decl, ok = checkUpperScopes(sym, ref.TypeName)
 				cache[cacheKey] = CacheVal{decl, lastNameChecked, ok}
+
+				if ok {
+					inDegree[lastNameChecked] += 1
+				}
 			}
 
 			if !ok { // not found
@@ -176,12 +183,24 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym symtab.Symtab, depGraph [][]int) 
 			}
 		}
 	}
+
+	for fullName, symbol := range sym.All() {
+		if _, ok := inDegree[fullName]; !ok {
+			errs = append(errs, &TypeUnusedWarning{
+				File: symbol.Unit.File,
+				Line: symbol.Line,
+				Col:  symbol.Col,
+				Name: symbol.Name,
+			})
+		}
+	}
+
 	return errs
 }
 
-func (tc *TypeChecker) checkTypes(depGraph [][]int) (symtab.Symtab, []error) {
-	sym := make(map[string]symtab.Decl)
+func (tc *TypeChecker) checkTypes(depGraph [][]int) (*symtab.Symtab, []error) {
 	var errs []error
+	sym := symtab.New()
 
 	for _, unit := range tc.units {
 		pkg := tc.pkgs[unit]
@@ -267,7 +286,7 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (symtab.Symtab, []error) {
 		}
 	}
 
-	for _, value := range sym {
+	for _, value := range sym.All() {
 		switch value.Type {
 		case parser.NodeKindEnumDecl:
 			if len(value.Fields) == 0 {
@@ -295,7 +314,7 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (symtab.Symtab, []error) {
 	return sym, errs
 }
 
-func (tc *TypeChecker) Check() (symtab.Symtab, []error) {
+func (tc *TypeChecker) Check() (*symtab.Symtab, []error) {
 	// TODO: embed WKT to avoid reparsing them
 
 	var (

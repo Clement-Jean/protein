@@ -10,7 +10,7 @@ import (
 	"github.com/Clement-Jean/protein/unit"
 )
 
-func (tc *TypeChecker) handleService(sym symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleService(sym *symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx].Offset
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	line, col := tc.getLineColumn(unit, start)
@@ -21,9 +21,11 @@ func (tc *TypeChecker) handleService(sym symtab.Symtab, scope *[]string, unit *u
 		prefix = "." + prefix
 	}
 
+	(*scope) = append((*scope), name)
+
 	fullName := fmt.Sprintf("%s.%s", prefix, name)
 
-	if decl, ok := sym[fullName]; ok {
+	if decl, ok := sym.SearchDecl(fullName); ok {
 		return &TypeRedefinedError{
 			Name:  fullName,
 			Files: []string{unit.File, decl.Unit.File},
@@ -32,8 +34,7 @@ func (tc *TypeChecker) handleService(sym symtab.Symtab, scope *[]string, unit *u
 		}
 	}
 
-	(*scope) = append((*scope), name)
-	sym[fullName] = symtab.Decl{
+	sym.Decls[fullName] = symtab.Decl{
 		Unit:   unit,
 		Line:   line,
 		Col:    col,
@@ -44,7 +45,7 @@ func (tc *TypeChecker) handleService(sym symtab.Symtab, scope *[]string, unit *u
 	return nil
 }
 
-func (tc *TypeChecker) handleRPCDecl(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleRPCDecl(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	_, rpcName := collectIdentifier(idx, unit, start)
 	line, col := tc.getLineColumn(unit, start.Offset)
@@ -56,7 +57,7 @@ func (tc *TypeChecker) handleRPCDecl(sym symtab.Symtab, scope []string, unit *un
 
 	fullName := fmt.Sprintf("%s.%s", prefix, rpcName)
 
-	if decl, ok := sym[fullName]; ok {
+	if decl, ok := sym.SearchDecl(fullName); ok {
 		return &TypeRedefinedError{
 			Name:  fullName,
 			Files: []string{unit.File, decl.Unit.File},
@@ -65,7 +66,7 @@ func (tc *TypeChecker) handleRPCDecl(sym symtab.Symtab, scope []string, unit *un
 		}
 	}
 
-	sym[fullName] = symtab.Decl{
+	sym.Decls[fullName] = symtab.Decl{
 		Unit:   unit,
 		Line:   line,
 		Col:    col,
@@ -76,7 +77,7 @@ func (tc *TypeChecker) handleRPCDecl(sym symtab.Symtab, scope []string, unit *un
 	return nil
 }
 
-func (tc *TypeChecker) handleRPCInputOutput(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleRPCInputOutput(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	isPrecededByDot := idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot
 	_, id := collectIdentifier(idx, unit, start)
@@ -89,14 +90,15 @@ func (tc *TypeChecker) handleRPCInputOutput(sym symtab.Symtab, scope []string, u
 		start = unit.Toks.TokenInfos[idx-1]
 	}
 
-	if value, found := sym[prefix]; found {
-		value.Fields[name] = symtab.Ref{
+	if decl, found := sym.SearchDecl(prefix); found {
+		ref := symtab.Ref{
 			Unit:     unit,
 			Line:     line,
 			Col:      col,
 			Type:     parser.NodeKindRPCInputOutput,
 			TypeName: name,
 		}
+		sym.AddRef(&decl, prefix, name, 0, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/Clement-Jean/protein/symtab"
 )
 
-func checkUpperScopes(sym symtab.Symtab, typeName string) (string, symtab.Decl, bool) {
+func checkUpperScopes(sym *symtab.Symtab, typeName string) (string, symtab.Decl, bool) {
 	idxEnd := strings.IndexByte(typeName, ']')
 	if idxEnd == -1 {
 		return typeName, symtab.Decl{}, false
@@ -27,7 +27,7 @@ func checkUpperScopes(sym symtab.Symtab, typeName string) (string, symtab.Decl, 
 	scopeIdx := strings.LastIndexByte(pkgName, '.')
 
 	for {
-		if decl, ok := sym[name]; ok {
+		if decl, ok := sym.SearchDecl(name); ok {
 			return name, decl, ok
 		}
 
@@ -41,7 +41,7 @@ func checkUpperScopes(sym symtab.Symtab, typeName string) (string, symtab.Decl, 
 	}
 
 	name = fmt.Sprintf("%s.%s", minScope, ref)
-	decl, ok := sym[name]
+	decl, ok := sym.SearchDecl(name)
 	return name, decl, ok
 }
 

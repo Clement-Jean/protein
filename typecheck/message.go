@@ -36,6 +36,7 @@ func collectIdentifier(idx uint32, unit *unit.Unit, start lexer.TokenInfo) (uint
 
 func fullyQualifyIdentifier(scope []string, id string) string {
 	var fullyQualified string
+
 	if len(scope) != 0 {
 		if strings.HasPrefix(scope[0], ".") {
 			fullyQualified = strings.Join(scope, ".")
@@ -43,12 +44,13 @@ func fullyQualifyIdentifier(scope []string, id string) string {
 			fullyQualified = "." + strings.Join(scope, ".")
 		}
 	} else if !strings.HasPrefix(id, ".") {
-		fullyQualified = "."
+		return id
 	}
+
 	return fullyQualified
 }
 
-func (tc *TypeChecker) handleMessage(sym symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleMessage(sym *symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx].Offset
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	line, col := tc.getLineColumn(unit, start)
@@ -59,9 +61,12 @@ func (tc *TypeChecker) handleMessage(sym symtab.Symtab, scope *[]string, unit *u
 		prefix = "." + prefix
 	}
 
+	(*scope) = append((*scope), name)
+
 	fullName := fmt.Sprintf("%s.%s", prefix, name)
 
-	if decl, ok := sym[fullName]; ok {
+	if decl, ok := sym.SearchDecl(fullName); ok {
+		println("ERROR")
 		return &TypeRedefinedError{
 			Name:  fullName,
 			Files: []string{unit.File, decl.Unit.File},
@@ -70,8 +75,7 @@ func (tc *TypeChecker) handleMessage(sym symtab.Symtab, scope *[]string, unit *u
 		}
 	}
 
-	(*scope) = append((*scope), name)
-	sym[fullName] = symtab.Decl{
+	sym.Decls[fullName] = symtab.Decl{
 		Unit:      unit,
 		Line:      line,
 		Col:       col,
@@ -83,7 +87,7 @@ func (tc *TypeChecker) handleMessage(sym symtab.Symtab, scope *[]string, unit *u
 	return nil
 }
 
-func (tc *TypeChecker) handleOneof(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleOneof(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx].Offset
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	line, col := tc.getLineColumn(unit, start)
@@ -96,7 +100,7 @@ func (tc *TypeChecker) handleOneof(sym symtab.Symtab, scope []string, unit *unit
 
 	fullName := fmt.Sprintf("%s.%s", prefix, name)
 
-	if decl, ok := sym[fullName]; ok {
+	if decl, ok := sym.SearchDecl(fullName); ok {
 		return &TypeRedefinedError{
 			Name:  fullName,
 			Files: []string{unit.File, decl.Unit.File},
@@ -105,7 +109,7 @@ func (tc *TypeChecker) handleOneof(sym symtab.Symtab, scope []string, unit *unit
 		}
 	}
 
-	sym[fullName] = symtab.Decl{
+	sym.Decls[fullName] = symtab.Decl{
 		Unit: unit,
 		Line: line,
 		Col:  col,
@@ -115,7 +119,7 @@ func (tc *TypeChecker) handleOneof(sym symtab.Symtab, scope []string, unit *unit
 	return nil
 }
 
-func (tc *TypeChecker) handleMapDecl(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleMapDecl(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	endIdx, fieldName := collectIdentifier(idx, unit, start)
 	line, col := tc.getLineColumn(unit, start.Offset)
@@ -134,8 +138,8 @@ func (tc *TypeChecker) handleMapDecl(sym symtab.Symtab, scope []string, unit *un
 
 	prefix := fullyQualifyIdentifier(scope, "")
 
-	if value, found := sym[prefix]; found {
-		if _, ok := value.Fields[fieldName]; ok {
+	if decl, found := sym.SearchDecl(prefix); found {
+		if _, ok := decl.Fields[fieldName]; ok {
 			return &FieldNameReusedError{
 				ParentName: prefix,
 				Name:       fieldName,
@@ -144,7 +148,7 @@ func (tc *TypeChecker) handleMapDecl(sym symtab.Symtab, scope []string, unit *un
 				Col:        col,
 			}
 		}
-		if _, ok := value.FieldTags[fieldTag]; ok {
+		if _, ok := decl.FieldTags[fieldTag]; ok {
 			return &FieldTagReusedError{
 				ParentName: prefix,
 				Tag:        fieldTag,
@@ -155,8 +159,7 @@ func (tc *TypeChecker) handleMapDecl(sym symtab.Symtab, scope []string, unit *un
 		}
 
 		ref := symtab.Ref{Unit: unit, Line: line, Col: col, Tag: fieldTag}
-		value.Fields[fieldName] = ref
-		value.FieldTags[fieldTag] = ref
+		sym.AddRef(&decl, prefix, fieldName, fieldTag, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}
@@ -164,7 +167,7 @@ func (tc *TypeChecker) handleMapDecl(sym symtab.Symtab, scope []string, unit *un
 	return nil
 }
 
-func (tc *TypeChecker) handleMapValue(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleMapValue(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	endIdx, id := collectIdentifier(idx, unit, start)
 
@@ -176,7 +179,7 @@ func (tc *TypeChecker) handleMapValue(sym symtab.Symtab, scope []string, unit *u
 	isPrecededByDot := idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot
 	endOffset := unit.Toks.TokenInfos[idx].Offset
 	endNextOffset := unit.Toks.TokenInfos[endIdx-1].Offset
-	fieldName := strings.TrimSuffix(string(unit.Buffer.Range(endOffset, endNextOffset)), " ")
+	typeName := strings.TrimSuffix(string(unit.Buffer.Range(endOffset, endNextOffset)), " ")
 
 	prefix := fullyQualifyIdentifier(scope, id)
 	name := splitAndMerge(id, prefix)
@@ -185,21 +188,22 @@ func (tc *TypeChecker) handleMapValue(sym symtab.Symtab, scope []string, unit *u
 		start = unit.Toks.TokenInfos[idx-1]
 	}
 
-	if value, found := sym[prefix]; found {
+	if decl, found := sym.SearchDecl(prefix); found {
 		ref := symtab.Ref{
 			Unit:     unit,
 			Line:     line,
 			Col:      col,
 			TypeName: name,
 		}
-		value.Fields[fieldName] = ref
+
+		sym.AddRef(&decl, prefix, typeName, 0, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}
 	return nil
 }
 
-func (tc *TypeChecker) handleField(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleField(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	isPrecededByDot := idx-1 > 0 && unit.Toks.TokenInfos[idx-1].Kind == lexer.TokenKindDot
 	endIdx, id := collectIdentifier(idx, unit, start)
@@ -228,8 +232,8 @@ func (tc *TypeChecker) handleField(sym symtab.Symtab, scope []string, unit *unit
 		start = unit.Toks.TokenInfos[idx-1]
 	}
 
-	if value, found := sym[prefix]; found {
-		if _, ok := value.Fields[fieldName]; ok {
+	if decl, found := sym.SearchDecl(prefix); found {
+		if _, ok := decl.Fields[fieldName]; ok {
 			return &FieldNameReusedError{
 				ParentName: prefix,
 				Name:       fieldName,
@@ -238,7 +242,7 @@ func (tc *TypeChecker) handleField(sym symtab.Symtab, scope []string, unit *unit
 				Col:        col,
 			}
 		}
-		if _, ok := value.FieldTags[fieldTag]; ok {
+		if _, ok := decl.FieldTags[fieldTag]; ok {
 			return &FieldTagReusedError{
 				ParentName: prefix,
 				Tag:        fieldTag,
@@ -251,13 +255,12 @@ func (tc *TypeChecker) handleField(sym symtab.Symtab, scope []string, unit *unit
 		var ref symtab.Ref
 
 		if len(id) == 0 { // non user-defined types (e.g. int32)
-			ref = symtab.Ref{Unit: unit, Line: line, Col: col, Type: value.Type, Tag: fieldTag}
+			ref = symtab.Ref{Unit: unit, Line: line, Col: col, Type: decl.Type, Tag: fieldTag}
 		} else {
 			ref = symtab.Ref{Unit: unit, Line: line, Col: col, TypeName: name, Tag: fieldTag}
 		}
 
-		value.Fields[fieldName] = ref
-		value.FieldTags[fieldTag] = ref
+		sym.AddRef(&decl, prefix, fieldName, fieldTag, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}

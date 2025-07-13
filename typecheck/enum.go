@@ -11,7 +11,7 @@ import (
 	"github.com/Clement-Jean/protein/unit"
 )
 
-func (tc *TypeChecker) handleEnum(sym symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleEnum(sym *symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx].Offset
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	line, col := tc.getLineColumn(unit, start)
@@ -22,9 +22,11 @@ func (tc *TypeChecker) handleEnum(sym symtab.Symtab, scope *[]string, unit *unit
 		prefix = "." + prefix
 	}
 
+	(*scope) = append((*scope), name)
+
 	fullName := fmt.Sprintf("%s.%s", prefix, name)
 
-	if decl, ok := sym[fullName]; ok {
+	if decl, ok := sym.SearchDecl(fullName); ok {
 		return &TypeRedefinedError{
 			Name:  fullName,
 			Files: []string{unit.File, decl.Unit.File},
@@ -33,8 +35,7 @@ func (tc *TypeChecker) handleEnum(sym symtab.Symtab, scope *[]string, unit *unit
 		}
 	}
 
-	(*scope) = append((*scope), name)
-	sym[fullName] = symtab.Decl{
+	sym.Decls[fullName] = symtab.Decl{
 		Unit:      unit,
 		Line:      line,
 		Col:       col,
@@ -46,7 +47,7 @@ func (tc *TypeChecker) handleEnum(sym symtab.Symtab, scope *[]string, unit *unit
 	return nil
 }
 
-func (tc *TypeChecker) handleValue(sym symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleValue(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx].Offset
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	line, col := tc.getLineColumn(unit, start)
@@ -66,8 +67,8 @@ func (tc *TypeChecker) handleValue(sym symtab.Symtab, scope []string, unit *unit
 
 	prefix := fullyQualifyIdentifier(scope, "")
 
-	if value, found := sym[prefix]; found {
-		if _, ok := value.Fields[valueName]; ok {
+	if decl, found := sym.SearchDecl(prefix); found {
+		if _, ok := decl.Fields[valueName]; ok {
 			return &FieldNameReusedError{
 				ParentName: prefix,
 				Name:       valueName,
@@ -76,7 +77,7 @@ func (tc *TypeChecker) handleValue(sym symtab.Symtab, scope []string, unit *unit
 				Col:        col,
 			}
 		}
-		if _, ok := value.FieldTags[valueTag]; ok {
+		if _, ok := decl.FieldTags[valueTag]; ok {
 			return &FieldTagReusedError{
 				ParentName: prefix,
 				Tag:        valueTag,
@@ -87,8 +88,7 @@ func (tc *TypeChecker) handleValue(sym symtab.Symtab, scope []string, unit *unit
 		}
 
 		ref := symtab.Ref{Unit: unit, Line: line, Col: col, Tag: valueTag}
-		value.Fields[valueName] = ref
-		value.FieldTags[valueTag] = ref
+		sym.AddRef(&decl, prefix, valueName, valueTag, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}
