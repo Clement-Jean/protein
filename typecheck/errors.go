@@ -10,9 +10,10 @@ type Warning interface {
 }
 
 type UnknownSyntaxError struct {
-	File      string
-	Line, Col int
-	Value     string
+	File  string
+	Value string
+	Line  int
+	Col   int
 }
 
 func (e *UnknownSyntaxError) Error() string {
@@ -203,9 +204,10 @@ func (e *FieldNameReusedError) Error() string {
 
 type FieldTagReusedError struct {
 	ParentName string
-	Tag        int64
 	File       string
-	Line, Col  int
+	Tag        int64
+	Line       int
+	Col        int
 }
 
 func (e *FieldTagReusedError) Error() string {
@@ -282,9 +284,10 @@ func (e *EnumFirstValueTagZeroError) Error() string {
 }
 
 type OptionUnknownError struct {
-	File      string
-	Line, Col int
-	Name      string
+	File string
+	Name string
+	Line int
+	Col  int
 }
 
 func (e *OptionUnknownError) Error() string {

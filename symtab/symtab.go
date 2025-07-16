@@ -42,21 +42,21 @@ func (s *Symtab) All() iter.Seq2[string, Decl] {
 
 type Decl struct {
 	Unit      *unit.Unit
-	Line, Col int
-	Type      parser.NodeKind
-	Name      string
 	Fields    map[string]Ref
-	FieldTags map[int64]Ref // FIX change to uint64
+	FieldTags map[int64]Ref
+	Name      string
+	Line      int
+	Col       int
+	Type      parser.NodeKind
 }
 
 type Ref struct {
-	// FIX having both Type and TypeName is kind of redundant
-	//     could we somehow merge them?
-	Unit      *unit.Unit
-	Line, Col int
-	Type      parser.NodeKind
-	TypeName  string
-	Tag       int64 // FIX change to uint64
+	Unit     *unit.Unit
+	TypeName string
+	Line     int
+	Col      int
+	Tag      int64
+	Type     parser.NodeKind
 }
 
 // TODO to descriptor

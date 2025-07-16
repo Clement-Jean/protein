@@ -14,19 +14,16 @@ import (
 )
 
 type TypeChecker struct {
-	srcCreator SourceCreator
-	fileCheck  FileExistsCheck
-	pkgs       map[*unit.Unit]string
-
-	depId     int
-	depsIDs   map[*unit.Unit]int
-	depsNames map[int]*unit.Unit
-
+	srcCreator   SourceCreator
+	fileCheck    FileExistsCheck
+	pkgs         map[*unit.Unit]string
+	depsIDs      map[*unit.Unit]int
+	depsNames    map[int]*unit.Unit
 	unitSyntax   map[*unit.Unit]syntaxKind
 	units        []*unit.Unit
 	includePaths []string
-
-	errorLevel ErrorLevel
+	depId        int
+	errorLevel   ErrorLevel
 }
 
 func New(units []*unit.Unit, opts ...TypeCheckerOpt) *TypeChecker {
