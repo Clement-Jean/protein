@@ -66,4 +66,17 @@ var extendTests = []typecheckTestCase{
 			},
 		},
 	},
+	{
+		name: "extend map not allowed",
+		contents: []testFile{
+			{"a.proto", "message B {} extend B { map<string, string> a = 1; }"},
+		},
+		errors: []error{
+			&typecheck.ExtendMapNotAllowedError{
+				File: "a.proto",
+				Line: 1,
+				Col:  45,
+			},
+		},
+	},
 }

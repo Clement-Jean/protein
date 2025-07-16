@@ -293,3 +293,15 @@ func (e *OptionUnknownError) Error() string {
 		e.File, e.Line, e.Col, e.Name,
 	)
 }
+
+type ExtendMapNotAllowedError struct {
+	File      string
+	Line, Col int
+}
+
+func (e *ExtendMapNotAllowedError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: map fields are not allowed to be extensions.",
+		e.File, e.Line, e.Col,
+	)
+}

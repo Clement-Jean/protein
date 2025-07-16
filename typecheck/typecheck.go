@@ -404,8 +404,13 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (*symtab.Symtab, []error) {
 					errs = append(errs, err)
 				}
 			case parser.NodeKindExtendMapDecl:
-				// TODO custom error
-				errs = append(errs, fmt.Errorf("map fields are not allowed to be extensions."))
+				start := unit.Toks.TokenInfos[tokIdx]
+				line, col := tc.getLineColumn(unit, start.Offset)
+				errs = append(errs, &ExtendMapNotAllowedError{
+					File: unit.File,
+					Line: line,
+					Col:  col,
+				})
 
 			// REFS
 			case parser.NodeKindMessageFieldDecl:
