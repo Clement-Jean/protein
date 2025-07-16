@@ -86,6 +86,10 @@ func (p *Parser) parseMessageValue() {
 		p.addLeafNode(false)
 		p.next()
 		p.parseEnum()
+	case lexer.TokenKindExtend:
+		p.addLeafNode(false)
+		p.next()
+		p.parseExtend()
 	default:
 		var (
 			dotIdx      uint32

@@ -135,3 +135,26 @@ parseTree = [
   {kind: EOF, hasError: true, subtreeSize: 4},
 ]
 errs = [expected [}], got EOF]
+
+================================================================================
+message extend
+================================================================================
+
+message Test {
+  extend A {}
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: extend},
+      {kind: Identifier},
+      {kind: {},
+    {kind: }, subtreeSize: 4},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
