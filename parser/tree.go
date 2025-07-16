@@ -59,7 +59,7 @@ func (k NodeKind) IsTypeRef() bool {
 }
 
 func (k NodeKind) NotType() bool {
-	return k == NodeKindOneOfDecl
+	return k == NodeKindOneOfDecl || k == NodeKindServiceDecl || k == NodeKindRPCDecl
 }
 
 type Node struct {

@@ -31,4 +31,32 @@ var serviceTests = []typecheckTestCase{
 			},
 		},
 	},
+	{
+		name: "rpc not type",
+		contents: []testFile{
+			{"a.proto", "message C { A.B b = 1; } service A { rpc B (C) returns (C); }"},
+		},
+		errors: []error{
+			&typecheck.NotTypeError{
+				File: "a.proto",
+				Line: 1,
+				Col:  13,
+				Name: "A.B",
+			},
+		},
+	},
+	{
+		name: "service not type",
+		contents: []testFile{
+			{"a.proto", "message C { A a = 1; } service A { }"},
+		},
+		errors: []error{
+			&typecheck.NotTypeError{
+				File: "a.proto",
+				Line: 1,
+				Col:  13,
+				Name: "A",
+			},
+		},
+	},
 }
