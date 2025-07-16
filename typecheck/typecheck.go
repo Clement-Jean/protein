@@ -392,7 +392,7 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (*symtab.Symtab, []error) {
 					errs = append(errs, err)
 				}
 			case parser.NodeKindExtendDecl:
-				if err := tc.handleExtend(sym, &st, unit, tokIdx); err != nil {
+				if err := tc.handleExtend(sym, st, unit, tokIdx); err != nil {
 					errs = append(errs, err)
 				}
 			case parser.NodeKindOptionFile:

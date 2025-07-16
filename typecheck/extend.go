@@ -10,7 +10,7 @@ import (
 	"github.com/Clement-Jean/protein/unit"
 )
 
-func (tc *TypeChecker) handleExtend(sym *symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleExtend(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	_, name := collectIdentifier(idx, unit, start)
 	line, col := tc.getLineColumn(unit, start.Offset)
