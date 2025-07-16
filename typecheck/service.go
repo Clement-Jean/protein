@@ -98,7 +98,7 @@ func (tc *TypeChecker) handleRPCInputOutput(sym *symtab.Symtab, scope []string, 
 			Type:     parser.NodeKindRPCInputOutput,
 			TypeName: name,
 		}
-		sym.AddRef(&decl, prefix, name, 0, ref)
+		sym.AddRef(&decl, name, 0, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}

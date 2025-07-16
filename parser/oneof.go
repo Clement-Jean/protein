@@ -39,7 +39,7 @@ func (p *Parser) parseOneofValue() {
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
 		p.next()
-		p.parseOption()
+		p.parseOption(NodeKindOptionOneof)
 	default:
 		hasDot := false
 		if curr == lexer.TokenKindDot {

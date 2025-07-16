@@ -88,17 +88,17 @@ func fakeFileCheck(contents, unknown []testFile) typecheck.FileExistsCheck {
 }
 
 type typecheckTestCase struct {
-	name     string
-	contents []testFile
-	unknown  []testFile
-	errors   []error
+	name       string
+	contents   []testFile
+	unknown    []testFile
+	errors     []error
+	errorLevel typecheck.ErrorLevel
 }
-
-// TODO: set error level per test!
 
 func TestTypeCheck(t *testing.T) {
 	includePaths := []string{"", "test"}
 	tests := slices.Concat(
+		syntaxTests,
 		packageTests,
 		importTests,
 		messageTests,
@@ -106,11 +106,17 @@ func TestTypeCheck(t *testing.T) {
 		oneofTests,
 		enumTests,
 		serviceTests,
+		optionTests,
+		extendTests,
 	)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			units := createUnits(t, test.contents)
+
+			if test.errorLevel == typecheck.ErrorLevelUndefined {
+				test.errorLevel = typecheck.ErrorLevelError
+			}
 
 			t.Run(test.name, func(t *testing.T) {
 				l := typecheck.New(
@@ -118,7 +124,7 @@ func TestTypeCheck(t *testing.T) {
 					typecheck.WithIncludePaths(includePaths...),
 					typecheck.WithSourceCreator(fakeSourceCreator(test.contents, test.unknown)),
 					typecheck.WithFileCheck(fakeFileCheck(test.contents, test.unknown)),
-					typecheck.WithErrorLevel(typecheck.ErrorLevelError),
+					typecheck.WithErrorLevel(test.errorLevel),
 				)
 				_, errs := l.Check()
 

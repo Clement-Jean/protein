@@ -108,7 +108,7 @@ parseTree = [
   {kind: }, subtreeSize: 6},
   {kind: EOF},
 ]
-errs = [expected [Integer String], got ;]
+errs = [expected [Integer HexInteger OctInt String], got ;]
 
 ================================================================================
 expected range
@@ -130,7 +130,7 @@ parseTree = [
   {kind: }, subtreeSize: 8},
   {kind: EOF},
 ]
-errs = [expected [Integer max], got String]
+errs = [expected [Integer HexInteger OctInt max], got String]
 
 ================================================================================
 expected semicolon

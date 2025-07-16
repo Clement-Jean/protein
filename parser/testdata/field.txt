@@ -142,6 +142,35 @@ parseTree = [
 ]
 
 ================================================================================
+field options comment
+================================================================================
+
+message test {
+  uint32 id = 1 [/*deprecated = true,*/ test = 1];
+}
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+      {kind: uint32},
+        {kind: Identifier},
+        {kind: Integer},
+      {kind: =, subtreeSize: 3},
+        {kind: [},
+          {kind: Identifier},
+          {kind: Integer},
+        {kind: =, subtreeSize: 3},
+      {kind: ], subtreeSize: 5},
+    {kind: ;, subtreeSize: 10},
+  {kind: }, subtreeSize: 14},
+  {kind: EOF},
+]
+
+================================================================================
 repeated
 ================================================================================
 
@@ -370,7 +399,7 @@ parseTree = [
   {kind: }, subtreeSize: 9},
   {kind: EOF},
 ]
-errs = [expected [Integer], got Float]
+errs = [expected [Integer HexInteger OctInt], got Float]
 
 ================================================================================
 expected semicolon

@@ -131,8 +131,10 @@ func (l *Lexer) lexNumber() (state stateFn) {
 
 	if ok := l.accept("0"); ok { // starts with 0
 		if ok := l.accept("xX"); ok {
+			kind = TokenKindHexInt
 			digits = isHexadecimalDigit
-		} else {
+		} else if l.accept("0123456789") {
+			kind = TokenKindOctInt
 			digits = isOctalDigit
 		}
 	}

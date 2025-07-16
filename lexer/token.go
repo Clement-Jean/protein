@@ -25,9 +25,11 @@ const (
 	TokenKindRightAngle  // >
 	TokenKindSlash       // /
 
-	TokenKindInt   // Integer
-	TokenKindFloat // Float
-	TokenKindStr   // String
+	TokenKindInt    // Integer
+	TokenKindHexInt // HexInteger
+	TokenKindOctInt // OctInt
+	TokenKindFloat  // Float
+	TokenKindStr    // String
 )
 
 // /!\ BEWARE: All the tokens and literals after this line
@@ -162,6 +164,14 @@ var kinds = [...]TokenKind{
 	TokenKindTypeUint32,
 	TokenKindTypeUint64,
 	TokenKindWeak,
+}
+
+func (k TokenKind) IsBool() bool {
+	return k == TokenKindTrue || k == TokenKindFalse
+}
+
+func (k TokenKind) IsInteger() bool {
+	return k >= TokenKindInt && k <= TokenKindOctInt
 }
 
 func (k TokenKind) IsIdentifier() bool {

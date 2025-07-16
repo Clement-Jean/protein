@@ -62,15 +62,19 @@ func _() {
 	_ = x[stateRPCReqResFinish-51]
 	_ = x[stateRPCValue-52]
 	_ = x[stateRPCFinish-53]
-	_ = x[stateIdentifier-54]
-	_ = x[stateFullIdentifierRoot-55]
-	_ = x[stateFullIdentifierRest-56]
-	_ = x[stateEnder-57]
+	_ = x[stateExtendBlock-54]
+	_ = x[stateExtendField-55]
+	_ = x[stateExtendFinish-56]
+	_ = x[stateExtensionsFinish-57]
+	_ = x[stateIdentifier-58]
+	_ = x[stateFullIdentifierRoot-59]
+	_ = x[stateFullIdentifierRest-60]
+	_ = x[stateEnder-61]
 }
 
-const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertSemicolonstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateTextListValuestateTextListFinishstateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionAssignstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageMapStartstateMessageMapKeyValuestateMessageMapCommastateMessageMapFinishstateMessageValuestateMessageFinishstateReservedRangestateReservedNamestateReservedFinishstateOneofBlockstateOneofValuestateOneofFinishstateEnumBlockstateEnumValuestateEnumFinishstateServiceBlockstateServiceValuestateServiceFinishstateRPCDefinitionstateRPCReqResstateRPCReqResFinishstateRPCValuestateRPCFinishstateIdentifierstateFullIdentifierRootstateFullIdentifierReststateEnder"
+const _state_name = "stateTopLevelstateSyntaxAssignstateSyntaxFinishstateEditionAssignstateEditionFinishstateImportValuestateImportFinishstatePackageFinishstateOptionNamestateOptionNameReststateOptionNameParenFinishstateOptionAssignstateOptionEqualstateOptionFinishstateTextFieldValuestateTextFieldAssignstateTextFieldNamestateTextFieldExtensionNamestateTextFieldExtensionNameFinishstateTextMessageValuestateTextMessageInsertSemicolonstateTextMessageFinishRightBracestateTextMessageFinishRightAnglestateTextListValuestateTextListFinishstateMessageBlockstateMessageFieldAssignstateMessageFieldOptionstateMessageFieldOptionAssignstateMessageFieldOptionFinishstateMessageFieldFinishstateMessageMapStartstateMessageMapKeyValuestateMessageMapCommastateMessageMapFinishstateMessageValuestateMessageFinishstateReservedRangestateReservedNamestateReservedFinishstateOneofBlockstateOneofValuestateOneofFinishstateEnumBlockstateEnumValuestateEnumFinishstateServiceBlockstateServiceValuestateServiceFinishstateRPCDefinitionstateRPCReqResstateRPCReqResFinishstateRPCValuestateRPCFinishstateExtendBlockstateExtendFieldstateExtendFinishstateExtensionsFinishstateIdentifierstateFullIdentifierRootstateFullIdentifierReststateEnder"
 
-var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 413, 445, 477, 495, 514, 531, 554, 577, 606, 635, 658, 678, 701, 721, 742, 759, 777, 795, 812, 831, 846, 861, 877, 891, 905, 920, 937, 954, 972, 990, 1004, 1024, 1037, 1051, 1066, 1089, 1112, 1122}
+var _state_index = [...]uint16{0, 13, 30, 47, 65, 83, 99, 116, 134, 149, 168, 194, 211, 227, 244, 263, 283, 301, 328, 361, 382, 413, 445, 477, 495, 514, 531, 554, 577, 606, 635, 658, 678, 701, 721, 742, 759, 777, 795, 812, 831, 846, 861, 877, 891, 905, 920, 937, 954, 972, 990, 1004, 1024, 1037, 1051, 1067, 1083, 1100, 1121, 1136, 1159, 1182, 1192}
 
 func (i state) String() string {
 	if i >= state(len(_state_index)-1) {

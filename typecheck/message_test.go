@@ -32,7 +32,7 @@ var messageTests = []typecheckTestCase{
 			&typecheck.TypeRedefinedError{
 				Files: []string{"a.proto", "a.proto"},
 				Lines: []int{1, 1},
-				Cols:  []int{22, 9},
+				Cols:  []int{9, 22},
 				Name:  ".A",
 			},
 		},
@@ -45,7 +45,7 @@ var messageTests = []typecheckTestCase{
 		},
 		errors: []error{
 			&typecheck.TypeRedefinedError{
-				Files: []string{"b.proto", "a.proto"},
+				Files: []string{"a.proto", "b.proto"},
 				Lines: []int{1, 1},
 				Cols:  []int{9, 9},
 				Name:  ".A",

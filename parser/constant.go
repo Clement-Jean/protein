@@ -4,6 +4,6 @@ import "github.com/Clement-Jean/protein/lexer"
 
 var constantTypes = []lexer.TokenKind{
 	lexer.TokenKindTrue, lexer.TokenKindFalse,
-	lexer.TokenKindInt, lexer.TokenKindFloat,
-	lexer.TokenKindStr, lexer.TokenKindIdentifier,
+	lexer.TokenKindInt, lexer.TokenKindHexInt, lexer.TokenKindOctInt,
+	lexer.TokenKindFloat, lexer.TokenKindStr, lexer.TokenKindIdentifier,
 }

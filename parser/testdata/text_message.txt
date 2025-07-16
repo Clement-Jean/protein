@@ -500,4 +500,4 @@ parseTree = [
   {kind: ;, subtreeSize: 9},
   {kind: EOF},
 ]
-errs = [expected [true false Integer Float String Identifier [], got )]
+errs = [expected [true false Integer HexInteger OctInt Float String Identifier [], got )]

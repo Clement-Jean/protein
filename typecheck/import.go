@@ -56,11 +56,20 @@ func (tc *TypeChecker) handleImport(depGraph *[][]int, u *unit.Unit, idx uint32)
 found:
 
 	if to == nil {
-		// add import to be parsed late (see: handleUnknownImports)
-		tc.units = append(tc.units, &unit.Unit{File: file})
-		to = tc.units[len(tc.units)-1]
-		tc.registerDep(to)
-		*depGraph = append(*depGraph, make([]int, 0))
+		idx := slices.IndexFunc(tc.units, func(u *unit.Unit) bool {
+			return u.File == file
+		})
+
+		if idx != -1 {
+			to = tc.units[idx]
+		} else {
+			// add import to be parsed late (see: handleUnknownImports)
+			newUnit := &unit.Unit{File: file}
+			tc.units = append(tc.units, newUnit)
+			to = newUnit
+			tc.registerDep(to)
+			*depGraph = append(*depGraph, make([]int, 0))
+		}
 	}
 
 	toId := tc.depsIDs[to]

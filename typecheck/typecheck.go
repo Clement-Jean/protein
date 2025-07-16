@@ -2,6 +2,7 @@ package typecheck
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"slices"
 	"strings"
@@ -21,6 +22,7 @@ type TypeChecker struct {
 	depsIDs   map[*unit.Unit]int
 	depsNames map[int]*unit.Unit
 
+	unitSyntax   map[*unit.Unit]syntaxKind
 	units        []*unit.Unit
 	includePaths []string
 
@@ -34,6 +36,8 @@ func New(units []*unit.Unit, opts ...TypeCheckerOpt) *TypeChecker {
 		depId:     0,
 		depsIDs:   make(map[*unit.Unit]int, len(units)),
 		depsNames: make(map[int]*unit.Unit, len(units)),
+
+		unitSyntax: make(map[*unit.Unit]syntaxKind),
 
 		includePaths: []string{""},
 		srcCreator:   source.NewFromFile,
@@ -65,6 +69,103 @@ func (tc *TypeChecker) registerDep(unit *unit.Unit) {
 	tc.depId++
 }
 
+func (tc *TypeChecker) checkFileOption(sym *symtab.Symtab, refName string, ref symtab.Ref, parentDecl symtab.Decl) error {
+	lParen := strings.IndexByte(refName, '(')
+	rParen := strings.LastIndexByte(refName, ')')
+	lastDot := strings.LastIndexByte(refName, '.')
+
+	if lParen != rParen { // found parens
+		declName := refName[lParen+1 : rParen]
+		if !strings.HasPrefix(declName, ".") {
+			declName = "." + declName
+		}
+
+		decl, ok := sym.SearchDecl(declName)
+		if !ok {
+			return &OptionUnknownError{
+				File: ref.Unit.File,
+				Line: ref.Line,
+				Col:  ref.Col,
+				Name: declName,
+			}
+		}
+
+		if lastDot > rParen { // (A.B).C
+			fieldIdx := rParen + strings.IndexByte(refName[rParen:], '.')
+			subfields := strings.Split(refName[fieldIdx+1:], ".")
+			optionNameIdx := strings.LastIndexByte(refName[:rParen], '.')
+			optionName := refName[optionNameIdx+1 : rParen]
+
+			field, ok := decl.Fields[optionName]
+			if !ok {
+				// TODO correct
+				return &OptionUnknownError{
+					File: ref.Unit.File,
+					Line: ref.Line,
+					Col:  ref.Col,
+					Name: refName,
+				}
+			}
+
+			if len(field.TypeName) != 0 {
+				if _, decl, ok = checkUpperScopes(sym, field.TypeName); !ok {
+					// TODO correct
+					return &OptionUnknownError{
+						File: ref.Unit.File,
+						Line: ref.Line,
+						Col:  ref.Col,
+						Name: refName,
+					}
+				}
+			} else if len(subfields) > 0 {
+				return fmt.Errorf("Scalar") // TODO custom error
+			}
+
+			for i, subfield := range subfields {
+				field, ok := decl.Fields[subfield]
+
+				if !ok {
+					// TODO correct
+					return &OptionUnknownError{
+						File: ref.Unit.File,
+						Line: ref.Line,
+						Col:  ref.Col,
+						Name: refName,
+					}
+				}
+
+				if len(field.TypeName) != 0 {
+					if _, decl, ok = checkUpperScopes(sym, field.TypeName); !ok {
+						// TODO correct
+						return &OptionUnknownError{
+							File: ref.Unit.File,
+							Line: ref.Line,
+							Col:  ref.Col,
+							Name: refName,
+						}
+					}
+				} else if i < len(subfields)-1 { // not last and scalar
+					return fmt.Errorf("Scalar") // TODO custom error
+				}
+			}
+		}
+	} else {
+		_, ok := parentDecl.Fields[refName]
+		if !ok {
+			// TODO correct
+			return &OptionUnknownError{
+				File: ref.Unit.File,
+				Line: ref.Line,
+				Col:  ref.Col,
+				Name: refName,
+			}
+		}
+	}
+
+	// TODO check value type!!
+	return nil
+}
+
 func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int) (errs []error) {
 	// these types are only relevant in the context of this function
 	type CacheKey struct {
@@ -81,27 +182,41 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int)
 	inDegree := make(map[string]int) // in degree of types to find unused
 
 	for _, symbol := range sym.All() {
-		for _, ref := range symbol.Fields {
+		if symbol.Type == parser.NodeKindExtendDecl {
+			// extendDecl should always be replaced by messageDecl
+			// so if we are here, it means the message type was not
+			// defined.
+			errs = append(errs, &TypeNotDefinedError{
+				File: symbol.Unit.File,
+				Name: symbol.Name,
+				Line: symbol.Line,
+				Col:  symbol.Col,
+			})
+			continue
+		}
+
+		for refName, ref := range symbol.Fields {
 			if ref.Type != parser.NodeKindUndefined || !strings.HasPrefix(ref.TypeName, ".") {
 				continue
 			}
 
 			var (
 				lastNameChecked string
-				decl            symtab.Decl
+				refDecl         symtab.Decl
 				ok              bool
 			)
 
 			cacheKey := CacheKey{symbol.Unit, ref.TypeName}
 			if val, hasVal := cache[cacheKey]; hasVal {
 				lastNameChecked, ok = val.lastNameChecked, val.ok
+				refDecl = val.decl
 
 				if ok {
 					inDegree[lastNameChecked] += 1
 				}
 			} else {
-				lastNameChecked, decl, ok = checkUpperScopes(sym, ref.TypeName)
-				cache[cacheKey] = CacheVal{decl, lastNameChecked, ok}
+				lastNameChecked, refDecl, ok = checkUpperScopes(sym, ref.TypeName)
+				cache[cacheKey] = CacheVal{refDecl, lastNameChecked, ok}
 
 				if ok {
 					inDegree[lastNameChecked] += 1
@@ -124,15 +239,24 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int)
 						Col:          ref.Col,
 					})
 				} else {
-					errs = append(errs, &TypeNotDefinedError{
-						File: symbol.Unit.File,
-						Name: ref.TypeName,
-						Line: ref.Line,
-						Col:  ref.Col,
-					})
+					if symbol.Type == parser.NodeKindOptionFile {
+						errs = append(errs, &OptionUnknownError{
+							File: symbol.Unit.File,
+							Name: ref.TypeName,
+							Line: ref.Line,
+							Col:  ref.Col,
+						})
+					} else {
+						errs = append(errs, &TypeNotDefinedError{
+							File: symbol.Unit.File,
+							Name: ref.TypeName,
+							Line: ref.Line,
+							Col:  ref.Col,
+						})
+					}
 				}
 			} else {
-				if decl.Type.NotType() {
+				if refDecl.Type.NotType() {
 					closeIdx := strings.LastIndexByte(ref.TypeName, ']')
 
 					if closeIdx != -1 {
@@ -146,7 +270,7 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int)
 						Col:  ref.Col,
 					})
 					continue
-				} else if decl.Type != parser.NodeKindMessageDecl && ref.Type == parser.NodeKindRPCInputOutput {
+				} else if refDecl.Type != parser.NodeKindMessageDecl && ref.Type == parser.NodeKindRPCInputOutput {
 					closeIdx := strings.LastIndexByte(ref.TypeName, ']')
 
 					if closeIdx != -1 {
@@ -160,10 +284,14 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int)
 						Col:  ref.Col,
 					})
 					continue
+				} else if symbol.Type == parser.NodeKindOptionFile {
+					if err := tc.checkFileOption(sym, refName, ref, refDecl); err != nil {
+						errs = append(errs, err)
+					}
 				}
 
-				accessible := decl.Unit == ref.Unit || // in same file
-					slices.Contains(depGraph[tc.depsIDs[ref.Unit]], tc.depsIDs[decl.Unit]) // imported
+				accessible := refDecl.Unit == symbol.Unit || // in same file
+					slices.Contains(depGraph[tc.depsIDs[symbol.Unit]], tc.depsIDs[refDecl.Unit]) // imported
 
 				if !accessible {
 					closeIdx := strings.LastIndexByte(ref.TypeName, ']')
@@ -174,7 +302,7 @@ func (tc *TypeChecker) checkTypesDeclsRefs(sym *symtab.Symtab, depGraph [][]int)
 
 					errs = append(errs, &TypeNotImportedError{
 						Name:    ref.TypeName,
-						DefFile: decl.Unit.File,
+						DefFile: refDecl.Unit.File,
 						RefFile: symbol.Unit.File,
 						Line:    ref.Line,
 						Col:     ref.Col,
@@ -241,8 +369,8 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (*symtab.Symtab, []error) {
 					}
 					errs = append(errs, err)
 				}
-			case parser.NodeKindMapDecl:
-				if err := tc.handleMapDecl(sym, st, unit, tokIdx); err != nil {
+			case parser.NodeKindMessageMapDecl:
+				if err := tc.handleMessageMapDecl(sym, st, unit, tokIdx); err != nil {
 					errs = append(errs, err)
 				}
 			case parser.NodeKindEnumDecl:
@@ -263,6 +391,21 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (*symtab.Symtab, []error) {
 				if err := tc.handleRPCDecl(sym, st, unit, tokIdx); err != nil {
 					errs = append(errs, err)
 				}
+			case parser.NodeKindExtendDecl:
+				if err := tc.handleExtend(sym, &st, unit, tokIdx); err != nil {
+					errs = append(errs, err)
+				}
+			case parser.NodeKindOptionFile:
+				if err := tc.handleFileOption(sym, st, unit, tokIdx); err != nil {
+					errs = append(errs, err)
+				}
+			case parser.NodeKindExtendFieldDecl:
+				if err := tc.handleExtendField(sym, st, unit, tokIdx); err != nil {
+					errs = append(errs, err)
+				}
+			case parser.NodeKindExtendMapDecl:
+				// TODO custom error
+				errs = append(errs, fmt.Errorf("map fields are not allowed to be extensions."))
 
 			// REFS
 			case parser.NodeKindMessageFieldDecl:
@@ -340,6 +483,10 @@ func (tc *TypeChecker) Check() (*symtab.Symtab, []error) {
 		for j := i; j < len(tc.units); j++ {
 			for _, node := range tc.units[j].Tree {
 				switch node.Kind {
+				case parser.NodeKindSyntaxStmt:
+					if err := tc.handleSyntax(tc.units[j], node.TokIdx); err != nil {
+						errs = append(errs, err)
+					}
 				case parser.NodeKindImportStmt:
 					if err := tc.handleImport(&depGraph, tc.units[j], node.TokIdx); err != nil {
 						errs = append(errs, err...)

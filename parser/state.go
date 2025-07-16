@@ -83,6 +83,14 @@ const (
 	stateRPCValue
 	stateRPCFinish
 
+	// EXTEND
+	stateExtendBlock
+	stateExtendField
+	stateExtendFinish
+
+	// EXTENSIONS
+	stateExtensionsFinish
+
 	// IDENTIFIERS
 	stateIdentifier
 	stateFullIdentifierRoot

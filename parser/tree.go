@@ -16,26 +16,38 @@ type NodeKind uint16
 
 const (
 	NodeKindUndefined    NodeKind = iota // Undefined
+	NodeKindSyntaxStmt                   // SyntaxStmt
 	NodeKindImportStmt                   // ImportStmt
 	NodeKindPackageStmt                  // PackageStmt
 	NodeKindMessageClose                 // MessageClose
 	NodeKindEnumClose                    // EnumClose
 	NodeKindServiceClose                 // ServiceClose
 	NodeKindOneofClose                   // OneofClose
+	NodeKindExtendClose                  // ExtendClose
 
 	// type defs
-	NodeKindMessageDecl // MessageDecl
-	NodeKindOneOfDecl   // OneOfDecl
-	NodeKindMapDecl     // MapDecl
-	NodeKindEnumDecl    // EnumDecl
-	NodeKindServiceDecl // ServiceDecl
-	NodeKindRPCDecl     // RPCDecl
+	NodeKindMessageDecl     // MessageDecl
+	NodeKindOneOfDecl       // OneOfDecl
+	NodeKindMessageMapDecl  // MessageMapDecl
+	NodeKindEnumDecl        // EnumDecl
+	NodeKindServiceDecl     // ServiceDecl
+	NodeKindRPCDecl         // RPCDecl
+	NodeKindExtendDecl      // ExtendDecl
+	NodeKindExtendMapDecl   // ExtendMapDecl
+	NodeKindExtendFieldDecl // ExtendFieldDecl
 
 	// type refs
-	NodeKindMessageFieldDecl // FieldDecl
-	NodeKindEnumValueDecl    // ValueDecl
+	NodeKindMessageFieldDecl // MessageFieldDecl
 	NodeKindMapValue         // MapValue
+	NodeKindEnumValueDecl    // EnumValueDecl
 	NodeKindRPCInputOutput   // RPCInputOutput
+	NodeKindOptionFile       // OptionFile
+	NodeKindOptionMessage    // OptionMessage
+	NodeKindOptionOneof      // OptionOneof
+	NodeKindOptionField      // OptionField
+	NodeKindOptionEnum       // OptionEnum
+	NodeKindOptionService    // OptionService
+	NodeKindOptionRPC        // OptionRPC
 )
 
 func (k NodeKind) IsTypeDef() bool {

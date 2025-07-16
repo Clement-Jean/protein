@@ -99,6 +99,7 @@ var importTests = []typecheckTestCase{
 			{"a.proto", "import weak 'b.proto';"},
 			{"b.proto", ""},
 		},
+		errorLevel: typecheck.ErrorLevelWarning,
 		errors: []error{
 			&typecheck.WeakImportNoEffectWarning{
 				File: "a.proto",

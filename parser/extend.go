@@ -2,13 +2,18 @@ package parser
 
 import "github.com/Clement-Jean/protein/lexer"
 
-func (p *Parser) parseMessage() {
-	p.pushState(stateMessageFinish)
-	p.pushState(stateMessageBlock)
-	p.pushTypedState(NodeKindMessageDecl, stateIdentifier)
+func (p *Parser) parseExtend() {
+	p.pushState(stateExtendFinish)
+	p.pushState(stateExtendBlock)
+	p.pushTypedState(NodeKindExtendDecl, stateFullIdentifierRoot)
+
+	if p.curr() == lexer.TokenKindDot {
+		p.addLeafNode(false)
+		p.next()
+	}
 }
 
-func (p *Parser) parseMessageBlock() {
+func (p *Parser) parseExtendBlock() {
 	p.popState()
 
 	hasError := p.curr() != lexer.TokenKindLeftBrace
@@ -21,72 +26,24 @@ func (p *Parser) parseMessageBlock() {
 		p.skipPastLikelyEnd(p.currTok)
 	}
 
-	p.pushState(stateMessageValue)
+	p.pushState(stateExtendField)
 }
 
-var messageScopeExpected = []lexer.TokenKind{
-	lexer.TokenKindTypeFloat,
-	lexer.TokenKindOption,
-	lexer.TokenKindTypeDouble,
-	lexer.TokenKindTypeInt32,
-	lexer.TokenKindTypeInt64,
-	lexer.TokenKindTypeUint32,
-	lexer.TokenKindTypeUint64,
-	lexer.TokenKindTypeSint32,
-	lexer.TokenKindTypeSint64,
-	lexer.TokenKindTypeFixed32,
-	lexer.TokenKindTypeFixed64,
-	lexer.TokenKindTypeSfixed32,
-	lexer.TokenKindTypeSfixed64,
-	lexer.TokenKindTypeBool,
-	lexer.TokenKindTypeString,
-	lexer.TokenKindTypeBytes,
-	lexer.TokenKindMap,
-	lexer.TokenKindIdentifier,
-	lexer.TokenKindReserved,
-	lexer.TokenKindExtensions,
-	lexer.TokenKindOneOf,
-	lexer.TokenKindMessage,
-	lexer.TokenKindRightBrace,
-}
-
-func (p *Parser) parseMessageValue() {
+func (p *Parser) parseExtendField() {
 	switch curr := p.curr(); curr {
 	case lexer.TokenKindSemicolon, lexer.TokenKindComment:
 		p.next()
 	case lexer.TokenKindEOF, lexer.TokenKindRightBrace:
 		p.popState()
-	case lexer.TokenKindOption:
-		p.addLeafNode(false)
-		p.next()
-		p.parseOption(NodeKindOptionMessage)
-	case lexer.TokenKindReserved:
-		p.addLeafNode(false)
-		p.next()
-		p.parseReserved()
-	case lexer.TokenKindExtensions:
-		p.addLeafNode(false)
-		p.next()
-		p.parseExtensions()
-	case lexer.TokenKindOneOf:
-		p.addLeafNode(false)
-		p.next()
-		p.parseOneof()
 	case lexer.TokenKindMap:
 		p.pushState(stateMessageFieldFinish)
-		p.pushTypedState(NodeKindMessageMapDecl, stateMessageFieldAssign)
+		p.pushTypedState(NodeKindExtendMapDecl, stateMessageFieldAssign)
 		p.parseMessageMap()
 		p.addLeafNode(false)
 		p.next()
-	case lexer.TokenKindMessage:
-		p.addLeafNode(false)
-		p.next()
-		p.parseMessage()
-	case lexer.TokenKindEnum:
-		p.addLeafNode(false)
-		p.next()
-		p.parseEnum()
 	default:
+		// TODO same as message parsing field
+		//      put that into a function?
 		var (
 			dotIdx      uint32
 			modifierIdx uint32
@@ -109,7 +66,7 @@ func (p *Parser) parseMessageValue() {
 		if curr.IsIdentifier() {
 			p.pushState(stateMessageFieldFinish)
 			p.pushState(stateMessageFieldAssign)
-			p.pushTypedState(NodeKindMessageFieldDecl, stateFullIdentifierRoot)
+			p.pushTypedState(NodeKindExtendFieldDecl, stateFullIdentifierRoot)
 
 			if hasModifier {
 				p.addNode(modifierIdx, stateStackEntry{
@@ -155,7 +112,7 @@ func (p *Parser) parseMessageValue() {
 	}
 }
 
-func (p *Parser) parseMessageFinish() {
+func (p *Parser) parseExtendFinish() {
 	state := p.popState()
 	tokIdx := p.currTok
 
@@ -168,5 +125,5 @@ func (p *Parser) parseMessageFinish() {
 		tokIdx = p.skipPastLikelyEnd(tokIdx)
 	}
 
-	p.addTypedNode(tokIdx, NodeKindMessageClose, state)
+	p.addTypedNode(tokIdx, NodeKindExtendClose, state)
 }

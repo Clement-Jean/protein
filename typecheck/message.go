@@ -43,11 +43,25 @@ func fullyQualifyIdentifier(scope []string, id string) string {
 		} else {
 			fullyQualified = "." + strings.Join(scope, ".")
 		}
-	} else if !strings.HasPrefix(id, ".") {
+	} else if strings.HasPrefix(id, ".") {
 		return id
 	}
 
 	return fullyQualified
+}
+
+func parseTag(tok lexer.TokenInfo, tag string) int64 {
+	var valueTag int64
+
+	switch tok.Kind {
+	case lexer.TokenKindHexInt:
+		valueTag, _ = strconv.ParseInt(tag[2:], 16, 64)
+	case lexer.TokenKindOctInt:
+		valueTag, _ = strconv.ParseInt(tag, 8, 64)
+	default:
+		valueTag, _ = strconv.ParseInt(tag, 10, 64)
+	}
+	return valueTag
 }
 
 func (tc *TypeChecker) handleMessage(sym *symtab.Symtab, scope *[]string, unit *unit.Unit, idx uint32) error {
@@ -65,14 +79,21 @@ func (tc *TypeChecker) handleMessage(sym *symtab.Symtab, scope *[]string, unit *
 
 	fullName := fmt.Sprintf("%s.%s", prefix, name)
 
-	if decl, ok := sym.SearchDecl(fullName); ok {
-		println("ERROR")
+	decl, ok := sym.SearchDecl(fullName)
+	if ok && decl.Type != parser.NodeKindExtendDecl {
 		return &TypeRedefinedError{
 			Name:  fullName,
-			Files: []string{unit.File, decl.Unit.File},
-			Lines: []int{line, decl.Line},
-			Cols:  []int{col, decl.Col},
+			Files: []string{decl.Unit.File, unit.File},
+			Lines: []int{decl.Line, line},
+			Cols:  []int{decl.Col, col},
 		}
+	}
+
+	if ok { // extend is defined already
+		decl.Type = parser.NodeKindMessageDecl
+		decl.Unit = unit
+		sym.Decls[fullName] = decl
+		return nil
 	}
 
 	sym.Decls[fullName] = symtab.Decl{
@@ -119,14 +140,16 @@ func (tc *TypeChecker) handleOneof(sym *symtab.Symtab, scope []string, unit *uni
 	return nil
 }
 
-func (tc *TypeChecker) handleMapDecl(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) handleMessageMapDecl(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx]
 	endIdx, fieldName := collectIdentifier(idx, unit, start)
 	line, col := tc.getLineColumn(unit, start.Offset)
 
-	endOffset := unit.Toks.TokenInfos[endIdx+1].Offset
+	tagToken := unit.Toks.TokenInfos[endIdx+1]
+	endOffset := tagToken.Offset
 	endNextOffset := unit.Toks.TokenInfos[endIdx+2].Offset
-	fieldTag, _ := strconv.ParseInt(string(unit.Buffer.Range(endOffset, endNextOffset)), 10, 32)
+	tag := string(unit.Buffer.Range(endOffset, endNextOffset))
+	fieldTag := parseTag(tagToken, tag)
 
 	if fieldTag > maxFieldTag {
 		return &MaxFieldTagError{
@@ -159,7 +182,7 @@ func (tc *TypeChecker) handleMapDecl(sym *symtab.Symtab, scope []string, unit *u
 		}
 
 		ref := symtab.Ref{Unit: unit, Line: line, Col: col, Tag: fieldTag}
-		sym.AddRef(&decl, prefix, fieldName, fieldTag, ref)
+		sym.AddRef(&decl, fieldName, fieldTag, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}
@@ -196,7 +219,7 @@ func (tc *TypeChecker) handleMapValue(sym *symtab.Symtab, scope []string, unit *
 			TypeName: name,
 		}
 
-		sym.AddRef(&decl, prefix, typeName, 0, ref)
+		sym.AddRef(&decl, typeName, 0, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}
@@ -213,9 +236,11 @@ func (tc *TypeChecker) handleField(sym *symtab.Symtab, scope []string, unit *uni
 	endNextOffset := unit.Toks.TokenInfos[endIdx+1].Offset
 	fieldName := strings.TrimSuffix(string(unit.Buffer.Range(endOffset, endNextOffset)), " ")
 
-	endOffset = unit.Toks.TokenInfos[endIdx+2].Offset
+	tagToken := unit.Toks.TokenInfos[endIdx+2]
+	endOffset = tagToken.Offset
 	endNextOffset = unit.Toks.TokenInfos[endIdx+3].Offset
-	fieldTag, _ := strconv.ParseInt(string(unit.Buffer.Range(endOffset, endNextOffset)), 10, 32)
+	tag := strings.TrimRight(string(unit.Buffer.Range(endOffset, endNextOffset)), "\n ")
+	fieldTag := parseTag(tagToken, tag)
 
 	if fieldTag > maxFieldTag {
 		return &MaxFieldTagError{
@@ -260,7 +285,7 @@ func (tc *TypeChecker) handleField(sym *symtab.Symtab, scope []string, unit *uni
 			ref = symtab.Ref{Unit: unit, Line: line, Col: col, TypeName: name, Tag: fieldTag}
 		}
 
-		sym.AddRef(&decl, prefix, fieldName, fieldTag, ref)
+		sym.AddRef(&decl, fieldName, fieldTag, ref)
 	} else {
 		panic("it should never happen! we should be in the right scope")
 	}

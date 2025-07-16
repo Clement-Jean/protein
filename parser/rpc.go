@@ -147,7 +147,7 @@ func (p *Parser) parseRPCValue() {
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
 		p.next()
-		p.parseOption()
+		p.parseOption(NodeKindOptionRPC)
 	default:
 		p.expectedCurr(lexer.TokenKindOption)
 		p.skipPastLikelyEnd(p.currTok)

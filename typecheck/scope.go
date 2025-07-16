@@ -10,7 +10,8 @@ import (
 func checkUpperScopes(sym *symtab.Symtab, typeName string) (string, symtab.Decl, bool) {
 	idxEnd := strings.IndexByte(typeName, ']')
 	if idxEnd == -1 {
-		return typeName, symtab.Decl{}, false
+		decl, ok := sym.SearchDecl(typeName)
+		return typeName, decl, ok
 	}
 
 	idxStart := strings.IndexByte(typeName, '[')

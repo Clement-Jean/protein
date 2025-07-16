@@ -28,8 +28,10 @@ func _() {
 	_ = x[TokenKindRightAngle-17]
 	_ = x[TokenKindSlash-18]
 	_ = x[TokenKindInt-19]
-	_ = x[TokenKindFloat-20]
-	_ = x[TokenKindStr-21]
+	_ = x[TokenKindHexInt-20]
+	_ = x[TokenKindOctInt-21]
+	_ = x[TokenKindFloat-22]
+	_ = x[TokenKindStr-23]
 	_ = x[TokenKindIdentifier-128]
 	_ = x[TokenKindTypeBool-129]
 	_ = x[TokenKindTypeBytes-130]
@@ -74,18 +76,18 @@ func _() {
 }
 
 const (
-	_TokenKind_name_0 = "EOFBOFErrorComment_=,:;.{[(<}])>/IntegerFloatString"
+	_TokenKind_name_0 = "EOFBOFErrorComment_=,:;.{[(<}])>/IntegerHexIntegerOctIntFloatString"
 	_TokenKind_name_1 = "Identifierboolbytesdoubleeditionenumextendextensionsfalsefixed32fixed64floatimportint32int64mapmaxmessageoneofoptionoptionalpackagepublicrepeatedrequiredreservedreturnsrpcservicesfixed32sfixed64sint32sint64streamstringsyntaxtotrueuint32uint64weak"
 )
 
 var (
-	_TokenKind_index_0 = [...]uint8{0, 3, 6, 11, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 40, 45, 51}
+	_TokenKind_index_0 = [...]uint8{0, 3, 6, 11, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 40, 50, 56, 61, 67}
 	_TokenKind_index_1 = [...]uint8{0, 10, 14, 19, 25, 32, 36, 42, 52, 57, 64, 71, 76, 82, 87, 92, 95, 98, 105, 110, 116, 124, 131, 137, 145, 153, 161, 168, 171, 178, 186, 194, 200, 206, 212, 218, 224, 226, 230, 236, 242, 246}
 )
 
 func (i TokenKind) String() string {
 	switch {
-	case i <= 21:
+	case i <= 23:
 		return _TokenKind_name_0[_TokenKind_index_0[i]:_TokenKind_index_0[i+1]]
 	case 128 <= i && i <= 168:
 		i -= 128

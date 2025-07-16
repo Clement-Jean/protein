@@ -59,13 +59,13 @@ func (p *Parser) parseMessageFieldAssign() {
 	}
 	curr = p.next()
 
-	hasError = curr != lexer.TokenKindInt
+	hasError = !curr.IsInteger()
 	p.addLeafNode(hasError)
 
 	if !hasError {
 		curr = p.next()
 	} else {
-		p.expectedCurr(lexer.TokenKindInt)
+		p.expectedCurr(lexer.TokenKindInt, lexer.TokenKindHexInt, lexer.TokenKindOctInt)
 		p.skipPastLikelyEnd(p.currTok)
 	}
 
@@ -83,12 +83,18 @@ func (p *Parser) parseMessageFieldOption() {
 	p.popState()
 
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindIdentifier && curr != lexer.TokenKindLeftParen
+	hasError := curr != lexer.TokenKindIdentifier &&
+		curr != lexer.TokenKindLeftParen &&
+		curr != lexer.TokenKindComment
+
+	if curr == lexer.TokenKindComment {
+		p.next()
+	}
 
 	if !hasError {
 		p.pushState(stateMessageFieldOptionFinish)
 		p.pushState(stateMessageFieldOptionAssign)
-		p.pushState(stateOptionName)
+		p.pushTypedState(NodeKindOptionField, stateOptionName)
 	} else {
 		p.popState()
 		p.expectedCurr(lexer.TokenKindIdentifier, lexer.TokenKindLeftParen)

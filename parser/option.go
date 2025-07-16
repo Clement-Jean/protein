@@ -6,20 +6,20 @@ import (
 	"github.com/Clement-Jean/protein/lexer"
 )
 
-func (p *Parser) parseOption() {
+func (p *Parser) parseOption(kind NodeKind) {
 	p.pushState(stateOptionFinish)
 	p.pushState(stateOptionAssign)
-	p.pushState(stateOptionName)
+	p.pushTypedState(kind, stateOptionName)
 }
 
 func (p *Parser) parseOptionName() {
-	p.popState()
+	state := p.popState()
 
 	curr := p.curr()
 	hasError := curr != lexer.TokenKindIdentifier &&
 		curr != lexer.TokenKindLeftParen &&
 		!curr.IsIdentifier()
-	p.addLeafNode(hasError)
+	p.addTypedLeafNode(state.kind, hasError)
 
 	switch curr {
 	case lexer.TokenKindIdentifier:

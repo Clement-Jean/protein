@@ -9,6 +9,16 @@ type Warning interface {
 	Warning() string
 }
 
+type UnknownSyntaxError struct {
+	File      string
+	Line, Col int
+	Value     string
+}
+
+func (e *UnknownSyntaxError) Error() string {
+	return fmt.Sprintf("%s:%d:%d: error: %q is not a known protobuf syntax", e.File, e.Line, e.Col, e.Value)
+}
+
 type ImportCycleError struct {
 	Files []string
 	// TODO LINES, COLS and change error message
@@ -268,5 +278,18 @@ func (e *EnumFirstValueTagZeroError) Error() string {
 	return fmt.Sprintf(
 		"%s:%d:%d: error: the first enum value must be zero for enums.",
 		e.File, e.Line, e.Col,
+	)
+}
+
+type OptionUnknownError struct {
+	File      string
+	Line, Col int
+	Name      string
+}
+
+func (e *OptionUnknownError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: option %s is unknown.",
+		e.File, e.Line, e.Col, e.Name,
 	)
 }

@@ -4,14 +4,14 @@ import "github.com/Clement-Jean/protein/lexer"
 
 func (p *Parser) parseReserved() {
 	switch p.curr() {
-	case lexer.TokenKindInt:
+	case lexer.TokenKindInt, lexer.TokenKindHexInt, lexer.TokenKindOctInt:
 		p.pushState(stateReservedFinish)
 		p.pushState(stateReservedRange)
 	case lexer.TokenKindStr:
 		p.pushState(stateReservedFinish)
 		p.pushState(stateReservedName)
 	default:
-		p.expectedCurr(lexer.TokenKindInt, lexer.TokenKindStr)
+		p.expectedCurr(lexer.TokenKindInt, lexer.TokenKindHexInt, lexer.TokenKindOctInt, lexer.TokenKindStr)
 		tokIdx := p.skipPastLikelyEnd(p.currTok)
 		p.addNode(tokIdx, stateStackEntry{
 			tokIdx:       tokIdx,
@@ -47,14 +47,14 @@ func (p *Parser) parseReservedRange() {
 	p.popState()
 
 	curr := p.curr()
-	hasError := curr != lexer.TokenKindInt && curr != lexer.TokenKindMax
+	hasError := !curr.IsInteger() && curr != lexer.TokenKindMax
 	p.addLeafNode(hasError)
 
 	if !hasError {
 		curr = p.next()
 	} else {
 		p.popState()
-		p.expectedCurr(lexer.TokenKindInt, lexer.TokenKindMax)
+		p.expectedCurr(lexer.TokenKindInt, lexer.TokenKindHexInt, lexer.TokenKindOctInt, lexer.TokenKindMax)
 		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon)
 	}
 

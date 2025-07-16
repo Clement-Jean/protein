@@ -9,27 +9,39 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[NodeKindUndefined-0]
-	_ = x[NodeKindImportStmt-1]
-	_ = x[NodeKindPackageStmt-2]
-	_ = x[NodeKindMessageClose-3]
-	_ = x[NodeKindEnumClose-4]
-	_ = x[NodeKindServiceClose-5]
-	_ = x[NodeKindOneofClose-6]
-	_ = x[NodeKindMessageDecl-7]
-	_ = x[NodeKindOneOfDecl-8]
-	_ = x[NodeKindMapDecl-9]
-	_ = x[NodeKindEnumDecl-10]
-	_ = x[NodeKindServiceDecl-11]
-	_ = x[NodeKindRPCDecl-12]
-	_ = x[NodeKindMessageFieldDecl-13]
-	_ = x[NodeKindEnumValueDecl-14]
-	_ = x[NodeKindMapValue-15]
-	_ = x[NodeKindRPCInputOutput-16]
+	_ = x[NodeKindSyntaxStmt-1]
+	_ = x[NodeKindImportStmt-2]
+	_ = x[NodeKindPackageStmt-3]
+	_ = x[NodeKindMessageClose-4]
+	_ = x[NodeKindEnumClose-5]
+	_ = x[NodeKindServiceClose-6]
+	_ = x[NodeKindOneofClose-7]
+	_ = x[NodeKindExtendClose-8]
+	_ = x[NodeKindMessageDecl-9]
+	_ = x[NodeKindOneOfDecl-10]
+	_ = x[NodeKindMessageMapDecl-11]
+	_ = x[NodeKindEnumDecl-12]
+	_ = x[NodeKindServiceDecl-13]
+	_ = x[NodeKindRPCDecl-14]
+	_ = x[NodeKindExtendDecl-15]
+	_ = x[NodeKindExtendMapDecl-16]
+	_ = x[NodeKindExtendFieldDecl-17]
+	_ = x[NodeKindMessageFieldDecl-18]
+	_ = x[NodeKindMapValue-19]
+	_ = x[NodeKindEnumValueDecl-20]
+	_ = x[NodeKindRPCInputOutput-21]
+	_ = x[NodeKindOptionFile-22]
+	_ = x[NodeKindOptionMessage-23]
+	_ = x[NodeKindOptionOneof-24]
+	_ = x[NodeKindOptionField-25]
+	_ = x[NodeKindOptionEnum-26]
+	_ = x[NodeKindOptionService-27]
+	_ = x[NodeKindOptionRPC-28]
 }
 
-const _NodeKind_name = "UndefinedImportStmtPackageStmtMessageCloseEnumCloseServiceCloseOneofCloseMessageDeclOneOfDeclMapDeclEnumDeclServiceDeclRPCDeclFieldDeclValueDeclMapValueRPCInputOutput"
+const _NodeKind_name = "UndefinedSyntaxStmtImportStmtPackageStmtMessageCloseEnumCloseServiceCloseOneofCloseExtendCloseMessageDeclOneOfDeclMessageMapDeclEnumDeclServiceDeclRPCDeclExtendDeclExtendMapDeclExtendFieldDeclMessageFieldDeclMapValueEnumValueDeclRPCInputOutputOptionFileOptionMessageOptionOneofOptionFieldOptionEnumOptionServiceOptionRPC"
 
-var _NodeKind_index = [...]uint8{0, 9, 19, 30, 42, 51, 63, 73, 84, 93, 100, 108, 119, 126, 135, 144, 152, 166}
+var _NodeKind_index = [...]uint16{0, 9, 19, 29, 40, 52, 61, 73, 83, 94, 105, 114, 128, 136, 147, 154, 164, 177, 192, 208, 216, 229, 243, 253, 266, 277, 288, 298, 311, 320}
 
 func (i NodeKind) String() string {
 	if i >= NodeKind(len(_NodeKind_index)-1) {

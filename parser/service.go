@@ -38,7 +38,7 @@ func (p *Parser) parseServiceValue() {
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
 		p.next()
-		p.parseOption()
+		p.parseOption(NodeKindOptionService)
 	case lexer.TokenKindRPC:
 		p.addLeafNode(false)
 		p.pushState(stateRPCFinish) // optional semicolon

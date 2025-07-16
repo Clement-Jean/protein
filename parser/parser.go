@@ -160,13 +160,15 @@ func (p *Parser) parseTopLevel() {
 	case lexer.TokenKindPackage:
 		p.parsePackage()
 	case lexer.TokenKindOption:
-		p.parseOption()
+		p.parseOption(NodeKindOptionFile)
 	case lexer.TokenKindMessage:
 		p.parseMessage()
 	case lexer.TokenKindEnum:
 		p.parseEnum()
 	case lexer.TokenKindService:
 		p.parseService()
+	case lexer.TokenKindExtend:
+		p.parseExtend()
 	}
 }
 
@@ -303,6 +305,18 @@ func (p *Parser) Parse() (ParseTree, []error) {
 			p.parseRPCValue()
 		case stateRPCFinish:
 			p.parseRPCFinish()
+
+		// EXTENDS
+		case stateExtendBlock:
+			p.parseExtendBlock()
+		case stateExtendField:
+			p.parseExtendField()
+		case stateExtendFinish:
+			p.parseExtendFinish()
+
+		// EXTENSIONS
+		case stateExtensionsFinish:
+			p.parseExtensionsFinish()
 
 		// IDENTIFIERS
 		case stateIdentifier:

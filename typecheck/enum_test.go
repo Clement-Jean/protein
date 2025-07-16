@@ -93,13 +93,13 @@ var enumTests = []typecheckTestCase{
 	{
 		name: "enum first value tag zero",
 		contents: []testFile{
-			{"a.proto", "enum A { A_UNSPECIFIED = 1; }"},
+			{"a.proto", "syntax = 'proto3'; enum A { A_UNSPECIFIED = 1; }"},
 		},
 		errors: []error{
 			&typecheck.EnumFirstValueTagZeroError{
 				File: "a.proto",
 				Line: 1,
-				Col:  10,
+				Col:  29,
 			},
 		},
 	},

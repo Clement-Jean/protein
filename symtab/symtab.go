@@ -22,7 +22,7 @@ func (s *Symtab) SearchDecl(name string) (Decl, bool) {
 	return decl, ok
 }
 
-func (s *Symtab) AddRef(decl *Decl, declFullName, fieldName string, fieldTag int64, ref Ref) {
+func (s *Symtab) AddRef(decl *Decl, fieldName string, fieldTag int64, ref Ref) {
 	decl.Fields[fieldName] = ref
 
 	if decl.FieldTags != nil {

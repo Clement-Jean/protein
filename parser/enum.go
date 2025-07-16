@@ -40,7 +40,7 @@ func (p *Parser) parseEnumValue() {
 	case lexer.TokenKindOption:
 		p.addLeafNode(false)
 		p.next()
-		p.parseOption()
+		p.parseOption(NodeKindOptionEnum)
 	case lexer.TokenKindReserved:
 		p.addLeafNode(false)
 		p.next()

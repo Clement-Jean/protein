@@ -22,7 +22,7 @@ func (p *Parser) parseSyntaxAssign() {
 	curr = p.next()
 
 	hasError = curr != lexer.TokenKindStr
-	p.addLeafNode(hasError)
+	p.addTypedLeafNode(NodeKindSyntaxStmt, hasError)
 
 	if !hasError {
 		p.next()

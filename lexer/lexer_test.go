@@ -348,8 +348,8 @@ var tests = []TestCase{
 		input: "0xff 0XFF",
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
-			{Kind: lexer.TokenKindInt},
-			{Kind: lexer.TokenKindInt, Offset: 5},
+			{Kind: lexer.TokenKindHexInt},
+			{Kind: lexer.TokenKindHexInt, Offset: 5},
 			{Kind: lexer.TokenKindEOF, Offset: 9},
 		},
 		lineInfos: []lexer.LineInfo{
@@ -361,7 +361,7 @@ var tests = []TestCase{
 		input: "056",
 		tokenInfos: []lexer.TokenInfo{
 			{Kind: lexer.TokenKindBOF},
-			{Kind: lexer.TokenKindInt},
+			{Kind: lexer.TokenKindOctInt},
 			{Kind: lexer.TokenKindEOF, Offset: 3},
 		},
 		lineInfos: []lexer.LineInfo{
