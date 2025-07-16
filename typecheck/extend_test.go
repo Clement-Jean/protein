@@ -52,4 +52,18 @@ var extendTests = []typecheckTestCase{
 			{"b.proto", "package google.protobuf; message FileOptions {}"},
 		},
 	},
+	{
+		name: "extend already defined",
+		contents: []testFile{
+			{"a.proto", "message A {} message B {} message C {} extend B { A a = 1; } extend C { A a = 1; }"},
+		},
+		errors: []error{
+			&typecheck.TypeRedefinedError{
+				Files: []string{"a.proto", "a.proto"},
+				Lines: []int{1, 1},
+				Cols:  []int{73, 51},
+				Name:  ".a",
+			},
+		},
+	},
 }
