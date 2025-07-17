@@ -21,3 +21,23 @@ parseTree = [
   {kind: }, subtreeSize: 11},
   {kind: EOF},
 ]
+
+================================================================================
+ranges expected integer
+================================================================================
+
+message Test { extensions "nope"; }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: message},
+    {kind: Identifier},
+    {kind: {},
+    {kind: extensions},
+    {kind: String, hasError: true},
+  {kind: }, subtreeSize: 6},
+  {kind: EOF},
+]
+errs = [expected [Integer HexInteger OctInt max], got String]

@@ -6,7 +6,7 @@ import (
 	"github.com/Clement-Jean/protein/lexer"
 )
 
-func (p *Parser) skipTo(end ...lexer.TokenKind) {
+func (p *Parser) skipTo(end ...lexer.TokenKind) lexer.TokenKind {
 	curr := p.curr()
 	for curr != lexer.TokenKindEOF && !slices.Contains(end, curr) {
 		if p.skipSubscope(curr) {
@@ -16,6 +16,7 @@ func (p *Parser) skipTo(end ...lexer.TokenKind) {
 
 		curr = p.next()
 	}
+	return curr
 }
 
 func (p *Parser) skipSubscope(curr lexer.TokenKind) bool {

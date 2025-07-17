@@ -33,7 +33,7 @@ func (p *Parser) parseReservedName() {
 	} else {
 		p.popState()
 		p.expectedCurr(lexer.TokenKindStr)
-		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon)
+		curr = p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon)
 	}
 
 	if curr == lexer.TokenKindComma {
@@ -55,7 +55,7 @@ func (p *Parser) parseReservedRange() {
 	} else {
 		p.popState()
 		p.expectedCurr(lexer.TokenKindInt, lexer.TokenKindHexInt, lexer.TokenKindOctInt, lexer.TokenKindMax)
-		p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon)
+		curr = p.skipTo(lexer.TokenKindComma, lexer.TokenKindSemicolon)
 	}
 
 	if curr == lexer.TokenKindTo {
