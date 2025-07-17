@@ -1,0 +1,78 @@
+================================================================================
+extend
+================================================================================
+
+extend Test { }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: extend},
+    {kind: Identifier},
+    {kind: {},
+  {kind: }, subtreeSize: 4},
+  {kind: EOF},
+]
+
+================================================================================
+extend full identifier
+================================================================================
+
+extend google.protobuf.FileOptions { }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: extend},
+        {kind: Identifier},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 3},
+      {kind: Identifier},
+    {kind: ., subtreeSize: 5},
+    {kind: {},
+  {kind: }, subtreeSize: 8},
+  {kind: EOF},
+]
+
+================================================================================
+extend full identifier leading dot
+================================================================================
+
+extend .google.protobuf.FileOptions { }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: extend},
+        {kind: .},
+        {kind: Identifier},
+        {kind: Identifier},
+      {kind: ., subtreeSize: 4},
+      {kind: Identifier},
+    {kind: ., subtreeSize: 6},
+    {kind: {},
+  {kind: }, subtreeSize: 9},
+  {kind: EOF},
+]
+
+
+================================================================================
+extend expected identifier
+================================================================================
+
+extend 1 { }
+
+--------------------------------------------------------------------------------
+
+parseTree = [
+  {kind: BOF},
+    {kind: extend},
+    {kind: Integer, hasError: true},
+    {kind: Integer, hasError: true},
+  {kind: }, subtreeSize: 4},
+  {kind: EOF},
+]
+errs = [expected [Identifier], got Integer expected [{], got Integer]

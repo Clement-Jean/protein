@@ -140,6 +140,7 @@ var testFiles = []string{
 	"enum.txt",
 	"service.txt",
 	"rpc.txt",
+	"extend.txt",
 	"a_bit_of_everything.txt",
 }
 
