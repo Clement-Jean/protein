@@ -114,4 +114,83 @@ var optionTests = []typecheckTestCase{
 			},
 		},
 	},
+	{
+		name: "option file access field of scalar type",
+		contents: []testFile{
+			{"a.proto", "import 'b.proto'; option (my.custom.a).b = true;"},
+			{"b.proto", "package my.custom; import 'google/protobuf/descriptor.proto'; extend google.protobuf.FileOptions { bool a = 1; }"},
+			{"google/protobuf/descriptor.proto", "package google.protobuf; message FileOptions {}"},
+		},
+		errors: []error{
+			&typecheck.OptionScalarTypeError{
+				File: "a.proto",
+				Line: 1,
+				Col:  26,
+				Name: "my.custom.a",
+			},
+		},
+	},
+	{
+		name: "option file access field of scalar type on subfield",
+		contents: []testFile{
+			{"a.proto", "import 'b.proto'; option (my.custom.a).b.c = true;"},
+			{"b.proto", "package my.custom; import 'google/protobuf/descriptor.proto'; message A { bool b = 1; } extend google.protobuf.FileOptions { A a = 1; }"},
+			{"google/protobuf/descriptor.proto", "package google.protobuf; message FileOptions {}"},
+		},
+		errors: []error{
+			&typecheck.OptionScalarTypeError{
+				File: "a.proto",
+				Line: 1,
+				Col:  26,
+				Name: "(my.custom.a).b",
+			},
+		},
+	},
+	{
+		name: "option file access unknown option",
+		contents: []testFile{
+			{"a.proto", "import 'b.proto'; option (my.custom.nope) = true;"},
+			{"b.proto", "package my.custom;"},
+		},
+		errors: []error{
+			&typecheck.OptionUnknownError{
+				File: "a.proto",
+				Line: 1,
+				Col:  26,
+				Name: ".my.custom.nope",
+			},
+		},
+	},
+	{
+		name: "option file access unknown option subfield",
+		contents: []testFile{
+			{"a.proto", "import 'b.proto'; option (my.custom.a).b = true;"},
+			{"b.proto", "package my.custom; import 'google/protobuf/descriptor.proto'; message A { } extend google.protobuf.FileOptions { A a = 1; }"},
+			{"google/protobuf/descriptor.proto", "package google.protobuf; message FileOptions {}"},
+		},
+		errors: []error{
+			&typecheck.OptionUnknownError{
+				File: "a.proto",
+				Line: 1,
+				Col:  26,
+				Name: "(my.custom.a).b",
+			},
+		},
+	},
+	{
+		name: "option file access unknown option subfield with wrong type",
+		contents: []testFile{
+			{"a.proto", "import 'b.proto'; option (my.custom.a).b = true;"},
+			{"b.proto", "package my.custom; import 'google/protobuf/descriptor.proto'; extend google.protobuf.FileOptions { A a = 1; }"},
+			{"google/protobuf/descriptor.proto", "package google.protobuf; message FileOptions {}"},
+		},
+		errors: []error{
+			&typecheck.OptionUnknownError{
+				File: "a.proto",
+				Line: 1,
+				Col:  26,
+				Name: "(my.custom.a).b",
+			},
+		},
+	},
 }

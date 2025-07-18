@@ -95,19 +95,18 @@ func (tc *TypeChecker) checkFileOption(sym *symtab.Symtab, refName string, ref s
 
 			field, ok := decl.Fields[optionName]
 			if !ok {
-				// TODO correct
+				name := refName[lParen+1 : rParen]
 				return &OptionUnknownError{
 					File: ref.Unit.File,
 					Line: ref.Line,
 					Col:  ref.Col,
-					Name: refName,
+					Name: name,
 				}
 			}
 
 			if len(field.TypeName) != 0 {
 				if _, decl, ok = checkUpperScopes(sym, field.TypeName); !ok {
-					// TODO correct
-					return &OptionUnknownError{
+					return &TypeNotDefinedError{
 						File: ref.Unit.File,
 						Line: ref.Line,
 						Col:  ref.Col,
@@ -115,26 +114,30 @@ func (tc *TypeChecker) checkFileOption(sym *symtab.Symtab, refName string, ref s
 					}
 				}
 			} else if len(subfields) > 0 {
-				return fmt.Errorf("Scalar") // TODO custom error
+				name := refName[lParen+1 : rParen]
+				return &OptionScalarTypeError{
+					File: ref.Unit.File,
+					Line: ref.Line,
+					Col:  ref.Col,
+					Name: name,
+				}
 			}
 
 			for i, subfield := range subfields {
 				field, ok := decl.Fields[subfield]
-
 				if !ok {
-					// TODO correct
+					name := fmt.Sprintf("(%s).%s", refName[lParen+1:rParen], strings.Join(subfields[:i+1], "."))
 					return &OptionUnknownError{
 						File: ref.Unit.File,
 						Line: ref.Line,
 						Col:  ref.Col,
-						Name: refName,
+						Name: name,
 					}
 				}
 
 				if len(field.TypeName) != 0 {
 					if _, decl, ok = checkUpperScopes(sym, field.TypeName); !ok {
-						// TODO correct
-						return &OptionUnknownError{
+						return &TypeNotDefinedError{
 							File: ref.Unit.File,
 							Line: ref.Line,
 							Col:  ref.Col,
@@ -142,14 +145,19 @@ func (tc *TypeChecker) checkFileOption(sym *symtab.Symtab, refName string, ref s
 						}
 					}
 				} else if i < len(subfields)-1 { // not last and scalar
-					return fmt.Errorf("Scalar") // TODO custom error
+					name := fmt.Sprintf("(%s).%s", refName[lParen+1:rParen], strings.Join(subfields[:i+1], "."))
+					return &OptionScalarTypeError{
+						File: ref.Unit.File,
+						Line: ref.Line,
+						Col:  ref.Col,
+						Name: name,
+					}
 				}
 			}
 		}
 	} else {
 		_, ok := parentDecl.Fields[refName]
 		if !ok {
-			// TODO correct
 			return &OptionUnknownError{
 				File: ref.Unit.File,
 				Line: ref.Line,

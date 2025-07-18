@@ -308,3 +308,16 @@ func (e *ExtendMapNotAllowedError) Error() string {
 		e.File, e.Line, e.Col,
 	)
 }
+
+type OptionScalarTypeError struct {
+	File      string
+	Name      string
+	Line, Col int
+}
+
+func (e *OptionScalarTypeError) Error() string {
+	return fmt.Sprintf(
+		"%s:%d:%d: error: option %q is a scalar type, not a message.",
+		e.File, e.Line, e.Col, e.Name,
+	)
+}
