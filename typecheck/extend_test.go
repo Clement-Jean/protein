@@ -79,4 +79,18 @@ var extendTests = []typecheckTestCase{
 			},
 		},
 	},
+	{
+		name: "extend message name clash",
+		contents: []testFile{
+			{"a.proto", "message B {} message a {} extend B { bool a = 1; }"},
+		},
+		errors: []error{
+			&typecheck.TypeRedefinedError{
+				Files: []string{"a.proto", "a.proto"},
+				Lines: []int{1, 1},
+				Cols:  []int{38, 22},
+				Name:  ".a",
+			},
+		},
+	},
 }

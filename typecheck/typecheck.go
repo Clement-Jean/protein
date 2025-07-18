@@ -435,6 +435,10 @@ func (tc *TypeChecker) checkTypes(depGraph [][]int) (*symtab.Symtab, []error) {
 					errs = append(errs, err)
 				}
 			// OTHER
+			case parser.NodeKindPackageStmt:
+				if err := tc.handlePackage(sym, unit, tokIdx); err != nil {
+					errs = append(errs, err)
+				}
 			default:
 				continue
 			}
@@ -494,11 +498,11 @@ func (tc *TypeChecker) Check() (*symtab.Symtab, []error) {
 			for _, node := range tc.units[j].Tree {
 				switch node.Kind {
 				case parser.NodeKindSyntaxStmt:
-					if err := tc.handleSyntax(tc.units[j], node.TokIdx); err != nil {
+					if err := tc.registerSyntax(tc.units[j], node.TokIdx); err != nil {
 						errs = append(errs, err)
 					}
 				case parser.NodeKindImportStmt:
-					if err := tc.handleImport(&depGraph, tc.units[j], node.TokIdx); err != nil {
+					if err := tc.registerImport(&depGraph, tc.units[j], node.TokIdx); err != nil {
 						errs = append(errs, err...)
 					}
 				case parser.NodeKindPackageStmt:
@@ -507,7 +511,7 @@ func (tc *TypeChecker) Check() (*symtab.Symtab, []error) {
 						break
 					}
 
-					tc.handlePackage(tc.pkgs, tc.units[j], node.TokIdx)
+					tc.registerPackage(tc.pkgs, tc.units[j], node.TokIdx)
 				}
 			}
 		}

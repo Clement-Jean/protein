@@ -10,7 +10,7 @@ import (
 	"github.com/Clement-Jean/protein/unit"
 )
 
-func (tc *TypeChecker) handleImport(depGraph *[][]int, u *unit.Unit, idx uint32) []error {
+func (tc *TypeChecker) registerImport(depGraph *[][]int, u *unit.Unit, idx uint32) []error {
 	isPublic := false
 	isWeak := false
 

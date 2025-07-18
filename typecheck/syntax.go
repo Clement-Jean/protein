@@ -13,7 +13,7 @@ const (
 	syntaxProto3
 )
 
-func (tc *TypeChecker) handleSyntax(unit *unit.Unit, idx uint32) error {
+func (tc *TypeChecker) registerSyntax(unit *unit.Unit, idx uint32) error {
 	start := unit.Toks.TokenInfos[idx].Offset
 	end := unit.Toks.TokenInfos[idx+1].Offset
 	syntax := strings.Trim(string(unit.Buffer.Range(start, end)), "\"'")

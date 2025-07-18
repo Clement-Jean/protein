@@ -125,6 +125,36 @@ var messageTests = []typecheckTestCase{
 			},
 		},
 	},
+	{
+		name: "message package name clash",
+		contents: []testFile{
+			{"a.proto", "message my {}"},
+			{"b.proto", "package my; message A {}"},
+		},
+		errors: []error{
+			&typecheck.TypeRedefinedError{
+				Files: []string{"a.proto", "b.proto"},
+				Lines: []int{1, 1},
+				Cols:  []int{9, 9},
+				Name:  ".my",
+			},
+		},
+	},
+	{
+		name: "message subpackage name clash",
+		contents: []testFile{
+			{"a.proto", "message my {}"},
+			{"b.proto", "package my.test; message A {}"},
+		},
+		errors: []error{
+			&typecheck.TypeRedefinedError{
+				Files: []string{"a.proto", "b.proto"},
+				Lines: []int{1, 1},
+				Cols:  []int{9, 9},
+				Name:  ".my",
+			},
+		},
+	},
 }
 
 var mapTests = []typecheckTestCase{
