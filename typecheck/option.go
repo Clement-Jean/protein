@@ -36,14 +36,15 @@ func collectOptionName(idx uint32, unit *unit.Unit, start lexer.TokenInfo) (uint
 //   - read all the fields of google.protobuf.FileOptions
 //   - register them as knownFileOptions
 var knownFileOptions = map[string]struct{}{
-	"deprecated":           struct{}{},
-	"java_package":         struct{}{},
-	"java_outer_classname": struct{}{},
-	"optimize_for":         struct{}{},
-	"go_package":           struct{}{},
-	"csharp_namespace":     struct{}{},
-	"objc_class_prefix":    struct{}{},
-	"cc_enable_arenas":     struct{}{},
+	"deprecated":           {},
+	"java_package":         {},
+	"java_outer_classname": {},
+	"java_multiple_files":  {},
+	"optimize_for":         {},
+	"go_package":           {},
+	"csharp_namespace":     {},
+	"objc_class_prefix":    {},
+	"cc_enable_arenas":     {},
 }
 
 func (tc *TypeChecker) handleFileOption(sym *symtab.Symtab, scope []string, unit *unit.Unit, idx uint32) error {
